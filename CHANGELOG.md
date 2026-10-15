@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [0.1.0] - 2026-10-15
 
-First release as `shirabe-profiling`. The project began as a copy of [dataxid-profiling](https://github.com/dataxid/dataxid-profiling) 0.4.0 (Apache-2.0).
+First release as `shirabe-profiling`. This project is a derivative work based on [dataxid-profiling](https://github.com/dataxid/dataxid-profiling) 0.4.0 (Apache-2.0).
 
 ### Changed
 
