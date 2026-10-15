@@ -1978,5 +1978,22 @@
     })();
   </script>
 
+  <script>
+    (function () {
+      var frame = null;
+      try { frame = window.frameElement; } catch (err) { return; }
+      if (!frame || String(frame.getAttribute('onload')).indexOf('__resizeIframe') === -1) return;
+
+      function fit() {
+        var height = document.body.offsetHeight;
+        if (height > 0 && frame.style.height !== height + 'px') frame.style.height = height + 'px';
+      }
+
+      fit();
+      document.addEventListener('reportshown', fit);
+      new ResizeObserver(fit).observe(document.body);
+    })();
+  </script>
+
 </body>
 </html>

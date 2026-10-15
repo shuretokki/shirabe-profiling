@@ -254,3 +254,40 @@ class TestDownloads:
         html = ProfileReport(_mixed()).to_html()
 
         assert 'data-save-table="sample-panel"' in html
+
+
+class TestNotebookFrame:
+    @staticmethod
+    def _script(html: str) -> str:
+        start = html.index("window.frameElement")
+        return html[
+            html.rindex(
+                "<script>",
+                0,
+                start,
+            ) : html.index(
+                "</script>",
+                start,
+            )
+        ]
+
+    def test_the_report_fits_the_marimo_frame_to_the_current_tab(self):
+        script = self._script(ProfileReport(_mixed()).to_html())
+
+        assert "__resizeIframe" in script
+        assert "document.body.offsetHeight" in script
+        assert "frame.style.height" in script
+        assert "'reportshown'" in script
+        assert "ResizeObserver" in script
+
+    def test_a_frame_that_is_not_marimo_is_left_alone(self):
+        script = self._script(ProfileReport(_mixed()).to_html())
+
+        assert "if (!frame ||" in script
+        assert "return;" in script
+        assert script.index("indexOf('__resizeIframe') === -1") < script.index("function fit")
+
+    def test_a_page_that_is_not_framed_or_cannot_reach_its_frame_does_nothing(self):
+        script = self._script(ProfileReport(_mixed()).to_html())
+
+        assert "try { frame = window.frameElement; } catch (err) { return; }" in script
