@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-Fast, Polars-native data profiling with interactive HTML reports and data quality alerts.
+High-performance Polars data profiling with web reports and quality warnings.
 </p>
 
 ## Quickstart
