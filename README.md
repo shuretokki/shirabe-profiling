@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/logo/wordmark-on-dark.svg">
-    <img src="assets/logo/wordmark-on-light.svg" alt="shirabe" width="240">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/assets/logo/wordmark-on-dark.svg">
+    <img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/assets/logo/wordmark-on-light.svg" alt="shirabe" width="240">
   </picture>
 </p>
 
@@ -47,37 +47,37 @@ report = ProfileReport(df, target="churned")
 **Overview,** row and column counts, missing cells, duplicate rows, memory, the column types, and the alerts.
 
 <p align="center">
-  <img src="docs/report-overview.png" alt="Dataset overview and alerts" width="700">
+  <img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-overview.png" alt="Dataset overview and alerts" width="700">
 </p>
 
 **Target,** how each column links to the target, how the target changes across a column, and how missing values relate to the target.
 
 <p align="center">
-  <img src="docs/report-target.png" alt="Target section with the link of each column to the target" width="700">
+  <img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-target.png" alt="Target section with the link of each column to the target" width="700">
 </p>
 
 **Column details,** statistics for each column, a tag and a mark for each alert, and tabs for `log1p` and Yeo-Johnson on a skewed column.
 
 <p align="center">
-  <img src="docs/report-columns.png" alt="Column details with alert tags and skew tabs" width="700">
+  <img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-columns.png" alt="Column details with alert tags and skew tabs" width="700">
 </p>
 
 **Correlations,** a heatmap for each method (Phik, Pearson, Spearman, Cramér's V, and Kendall), and a list of the strongest pairs.
 
 <p align="center">
-  <img src="docs/report-correlations.png" alt="Correlation heatmap with the strongest pairs" width="700">
+  <img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-correlations.png" alt="Correlation heatmap with the strongest pairs" width="700">
 </p>
 
 **Guide,** an alert marks a possible problem, so open it in the Guide tab to see its limit, some possible fixes, and the sources.
 
 <p align="center">
-  <img src="docs/report-guide.png" alt="The Guide tab with the High Missing alert open" width="700">
+  <img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-guide.png" alt="The Guide tab with the High Missing alert open" width="700">
 </p>
 
 **Dark theme,** the theme follows your system, and you can pick dark or light in the settings menu.
 
 <p align="center">
-  <img src="docs/report-dark.png" alt="Column details in the dark theme" width="700">
+  <img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-dark.png" alt="Column details in the dark theme" width="700">
 </p>
 
 The report also has:
