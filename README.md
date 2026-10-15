@@ -94,8 +94,6 @@ The package is not on PyPI yet, so install it from GitHub:
 pip install git+https://github.com/shuretokki/shirabe-profiling.git
 ```
 
-The report loads ECharts and Tailwind CSS from a CDN, so it needs an internet connection when you open it.
-
 ## Usage
 
 ### Read the results in code
@@ -146,12 +144,6 @@ Use `"overview"` when you want a fast first look, because it skips the slow part
 | HTML | `report.to_html("report.html")` | The interactive report |
 | JSON | `report.to_json("report.json")` | Other programs |
 | Dict | `report.to_dict()` | Python code |
-
-## Project
-
-- [Contributing](CONTRIBUTING.md)
-- [Changelog](CHANGELOG.md)
-- [GitHub Issues](https://github.com/shuretokki/shirabe-profiling/issues)
 
 ## License
 
