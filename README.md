@@ -29,9 +29,7 @@ report = ProfileReport(df)
 report.to_html("report.html")
 ```
 
-Pandas frames, CSV paths, and Parquet paths work too.
-
-Name the column that you want to predict to add a target section:
+Pandas frames, CSV paths, and Parquet paths work too, and you can name the column that you want to predict to add a target section:
 
 ```python
 report = ProfileReport(df, target="churned")
@@ -39,47 +37,47 @@ report = ProfileReport(df, target="churned")
 
 ## Highlights
 
-- **Fast.** The engine is Polars. A complete report for the Kaggle House Prices training file (1,460 rows and 81 columns) took 8 to 11 seconds. Overview mode took about 1 second. These are single runs on one machine.
-- **A guide for every alert.** The Guide tab covers all 10 alerts. Each one shows when the report raises it, some possible fixes, and the sources behind them.
-- **Made for modeling.** The target section shows how each column links to the target and warns about leakage. A skewed column gets tabs that show it after `log1p` and Yeo-Johnson.
-- **Easy to use in code.** Read the numbers with `.to_dict()`, `.to_json()`, `.stats`, and `.alerts`. The package is fully typed.
+- **Fast,** the engine is Polars, and a complete report for the Kaggle House Prices file (1,460 rows, 81 columns) took 8 to 11 seconds. Overview mode took about 1 second, in single runs on one machine.
+- **A guide for every alert,** the Guide tab covers all 10 alerts, with each limit, some possible fixes, and the sources.
+- **Made for modeling,** the target section shows how columns link to the target and warns about leakage, and skewed columns get `log1p` and Yeo-Johnson tabs.
+- **Easy to use in code,** read the numbers with `.to_dict()`, `.to_json()`, `.stats`, and `.alerts`, and the package is fully typed.
 
 ## What the report shows
 
-**Overview,** Row and column counts, missing cells, duplicate rows, memory, the column types, and the alerts.
+**Overview,** row and column counts, missing cells, duplicate rows, memory, the column types, and the alerts.
 
 <p align="center">
   <img src="docs/report-overview.png" alt="Dataset overview and alerts" width="700">
 </p>
 
-**Target,** How each column links to the target, how the target changes across a column, and how missing values relate to the target.
+**Target,** how each column links to the target, how the target changes across a column, and how missing values relate to the target.
 
 <p align="center">
   <img src="docs/report-target.png" alt="Target section with the link of each column to the target" width="700">
 </p>
 
-**Column details,** Statistics for each column, a tag for each alert, and a mark on the statistic that raised it.
+**Column details,** statistics for each column, a tag and a mark for each alert, and tabs for `log1p` and Yeo-Johnson on a skewed column.
 
 <p align="center">
   <img src="docs/report-columns.png" alt="Column details with alert tags and skew tabs" width="700">
 </p>
 
-**Correlations,** A heatmap for each method (Phik, Pearson, Spearman, Cramér's V, and Kendall) and a list of the strongest pairs.
+**Correlations,** a heatmap for each method (Phik, Pearson, Spearman, Cramér's V, and Kendall), and a list of the strongest pairs.
 
 <p align="center">
   <img src="docs/report-correlations.png" alt="Correlation heatmap with the strongest pairs" width="700">
 </p>
 
-**Guide.** An alert marks a possible problem. Open an alert in the Guide tab to see its limit, some possible fixes, and the sources.
+**Guide,** an alert marks a possible problem, so open it in the Guide tab to see its limit, some possible fixes, and the sources.
 
 <p align="center">
   <img src="docs/report-guide.png" alt="The Guide tab with the High Missing alert open" width="700">
 </p>
 
-**Light theme,** The theme follows your system. You can also pick dark or light in the settings menu.
+**Dark theme,** the theme follows your system, and you can pick dark or light in the settings menu.
 
 <p align="center">
-  <img src="docs/report-light.png" alt="Column details in the light theme" width="700">
+  <img src="docs/report-dark.png" alt="Column details in the dark theme" width="700">
 </p>
 
 The report also has:
@@ -90,11 +88,13 @@ The report also has:
 
 ## Installation
 
-The package is not on PyPI yet. Install it from GitHub:
+The package is not on PyPI yet, so install it from GitHub:
 
 ```bash
 pip install git+https://github.com/shuretokki/shirabe-profiling.git
 ```
+
+The report loads ECharts and Tailwind CSS from a CDN, so it needs an internet connection when you open it.
 
 ## Usage
 
@@ -125,7 +125,7 @@ report = ProfileReport(df, config=config)
 
 ### Modes
 
-Use `"overview"` when you want a fast first look. It skips the slow parts of the report.
+Use `"overview"` when you want a fast first look, because it skips the slow parts of the report.
 
 | Feature | `"complete"` | `"overview"` |
 |---|:-:|:-:|
@@ -155,6 +155,6 @@ Use `"overview"` when you want a fast first look. It skips the slow parts of the
 
 ## License
 
-[Apache-2.0](LICENSE). The work of others that this project includes or loads is listed in [LICENSES.md](LICENSES.md).
+[Apache-2.0](LICENSE), and the work of others that this project includes or loads is listed in [LICENSES.md](LICENSES.md).
 
 This project is a derivative work based on [dataxid-profiling](https://github.com/dataxid/dataxid-profiling) by DataXID, originally licensed under the Apache License 2.0.
