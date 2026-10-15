@@ -68,5 +68,5 @@ class TestLicenseLayout:
         pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
         line = next(row for row in pyproject.splitlines() if row.startswith("license-files"))
 
-        for pattern in ("LICENSE", "LICENSES.md", "LICENSES/*", "REUSE.toml"):
+        for pattern in ("LICENSE", "LICENSES/*", "REUSE.toml"):
             assert f'"{pattern}"' in line

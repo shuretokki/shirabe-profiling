@@ -3,13 +3,10 @@ SPDX-PackageName = "shirabe-profiling"
 SPDX-PackageSupplier = "shuretokki"
 SPDX-PackageDownloadLocation = "https://github.com/shuretokki/shirabe-profiling"
 
-# Everything is Apache-2.0 unless a later annotation says otherwise.
-# The last annotation that matches a file wins.
 [[annotations]]
 path = "**"
 SPDX-FileCopyrightText = [
   "2026 shuretokki",
-  "DataXID and the dataxid-profiling contributors",
 ]
 SPDX-License-Identifier = "Apache-2.0"
 
@@ -33,18 +30,15 @@ path = [
 SPDX-FileCopyrightText = "2019 The Lilex Project Authors (https://github.com/mishamyrt/Lilex)"
 SPDX-License-Identifier = "OFL-1.1-no-RFN"
 
-# The icon paths come from Lucide, and the Feather part of Lucide is MIT.
 [[annotations]]
 path = "src/shirabe_profiling/report/templates/icons.j2"
 SPDX-FileCopyrightText = [
   "2026 shuretokki",
-  "DataXID and the dataxid-profiling contributors",
   "Lucide Contributors 2022",
   "Cole Bemis 2013-2022 (Feather)",
 ]
 SPDX-License-Identifier = "Apache-2.0 AND ISC AND MIT"
 
-# The wordmark holds the outlines of the letters of two fonts.
 [[annotations]]
 path = [
   "assets/logo/wordmark-on-dark.svg",

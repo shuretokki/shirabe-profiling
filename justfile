@@ -186,6 +186,11 @@ alias t := test
 @cov:
     uv run pytest --cov=shirabe_profiling --cov-report=term-missing
 
+# Add license headers from the REUSE.toml rules, templates excluded: just annotate --dry-run, --replace to rewrite, or limit it to a path
+[group("maintenance")]
+@annotate *args:
+    uv run python scripts/annotate_from_reuse.py --exclude "**/*.j2" --exclude "**/*.html" --exclude "**/*.vue" {{ args }}
+
 # Delete the build output and the tool caches
 [group("maintenance")]
 @clean:

@@ -22,15 +22,23 @@ just test
 ## Checks
 
 ```bash
-just full-check  # lock file, lint, format, basedpyright, README check, and pytest (aliases: check, c, fc)
-just lint --fix  # apply safe lint fixes
-just fmt-write   # add trailing commas, then format with ruff (aliases: fmt, commas)
-just fmt-check   # check the formatting and the commas without changing files
-just typecheck   # basedpyright only
-just docs-check  # the README code blocks parse, and its images and links exist
+just full-check     # lock file, lint, format, basedpyright, README, licenses, and pytest (aliases: check, c, fc)
+just lint --fix     # apply safe lint fixes
+just fmt-write      # add trailing commas, then format with ruff (aliases: fmt, commas)
+just fmt-check      # check the formatting and the commas without changing files
+just typecheck      # basedpyright only
+just docs-check     # the README code blocks parse, and its images and links exist
+just license-check  # every file has a license and a copyright holder (REUSE)
 ```
 
 The recipes need `uv`, `git-cliff`, and `gh` on the PATH, and the Nix shell has all three.
+
+## Licenses
+
+`REUSE.toml` names the copyright holders and the license of every file, and `LICENSES/` holds one text for each license.
+When you add work from someone else, such as a font or an icon, add an annotation for its files to `REUSE.toml`.
+Then run `uvx reuse download --all` to fetch the license text, and run `just license-check` to make sure that every file is covered.
+Keep the root `LICENSE` and `LICENSES/Apache-2.0.txt` the same text, which a test checks.
 
 ## Changelog
 

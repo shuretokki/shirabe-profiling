@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright © 2026 shuretokki
+# SPDX-License-Identifier: Apache-2.0
+
 """Check that the README code blocks parse and that its local images and links exist."""
 
 from __future__ import annotations

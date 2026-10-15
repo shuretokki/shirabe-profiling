@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright © 2026 shuretokki
+# SPDX-License-Identifier: Apache-2.0
+
 """Check a built package against the rules that PyPI enforces when you upload it.
 
 The rules come from the upload code of Warehouse (warehouse/forklift/legacy.py and metadata.py).

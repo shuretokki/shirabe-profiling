@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright © 2026 shuretokki
+# SPDX-License-Identifier: Apache-2.0
+
 """Add trailing commas so that ruff format puts each argument on its own line.
 
 A call or a function signature with two or more arguments gets a trailing comma

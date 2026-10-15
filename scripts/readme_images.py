@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright © 2026 shuretokki
+# SPDX-License-Identifier: Apache-2.0
+
 """Make the screenshots for the README.
 
 The script builds a report from a synthetic customer dataset.
