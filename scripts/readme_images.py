@@ -2,7 +2,7 @@
 
 The script builds a report from a synthetic customer dataset.
 It shows one view at a time in a headless browser and crops each picture to its content.
-Every picture is 1200 pixels wide and between 600 and 800 pixels high.
+Every picture is 1280 pixels wide and between 640 and 853 pixels high.
 The ratio stays between 3:2 and 2:1.
 
 It needs Chrome, Chromium, or Edge. Set BROWSER to the program if the script cannot find it.
@@ -27,10 +27,10 @@ from PIL import Image, ImageChops
 
 from shirabe_profiling import ProfileReport
 
-WIDTH = 1200
+WIDTH = 1280
 VIEW_HEIGHT = 1100
-MIN_HEIGHT = 600
-MAX_HEIGHT = 800
+MIN_HEIGHT = 640
+MAX_HEIGHT = 853
 BOTTOM_PAD = 24
 
 BROWSERS = (
@@ -43,8 +43,7 @@ BROWSERS = (
 )
 WSL_EDGE = Path("/mnt/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
 
-# The tab bar adds nothing to a cropped picture.
-BASE_CSS = ".app-header{display:none}main{padding-top:1.5rem !important}"
+BASE_CSS = "main{padding-top:1.5rem !important}"
 
 
 def only(*ids: str) -> str:
@@ -66,6 +65,7 @@ class Shot:
     theme: str
     css: str
     open_first_alert: bool = False
+    tab: str = "report"
 
 
 SHOTS = (
@@ -97,6 +97,7 @@ SHOTS = (
         "light",
         GUIDE_CSS,
         open_first_alert=True,
+        tab="guide",
     ),
     Shot(
         "report-dark",
@@ -292,6 +293,16 @@ def page_for(
         style + "</head>",
         1,
     )
+    if shot.tab == "guide":
+        page = page.replace(
+            'id="tab-page-report" aria-controls="page-report" aria-selected="true"',
+            'id="tab-page-report" aria-controls="page-report" aria-selected="false"',
+            1,
+        ).replace(
+            'id="tab-page-guide" aria-controls="page-guide" aria-selected="false"',
+            'id="tab-page-guide" aria-controls="page-guide" aria-selected="true"',
+            1,
+        )
     if shot.open_first_alert:
         start = page.index('id="guide-alerts"')
         page = page[:start] + page[start:].replace(
