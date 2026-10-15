@@ -26,8 +26,3 @@ What you expected to happen.
 What actually happened. Include the full error traceback if applicable.
 
 ## Environment
-
-- **shirabe-profiling version**: `pip show shirabe-profiling`
-- **polars version**: `pip show polars`
-- **Python version**: `python --version`
-- **OS**:
