@@ -35,6 +35,12 @@ just typecheck  # basedpyright only
 It reads Conventional Commit messages (`feat:`, `fix:`, `perf:`, `chore(deps):`).
 Rewrite the draft as plain sentences and put it in `CHANGELOG.md`.
 
+## README Screenshots
+
+`just readme-images` makes the pictures in `docs/` again, so run it after a change to the report design.
+It builds a report from a synthetic dataset, crops each view with a headless browser, and needs an internet connection for the report scripts.
+It needs Chrome, Chromium, or Edge, and you can set `BROWSER` to the program if the script cannot find it.
+
 ## Code Style
 
 - Line length: 99 characters
