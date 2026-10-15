@@ -1,0 +1,58 @@
+version = 1
+SPDX-PackageName = "shirabe-profiling"
+SPDX-PackageSupplier = "shuretokki"
+SPDX-PackageDownloadLocation = "https://github.com/shuretokki/shirabe-profiling"
+
+# Everything is Apache-2.0 unless a later annotation says otherwise.
+# The last annotation that matches a file wins.
+[[annotations]]
+path = "**"
+SPDX-FileCopyrightText = [
+  "2026 shuretokki",
+  "DataXID and the dataxid-profiling contributors",
+]
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = [
+  "src/shirabe_profiling/report/templates/fonts/IBMPlexSans-Regular.woff",
+  "src/shirabe_profiling/report/templates/fonts/IBMPlexSans-SemiBold.woff",
+  "src/shirabe_profiling/report/templates/fonts/IBMPlexSans-LICENSE.txt",
+]
+SPDX-FileCopyrightText = [
+  "2017 IBM Corp. with Reserved Font Name \"Plex\"",
+  "2018 IBM Corp.",
+]
+SPDX-License-Identifier = "OFL-1.1-RFN"
+
+[[annotations]]
+path = [
+  "src/shirabe_profiling/report/templates/fonts/Lilex-Regular.woff",
+  "src/shirabe_profiling/report/templates/fonts/Lilex-OFL.txt",
+]
+SPDX-FileCopyrightText = "2019 The Lilex Project Authors (https://github.com/mishamyrt/Lilex)"
+SPDX-License-Identifier = "OFL-1.1-no-RFN"
+
+# The icon paths come from Lucide, and the Feather part of Lucide is MIT.
+[[annotations]]
+path = "src/shirabe_profiling/report/templates/icons.j2"
+SPDX-FileCopyrightText = [
+  "2026 shuretokki",
+  "DataXID and the dataxid-profiling contributors",
+  "Lucide Contributors 2022",
+  "Cole Bemis 2013-2022 (Feather)",
+]
+SPDX-License-Identifier = "Apache-2.0 AND ISC AND MIT"
+
+# The wordmark holds the outlines of the letters of two fonts.
+[[annotations]]
+path = [
+  "assets/logo/wordmark-on-dark.svg",
+  "assets/logo/wordmark-on-light.svg",
+]
+SPDX-FileCopyrightText = [
+  "2026 shuretokki",
+  "2011-2012 Ana Sanfelippo with Reserved Font Name \"Almendra\"",
+  "2021 The Shippori Mincho Project Authors (https://github.com/fontdasu/ShipporiMincho)",
+]
+SPDX-License-Identifier = "Apache-2.0 AND OFL-1.1-RFN AND OFL-1.1-no-RFN"

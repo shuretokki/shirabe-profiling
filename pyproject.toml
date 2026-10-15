@@ -5,7 +5,7 @@ description = "High-performance Polars data profiling with web reports and quali
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
-license-files = ["LICENSE"]
+license-files = ["LICENSE", "LICENSES.md", "LICENSES/*", "REUSE.toml"]
 authors = [{ name = "shuretokki" }]
 keywords = [
     "polars",
