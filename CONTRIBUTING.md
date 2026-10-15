@@ -35,6 +35,15 @@ just typecheck  # basedpyright only
 It reads Conventional Commit messages (`feat:`, `fix:`, `perf:`, `chore(deps):`).
 Rewrite the draft as plain sentences and put it in `CHANGELOG.md`.
 
+## Releasing
+
+1. `just bump 0.2.0` sets the version in `pyproject.toml`, `__init__.py`, and `uv.lock`.
+2. Write the `CHANGELOG.md` section for the version, and use `just changelog` for a draft.
+3. `just release` stops unless you are on an up-to-date main with only the release files changed. Then it runs the gate and the build, commits `chore(release): v0.2.0`, and tags `v0.2.0`.
+4. `just push` pushes main and the tag. `just publish-test` and `just publish` upload to TestPyPI and PyPI, and `just gh-release` makes the GitHub release from the changelog section.
+
+The uploads need `UV_PUBLISH_TOKEN`, and `gh-release` needs the `gh` command, which `just` checks before it starts.
+
 ## README Screenshots
 
 `just readme-images` makes the pictures in `docs/` again, so run it after a change to the report design.
