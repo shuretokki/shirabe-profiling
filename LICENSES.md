@@ -1,8 +1,9 @@
 # Licenses
 
-This project uses the Apache-2.0 license. The full text is in [LICENSE](LICENSE).
+This project uses the Apache-2.0 license. The full statement is in [LICENSE](LICENSE).
 
-This project began as a copy of [dataxid-profiling](https://github.com/dataxid/dataxid-profiling) 0.4.0 by DataXID, which also uses Apache-2.0.
+This project is a derivative work based on [dataxid-profiling](https://github.com/dataxid/dataxid-profiling) by DataXID, originally licensed under the Apache License 2.0.
+
 The table below lists the other work that this project includes or loads.
 
 ## Third-party work
