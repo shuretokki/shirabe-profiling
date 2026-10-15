@@ -10,7 +10,9 @@
 [![License](https://img.shields.io/github/license/shuretokki/shirabe-profiling.svg)](LICENSE)
 ![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 
-Fast, Polars-native data profiling with interactive HTML reports and data quality alerts.
+Fast data profiling for Polars. One call builds a single HTML report with charts, data quality alerts, and a guide to fix each alert.
+
+The name comes from the Japanese word 調べ (shirabe), which means an investigation or a close look.
 
 ## Quickstart
 
@@ -23,50 +25,65 @@ report = ProfileReport(df)
 report.to_html("report.html")
 ```
 
-Pandas works too:
+Pandas frames, CSV paths, and Parquet paths work too.
+
+Name the column that you want to predict to add a target section:
 
 ```python
-report = ProfileReport(pd.read_csv("data.csv"))
+report = ProfileReport(df, target="churned")
 ```
 
-## Report Preview
+## Highlights
 
-**Dataset overview** — row and column counts, missing cells, duplicates, memory, the column types, the alerts, and a target section when you pass `target=`.
+- **Fast.** The engine is Polars. A complete report for the Kaggle House Prices training file (1,460 rows and 81 columns) took 8 to 11 seconds. Overview mode took about 1 second. These are single runs on one machine.
+- **A guide for every alert.** The Guide tab covers all 10 alerts. Each one shows when the report raises it, some possible fixes, and the sources behind them.
+- **Made for modeling.** The target section shows how each column links to the target and warns about leakage. A skewed column gets tabs that show it after `log1p` and Yeo-Johnson.
+- **One file.** The report is one HTML file with a dark theme and a light theme. You need an internet connection to open it, because it loads ECharts and Tailwind CSS from a CDN.
+- **Easy to use in code.** Read the numbers with `.to_dict()`, `.to_json()`, `.stats`, and `.alerts`. The package is fully typed.
+
+## What the report shows
+
+**Overview.** Row and column counts, missing cells, duplicate rows, memory, the column types, and the alerts.
 
 <p align="center">
   <img src="docs/report-overview.png" alt="Dataset overview and alerts" width="700">
 </p>
 
-**Column details** — statistics for each column, a tag for each alert, and a highlight on the statistic that raised it. A skewed column gets tabs that show the data after `log1p` and Yeo-Johnson, each with its own statistics.
+**Target.** How each column links to the target, how the target changes across a column, and how missing values relate to the target.
+
+<p align="center">
+  <img src="docs/report-target.png" alt="Target section with the link of each column to the target" width="700">
+</p>
+
+**Column details.** Statistics for each column, a tag for each alert, and a mark on the statistic that raised it. A skewed column also gets tabs for `log1p` and Yeo-Johnson, each with its own statistics.
 
 <p align="center">
   <img src="docs/report-columns.png" alt="Column details with alert tags and skew tabs" width="700">
 </p>
 
-**Correlations** — a heatmap for each method (Phik, Pearson, Spearman, Cramér's V, and Kendall) and a list of the strongest pairs.
+**Light theme.** The theme follows your system. You can also pick dark or light in the settings menu.
 
 <p align="center">
-  <img src="docs/report-correlations.png" alt="Correlation heatmap" width="700">
+  <img src="docs/report-light.png" alt="Column details in the light theme" width="700">
 </p>
 
-**Interactions** — scatter plots for numeric pairs and box plots for categorical × numeric pairs, with dynamic column selection.
+**Correlations.** A heatmap for each method (Phik, Pearson, Spearman, Cramér's V, and Kendall) and a list of the strongest pairs.
 
-## Highlights
+<p align="center">
+  <img src="docs/report-correlations.png" alt="Correlation heatmap with the strongest pairs" width="700">
+</p>
 
-- Built on Polars: fast, memory-efficient, Rust-powered
-- 3 lines to profile any dataset
-- Programmatic-first: `.to_dict()`, `.stats`, `.alerts`
-- One HTML file with interactive ECharts charts, a dark theme, and a light theme
-- A Guide tab that explains each alert, when the report raises it, and how to fix it, with sources
-- Accepts Polars, Pandas, CSV, and Parquet
-- 5 column types: numeric, categorical, boolean, datetime, and text
-- 10 data quality alerts out of the box
-- 5 correlation types: Pearson, Spearman, Kendall, Cramér's V, and Phi K
-- A target section with a leakage check, when you pass `target=`
-- Interactions: scatter plot and box plot with dynamic column selection
-- Categorical value counts keep the long tail with an explicit "Other" rollup (`other_values`)
-- Two modes: `"complete"` for deep analysis and `"overview"` for speed
-- Fully typed
+**Guide.** An alert marks a possible problem. Open an alert in the Guide tab to see its limit, some possible fixes, and the sources.
+
+<p align="center">
+  <img src="docs/report-guide.png" alt="The Guide tab with the High Missing alert open" width="700">
+</p>
+
+The report also has:
+
+- An Interactions section with scatter plots, box plots, and a column picker.
+- A Missing Patterns table and an Outliers table.
+- A Sample section with the first rows, the last rows, random rows, and the rows with the most gaps.
 
 ## Installation
 
@@ -76,11 +93,9 @@ The package is not on PyPI yet. Install it from GitHub:
 pip install git+https://github.com/shuretokki/shirabe-profiling.git
 ```
 
-The report loads ECharts and Tailwind CSS from a CDN, so it needs an internet connection when you open it.
-
 ## Usage
 
-### Programmatic access
+### Read the results in code
 
 ```python
 report = ProfileReport(df, title="Customer Data Profile")
@@ -91,21 +106,7 @@ column_stats = report.stats["age"]
 correlations = report.correlations
 ```
 
-### Target
-
-Name the column that you want to predict to get the target section and the leakage check:
-
-```python
-report = ProfileReport(df, target="churned")
-```
-
-### JSON export
-
-```python
-report.to_json("report.json")
-```
-
-### Configuration
+### Settings
 
 ```python
 from shirabe_profiling import ProfileReport, ProfileConfig
@@ -121,10 +122,12 @@ report = ProfileReport(df, config=config)
 
 ### Modes
 
+Use `"overview"` when you want a fast first look. It skips the slow parts of the report.
+
 | Feature | `"complete"` | `"overview"` |
 |---|:-:|:-:|
 | Basic stats | ✓ | ✓ |
-| Histograms & value counts | ✓ | ✓ |
+| Histograms and value counts | ✓ | ✓ |
 | Correlations | ✓ | ✗ |
 | Interactions | ✓ | ✗ |
 | Skew transform tabs | ✓ | ✗ |
@@ -133,20 +136,17 @@ report = ProfileReport(df, config=config)
 | Character analysis | ✓ | ✗ |
 | Duplicate rows table | ✓ | ✗ |
 
-## Output formats
+### Output formats
 
-| Format | Method | Use case |
+| Format | Method | Use |
 |---|---|---|
-| HTML | `report.to_html("report.html")` | Interactive report |
-| JSON | `report.to_json("report.json")` | Machine-readable |
-| Dict | `report.to_dict()` | Python-native |
+| HTML | `report.to_html("report.html")` | The interactive report |
+| JSON | `report.to_json("report.json")` | Other programs |
+| Dict | `report.to_dict()` | Python code |
 
-## Contributing
+## Project
 
-Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
-## Links
-
+- [Contributing](CONTRIBUTING.md)
 - [Changelog](CHANGELOG.md)
 - [GitHub Issues](https://github.com/shuretokki/shirabe-profiling/issues)
 
