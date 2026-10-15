@@ -55,6 +55,11 @@ alias c := check
 build:
     uv build
 
+# Remake the README screenshots in docs/ (needs Chrome, Chromium, or Edge, and internet access)
+[group("docs")]
+readme-images:
+    uv run python scripts/readme_images.py docs
+
 # Print a CHANGELOG.md draft for the commits since the last tag
 [group("release")]
 @changelog:
