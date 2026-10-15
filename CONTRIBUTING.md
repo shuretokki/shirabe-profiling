@@ -22,12 +22,15 @@ just test
 ## Checks
 
 ```bash
-just check      # ruff lint, ruff format check, trailing commas, basedpyright, pytest
-just lint --fix # apply safe lint fixes
-just fmt        # add trailing commas, then format with ruff
-just commas     # same as fmt
-just typecheck  # basedpyright only
+just full-check  # lock file, lint, format, basedpyright, README check, and pytest (aliases: check, c, fc)
+just lint --fix  # apply safe lint fixes
+just fmt-write   # add trailing commas, then format with ruff (aliases: fmt, commas)
+just fmt-check   # check the formatting and the commas without changing files
+just typecheck   # basedpyright only
+just docs-check  # the README code blocks parse, and its images and links exist
 ```
+
+The recipes need `uv`, `git-cliff`, and `gh` on the PATH, and the Nix shell has all three.
 
 ## Changelog
 
@@ -39,10 +42,14 @@ Rewrite the draft as plain sentences and put it in `CHANGELOG.md`.
 
 1. `just bump 0.2.0` sets the version in `pyproject.toml`, `__init__.py`, and `uv.lock`.
 2. Write the `CHANGELOG.md` section for the version, and use `just changelog` for a draft.
-3. `just release` stops unless you are on an up-to-date main with only the release files changed. Then it runs the gate and the build, commits `chore(release): v0.2.0`, and tags `v0.2.0`.
-4. `just push` pushes main and the tag. `just publish-test` and `just publish` upload to TestPyPI and PyPI, and `just gh-release` makes the GitHub release from the changelog section.
+3. Commit both as `chore(release): 0.2.0`.
+4. `just release --dry-run` checks everything and prints the release notes, and it changes nothing.
+5. `just release` does the same, asks for a `y`, then tags `v0.2.0`, pushes main and the tag, and creates the GitHub release from the changelog section.
+6. `just publish-test` and `just publish` upload to TestPyPI and PyPI.
 
-The uploads need `UV_PUBLISH_TOKEN`, and `gh-release` needs the `gh` command, which `just` checks before it starts.
+The release stops unless you are on main with a clean tree that is not behind origin.
+It also needs agreeing version files, a changelog section, a package that builds, and a passing full check.
+The uploads need `UV_PUBLISH_TOKEN`.
 
 ## README Screenshots
 
