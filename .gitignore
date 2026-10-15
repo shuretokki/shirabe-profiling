@@ -1,40 +1,24 @@
-# Local docs
 .local/
-CHANGELOG.local.md
-
-# Nix and direnv
+.local.*
 .direnv/
 result
-
-# Python
 __pycache__/
 *.py[cod]
 *.so
 *.egg-info/
 dist/
 build/
-
-# Virtual environment
 .venv/
-
-# IDE
 .idea/
 .vscode/
 *.swp
 *.swo
-
-# OS
 .DS_Store
 Thumbs.db
-
-# Testing
 .pytest_cache/
 .coverage
 htmlcov/
 .mypy_cache/
-
-# Reports
 reports/
-
-# Jupyter
 .ipynb_checkpoints/
+.ruff_cache/
