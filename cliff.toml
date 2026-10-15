@@ -1,0 +1,31 @@
+# https://git-cliff.org/docs/configuration
+# `just changelog` prints a draft for the next version.
+# Rewrite the draft as plain sentences, then put it in CHANGELOG.md.
+
+[changelog]
+body = """
+## [{{ version | default(value="Unreleased") | trim_start_matches(pat="v") }}] - {{ timestamp | default(value=now()) | date(format="%Y-%m-%d") }}
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | striptags | trim }}
+{% for commit in commits %}
+- {{ commit.message | split(pat="\n") | first | trim | upper_first }}\
+{% endfor %}
+{% endfor %}
+"""
+trim = true
+
+[git]
+conventional_commits = true
+filter_unconventional = false
+protect_breaking_commits = true
+filter_commits = true
+tag_pattern = "v[0-9]*"
+sort_commits = "oldest"
+commit_parsers = [
+  { field = "breaking", pattern = "true", group = "<!-- 1 -->Changed" },
+  { message = "^feat", group = "<!-- 0 -->Added" },
+  { message = "^fix", group = "<!-- 2 -->Fixed" },
+  { message = "^perf", group = "<!-- 3 -->Performance" },
+  { message = "^chore\\(deps", group = "<!-- 4 -->Dependencies" },
+  { message = ".*", skip = true },
+]

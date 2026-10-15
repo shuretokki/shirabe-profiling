@@ -1,0 +1,1993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }}</title>
+  {% if favicon_b64 %}<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,{{ favicon_b64 }}">{% endif %}
+  <script>
+    window.reportSettings = (function () {
+      var root = document.documentElement;
+      var query = window.matchMedia('(prefers-color-scheme: light)');
+      var allowed = {
+        theme: ['system', 'dark', 'light'],
+        density: ['auto', 'default', 'touch']
+      };
+      var defaults = {theme: 'system', density: 'auto'};
+      var state = {theme: defaults.theme, density: defaults.density};
+
+      function read(key) {
+        try { return localStorage.getItem('report-' + key); } catch (err) { return null; }
+      }
+
+      function write(key, value) {
+        try {
+          if (value === defaults[key]) localStorage.removeItem('report-' + key);
+          else localStorage.setItem('report-' + key, value);
+        } catch (err) { return; }
+      }
+
+      function apply() {
+        root.dataset.theme = state.theme === 'system' ? (query.matches ? 'light' : 'dark') : state.theme;
+        if (state.density === 'auto') root.removeAttribute('data-density');
+        else root.dataset.density = state.density;
+      }
+
+      function refreshCharts() {
+        if (window.reportTheme) window.reportTheme.refresh();
+      }
+
+      Object.keys(allowed).forEach(function (key) {
+        var stored = read(key);
+        if (allowed[key].indexOf(stored) !== -1) state[key] = stored;
+      });
+      apply();
+
+      query.addEventListener('change', function () {
+        if (state.theme !== 'system') return;
+        apply();
+        refreshCharts();
+      });
+
+      return {
+        get: function (key) { return state[key]; },
+        set: function (key, value) {
+          if (allowed[key].indexOf(value) === -1) return;
+          state[key] = value;
+          write(key, value);
+          apply();
+          if (key === 'theme') refreshCharts();
+        },
+        reset: function () {
+          Object.keys(defaults).forEach(function (key) {
+            state[key] = defaults[key];
+            write(key, defaults[key]);
+          });
+          apply();
+          refreshCharts();
+        }
+      };
+    })();
+  </script>
+  <style>{{ font_faces | safe }}</style>
+  <style>{% include "report.css" %}</style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+  <script>
+    window.reportTheme = (function () {
+      var css = getComputedStyle(document.documentElement);
+      var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var registry = {};
+      var pending = {};
+      var api = {palette: []};
+
+      function token(name) {
+        return css.getPropertyValue('--' + name).trim();
+      }
+
+      function resolve(node) {
+        if (typeof node === 'string') {
+          var match = /^var\(--([a-z0-9-]+)\)$/.exec(node);
+          return match ? token(match[1]) : node;
+        }
+        if (Array.isArray(node)) return node.map(resolve);
+        if (node && typeof node === 'object') {
+          var out = {};
+          Object.keys(node).forEach(function (key) { out[key] = resolve(node[key]); });
+          return out;
+        }
+        return node;
+      }
+
+      function register() {
+        var text = token('text');
+        var muted = token('text-muted');
+        var line = token('border');
+        var faint = token('border-variant');
+        var axis = {
+          axisLine: {lineStyle: {color: line}},
+          axisTick: {lineStyle: {color: line}},
+          axisLabel: {color: muted},
+          nameTextStyle: {color: muted},
+          splitLine: {lineStyle: {color: faint}},
+          splitArea: {areaStyle: {color: ['transparent']}}
+        };
+        api.palette = ['primary', 'info', 'warning', 'number', 'success', 'error', 'text-muted'].map(token);
+
+        echarts.registerTheme('report', {
+          color: api.palette,
+          backgroundColor: 'transparent',
+          animation: !reduced,
+          animationDuration: 150,
+          animationDurationUpdate: 150,
+          animationEasing: 'quinticOut',
+          textStyle: {fontFamily: token('font-ui'), color: text},
+          title: {textStyle: {color: text, fontWeight: 600}},
+          legend: {textStyle: {color: muted}},
+          categoryAxis: axis,
+          valueAxis: axis,
+          visualMap: {textStyle: {color: muted}},
+          tooltip: {
+            backgroundColor: token('surface'),
+            borderColor: faint,
+            borderWidth: 1,
+            textStyle: {color: text, fontSize: 12},
+            extraCssText: 'border-radius:8px;box-shadow:' + token('shadow-elevated') + ';'
+          }
+        });
+      }
+
+      function build(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var existing = echarts.getInstanceByDom(el);
+        if (existing) existing.dispose();
+        echarts.init(el, 'report').setOption(resolve(registry[id]));
+      }
+
+      function mount(id, option) {
+        registry[id] = option;
+        if (document.getElementById(id).offsetWidth) build(id); else pending[id] = true;
+      }
+
+      function flush(root) {
+        Object.keys(pending).forEach(function (id) {
+          var el = document.getElementById(id);
+          if (!el || !el.offsetWidth || (root && !root.contains(el))) return;
+          delete pending[id];
+          build(id);
+        });
+      }
+
+      function refresh() {
+        register();
+        Object.keys(registry).forEach(function (id) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          if (el.offsetWidth) {
+            delete pending[id];
+            build(id);
+          } else {
+            pending[id] = true;
+          }
+        });
+        document.dispatchEvent(new Event('reporttheme'));
+      }
+
+      register();
+
+      document.fonts.ready.then(function () {
+        document.querySelectorAll('[_echarts_instance_]').forEach(function (el) {
+          var chart = echarts.getInstanceByDom(el);
+          if (chart && el.offsetWidth) chart.resize();
+        });
+      });
+
+      api.token = token;
+      api.resolve = resolve;
+      api.mount = mount;
+      api.flush = flush;
+      api.refresh = refresh;
+      return api;
+    })();
+  </script>
+</head>
+<body>
+{% from "icons.j2" import icon %}
+{% set type_icons = {'NUMERIC': 'hash', 'CATEGORICAL': 'type', 'BOOLEAN': 'toggle-left', 'DATETIME': 'calendar-clock', 'TEXT': 'align-left'} %}
+
+{% macro type_tone(type_name) -%}
+{%- if type_name == 'NUMERIC' %}badge-info{% elif type_name == 'CATEGORICAL' %}badge-success{% elif type_name == 'BOOLEAN' %}badge-number{% elif type_name == 'DATETIME' %}badge-warning{% endif -%}
+{%- endmacro %}
+
+{% macro type_color(type_name) -%}
+{%- if type_name == 'NUMERIC' %}info{% elif type_name == 'CATEGORICAL' %}success{% elif type_name == 'BOOLEAN' %}number{% elif type_name == 'DATETIME' %}warning{% else %}muted{% endif -%}
+{%- endmacro %}
+
+{% macro truncate_switch(target) -%}
+<button type="button" class="icon-button" data-truncate-target="{{ target }}" aria-pressed="true" aria-label="Compact cells" title="Compact cells: on">
+  <span class="truncate-on">{{ icon('fold-horizontal') }}</span>
+  <span class="truncate-off" hidden>{{ icon('unfold-horizontal') }}</span>
+</button>
+{%- endmacro %}
+
+{% macro alert_tone(alert_type) -%}
+{%- if alert_type in ('HIGH_MISSING', 'DUPLICATES', 'TARGET_LEAKAGE') %}badge-error{% elif alert_type in ('SKEWED', 'HIGH_ZEROS') %}badge-warning{% elif alert_type in ('IMBALANCED', 'CONSTANT') %}badge-number{% elif alert_type == 'HIGH_CORRELATION' %}badge-info{% elif alert_type == 'UNIFORM' %}badge-success{% endif -%}
+{%- endmacro %}
+
+{% macro stat(label, value, pct=none, flag=none) -%}
+<tr{% if flag %} class="is-alert" title="{{ flag }}"{% endif %}><td class="stat-label">{{ label }}</td><td class="num">{{ value }}{% if pct is not none %} <span class="muted">({{ pct }})</span>{% endif %}</td></tr>
+{%- endmacro %}
+{% macro column_table(col_data) -%}
+{% set flags = col_data.alert_rows or {} %}
+              <table class="table table-dense">
+                <tbody>
+                  {{ stat("Count", col_data.count | format_number) }}
+                  {{ stat("Missing", col_data.missing_count | format_number, col_data.missing_pct | format_pct, flag=flags.get("Missing")) }}
+                  {% if col_data.distinct_count is defined %}
+                  {{ stat("Distinct", col_data.distinct_count | format_number, col_data.distinct_pct | format_pct, flag=flags.get("Distinct")) }}
+                  {% endif %}
+
+                  {% if col_data.column_type == "NUMERIC" %}
+                  {{ stat("Mean", col_data.mean | format_float) }}
+                  {{ stat("Std", col_data.std | format_float) }}
+                  {{ stat("Variance", col_data.variance | format_float) }}
+                  {{ stat("Sum", col_data.sum | format_float) }}
+                  {{ stat("CV", col_data.cv | format_float) }}
+                  {{ stat("MAD", col_data.mad | format_float) }}
+                  {{ stat("Min", col_data.min | format_float) }}
+                  {{ stat("P5", col_data.p5 | format_float) }}
+                  {{ stat("Q25", col_data.q25 | format_float) }}
+                  {{ stat("Median", col_data.median | format_float) }}
+                  {{ stat("Q75", col_data.q75 | format_float) }}
+                  {{ stat("P95", col_data.p95 | format_float) }}
+                  {{ stat("Max", col_data.max | format_float) }}
+                  {{ stat("Range", col_data.range | format_float) }}
+                  {{ stat("IQR", col_data.iqr | format_float) }}
+                  {{ stat("Skewness", col_data.skewness | format_float, flag=flags.get("Skewness")) }}
+                  {{ stat("Kurtosis", col_data.kurtosis | format_float) }}
+                  {{ stat("Zeros", col_data.zeros_count, col_data.zeros_pct | format_pct, flag=flags.get("Zeros")) }}
+                  {{ stat("Negatives", col_data.negative_count, col_data.negative_pct | format_pct) }}
+                  {{ stat("Infinite", col_data.n_infinite) }}
+                  {% if col_data.monotonic_increase %}{{ stat("Monotonic", "Increasing") }}{% endif %}
+                  {% if col_data.monotonic_decrease %}{{ stat("Monotonic", "Decreasing") }}{% endif %}
+                  {% for label, value in col_data.extra_rows or [] %}{{ stat(label, value) }}{% endfor %}
+                  {% endif %}
+
+                  {% if col_data.column_type == "CATEGORICAL" %}
+                  {% if col_data.imbalance is not none %}{{ stat("Imbalance", col_data.imbalance | format_pct, flag=flags.get("Imbalance")) }}{% endif %}
+                  {% if col_data.other_values %}
+                  {{ stat("Other (rows)", col_data.other_values.count | format_number) }}
+                  {{ stat("Remaining categories", col_data.other_values.distinct_remaining | format_number) }}
+                  {% endif %}
+                  {% if col_data.length_mean is not none %}{{ stat("Avg Length", col_data.length_mean | format_float) }}{% endif %}
+                  {% if col_data.length_min is not none %}{{ stat("Min Length", col_data.length_min) }}{% endif %}
+                  {% if col_data.length_max is not none %}{{ stat("Max Length", col_data.length_max) }}{% endif %}
+                  {% if col_data.length_median is not none %}{{ stat("Median Length", col_data.length_median | format_float) }}{% endif %}
+                  {% if col_data.word_count_mean is not none %}{{ stat("Avg Words", col_data.word_count_mean | format_float) }}{% endif %}
+                  {% if col_data.has_non_ascii %}{{ stat("Non-ASCII", "Yes") }}{% endif %}
+                  {% if col_data.n_characters is not none %}{{ stat("Total Chars", col_data.n_characters | format_number) }}{% endif %}
+                  {% if col_data.n_characters_distinct is not none %}{{ stat("Distinct Chars", col_data.n_characters_distinct | format_number) }}{% endif %}
+                  {% endif %}
+
+                  {% if col_data.column_type == "BOOLEAN" %}
+                  {{ stat("True", col_data.true_count, col_data.true_pct | format_pct) }}
+                  {{ stat("False", col_data.false_count, col_data.false_pct | format_pct) }}
+                  {% endif %}
+
+                  {% if col_data.column_type == "DATETIME" %}
+                  {{ stat("Min", col_data.min or "—") }}
+                  {{ stat("Max", col_data.max or "—") }}
+                  {{ stat("Range", col_data.range or "—") }}
+                  {% endif %}
+
+                  {% if col_data.column_type == "TEXT" %}
+                  {{ stat("Avg Length", col_data.length_mean | format_float) }}
+                  {{ stat("Min Length", col_data.length_min) }}
+                  {{ stat("Max Length", col_data.length_max) }}
+                  {% endif %}
+                </tbody>
+              </table>
+{%- endmacro %}
+
+
+{% macro ext(url, text) -%}<a class="link link-external" href="{{ url }}" target="_blank" rel="noopener">{{ text }}</a>{%- endmacro %}
+
+{% macro data_table(rows) -%}
+<div class="overflow-x-auto">
+  <table class="table table-data">
+    <thead>
+      <tr>{% for col_name in rows[0].keys() %}<th title="{{ col_name }}"><span class="cell">{{ col_name }}</span></th>{% endfor %}</tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        {% for val in row.values() %}
+        <td title="{{ val }}">
+          {%- if val is none %}<span class="cell muted">null</span>
+          {%- else %}{% set short = val | shorten %}<span class="cell">{% if short != val %}<span class="cell-short">{{ short }}</span><span class="cell-full">{{ val }}</span>{% else %}{{ val }}{% endif %}</span>{% endif -%}
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{%- endmacro %}
+
+  <header class="app-header" id="top">
+    <h1 class="sr-only">{{ title }}</h1>
+    <div class="page-bar max-w-7xl mx-auto px-6">
+      {% if logo_mark %}
+      <span class="brand-mark" role="img" aria-label="{{ brand_name }}">{{ logo_mark | safe }}</span>
+      {% endif %}
+      <div class="tab-list" role="tablist" aria-label="Pages" id="page-tabs">
+        <button type="button" class="tab" role="tab" id="tab-page-report" aria-controls="page-report" aria-selected="true" tabindex="0" title="{{ title }}" aria-label="{{ title }}">
+          {{ icon('file-text', 14) }}<span class="tab-label">{{ title }}</span>
+        </button>
+        <button type="button" class="tab" role="tab" id="tab-page-guide" aria-controls="page-guide" aria-selected="false" tabindex="-1" title="Guide" aria-label="Guide">
+          {{ icon('book-open', 14) }}<span class="tab-label">Guide</span>
+        </button>
+        <button type="button" class="tab" role="tab" id="tab-page-feedback" aria-controls="page-feedback" aria-selected="false" tabindex="-1" title="Feedback" aria-label="Feedback">
+          {{ icon('message-square', 14) }}<span class="tab-label">Feedback</span>
+        </button>
+      </div>
+      <div class="header-actions">
+        <a class="icon-button" href="{{ repository_url }}" target="_blank" rel="noopener" aria-label="Source on GitHub" title="Source on GitHub">{{ icon('github') }}</a>
+        <div class="settings">
+          <button type="button" class="icon-button" id="settings-button" aria-haspopup="true" aria-expanded="false" aria-controls="settings-menu" aria-label="Settings" title="Settings">{{ icon('settings') }}</button>
+          <div class="menu settings-menu" id="settings-menu" role="group" aria-label="Settings" hidden>
+            <div class="menu-label" id="theme-label">Theme</div>
+            <div role="radiogroup" aria-labelledby="theme-label">
+              <button type="button" class="menu-item" role="radio" aria-checked="true" data-setting="theme" data-value="system"><span class="menu-lead">{{ icon('monitor', 14) }}</span><span class="chip-label">System</span><span class="menu-check">{{ icon('check', 14) }}</span></button>
+              <button type="button" class="menu-item" role="radio" aria-checked="false" data-setting="theme" data-value="dark"><span class="menu-lead">{{ icon('moon', 14) }}</span><span class="chip-label">Dark</span><span class="menu-check">{{ icon('check', 14) }}</span></button>
+              <button type="button" class="menu-item" role="radio" aria-checked="false" data-setting="theme" data-value="light"><span class="menu-lead">{{ icon('sun', 14) }}</span><span class="chip-label">Light</span><span class="menu-check">{{ icon('check', 14) }}</span></button>
+            </div>
+            <div class="menu-label" id="density-label">Density</div>
+            <div role="radiogroup" aria-labelledby="density-label">
+              <button type="button" class="menu-item" role="radio" aria-checked="true" data-setting="density" data-value="auto"><span class="chip-label">Automatic</span><span class="menu-check">{{ icon('check', 14) }}</span></button>
+              <button type="button" class="menu-item" role="radio" aria-checked="false" data-setting="density" data-value="default"><span class="chip-label">Default</span><span class="menu-check">{{ icon('check', 14) }}</span></button>
+              <button type="button" class="menu-item" role="radio" aria-checked="false" data-setting="density" data-value="touch"><span class="chip-label">Touch</span><span class="menu-check">{{ icon('check', 14) }}</span></button>
+            </div>
+            <div class="menu-rule"></div>
+            <button type="button" class="menu-item" id="settings-reset"><span class="chip-label">Reset to defaults</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 pt-6 pb-12">
+    <div role="tabpanel" id="page-report" aria-labelledby="tab-page-report" class="space-y-6">
+
+    <section aria-labelledby="sec-overview" id="overview-section">
+      <h2 class="section-title" id="sec-overview">{{ icon('chart-column') }}Dataset Overview</h2>
+
+      <div class="panel">
+        <div class="grid grid-cols-1 md:grid-cols-2">
+          <table class="table table-dense">
+            <tbody>
+              {{ stat("Rows", overview.n_rows | format_number) }}
+              {{ stat("Columns", overview.n_columns) }}
+              {{ stat("Missing Cells", overview.missing_cells | format_number, overview.missing_cells_pct | format_pct) }}
+              {{ stat("Duplicate Rows", overview.duplicate_rows | format_number, overview.duplicate_rows_pct | format_pct) }}
+              {{ stat("Memory", overview.memory_human) }}
+            </tbody>
+          </table>
+          <div class="rule-l-md p-3">
+            <div class="stat-label">Column Types</div>
+            {% set type_total = overview.type_distribution.values() | sum %}
+            {% if type_total %}
+            <div class="dist-bar" role="img" aria-label="Column type distribution">
+              {% for type_name, count in overview.type_distribution.items() %}
+              <span class="dist-seg dist-{{ type_color(type_name) }}" style="width: {{ (count / type_total * 100) | round(2) }}%" title="{{ type_name | humanize }}: {{ count }}"></span>
+              {% endfor %}
+            </div>
+            <ul class="dist-list">
+              {% for type_name, count in overview.type_distribution.items() %}
+              <li class="dist-row">
+                <span class="dot dist-{{ type_color(type_name) }}"></span>
+                <span class="chip-label">{{ type_name | humanize }}</span>
+                <span class="num">{{ count }}</span>
+                <span class="num muted">{{ (count / type_total) | format_pct }}</span>
+              </li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {% if alerts %}
+    <section aria-labelledby="sec-alerts" id="alerts-section">
+      <h2 class="section-title" id="sec-alerts">
+        <span class="icon-warning">{{ icon('triangle-alert') }}</span>Alerts
+        <span class="count-badge">{{ alerts | length }}</span>
+      </h2>
+      <div class="panel">
+        <div class="alert-groups">
+          {% for group in alerts | groupby('alert_type') %}
+          <div class="alert-group">
+            <div class="alert-group-head">
+              <span class="badge {{ alert_tone(group.grouper) }}">{{ group.grouper | humanize }}</span>
+              <span class="count-badge">{{ group.list | length }}</span>
+            </div>
+            <ul class="alert-items" id="alert-items-{{ loop.index }}"{% if group.list | length > 12 %} data-limit="8"{% endif %}>
+              {% for alert in group.list %}
+              <li class="alert-chip">
+                {% if alert.column %}
+                <span class="code">{{ alert.column }}</span>
+                {% if alert.details and alert.details.column_b %}<span class="muted">↔</span><span class="code">{{ alert.details.column_b }}</span>{% endif %}
+                {% else %}
+                <span class="muted">dataset</span>
+                {% endif %}
+                <span class="alert-value">{{ alert | alert_value }}</span>
+              </li>
+              {% endfor %}
+              {% if group.list | length > 12 %}
+              <li class="alert-more" data-limit-skip>
+                <button type="button" class="button" data-limit-toggle="alert-items-{{ loop.index }}" aria-expanded="false" aria-controls="alert-items-{{ loop.index }}">
+                  {{ icon('chevron-down', 14) }}<span class="more-label">Show {{ (group.list | length) - 8 }} more</span>
+                </button>
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if target %}
+    {% set summary = target.summary %}
+    <section aria-labelledby="sec-target" id="target-section">
+      <h2 class="section-title" id="sec-target">{{ icon('target') }}Target<span class="badge badge-info">{{ summary.column }}</span></h2>
+      <div class="stack">
+        <div class="panel">
+          <div class="grid grid-cols-1 md:grid-cols-2">
+            <table class="table table-dense">
+              <tbody>
+                {{ stat("Task", summary.task | capitalize) }}
+                {{ stat("Rows used", summary.rows | format_number) }}
+                {{ stat("Rows without a target value", summary.missing | format_number) }}
+                {% if summary.task == 'classification' %}
+                {{ stat("Class that the charts follow", summary.focus) }}
+                {{ stat("Share of that class", summary.overall | format_pct) }}
+                {% else %}
+                {{ stat("Mean", summary.stats.mean | compact) }}
+                {{ stat("Median", summary.stats.median | compact) }}
+                {{ stat("Standard deviation", summary.stats.std | compact) }}
+                {{ stat("Minimum", summary.stats.min | compact) }}
+                {{ stat("Maximum", summary.stats.max | compact) }}
+                {% if summary.stats.skew is defined %}{{ stat("Skewness", '%.2f' | format(summary.stats.skew)) }}{% endif %}
+                {% endif %}
+              </tbody>
+            </table>
+            <div class="rule-l-md p-3">
+              {% if summary.task == 'classification' %}
+              <div class="stat-label">Classes</div>
+              <ul class="bar-list bar-list-flush">
+                {% for item in summary.classes %}
+                <li class="bar-row bar-row-pair">
+                  <span class="code chip-label" title="{{ item.label }}">{{ item.label }}</span>
+                  <div class="progress" role="progressbar" aria-label="{{ item.label }}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ (item.share * 100) | round(1) }}">
+                    <div class="progress-fill" style="width: {{ (item.share * 100) | round(2) }}%"></div>
+                  </div>
+                  <span class="num">{{ item.share | format_pct }}</span>
+                </li>
+                {% endfor %}
+              </ul>
+              {% elif target.log_hint %}
+              <div class="stat-label">Log transform</div>
+              <p class="small">The values lean to one side. The skewness is {{ '%.2f' | format(summary.stats.skew) }}. After log(1 + x) the skewness is {{ '%.2f' | format(summary.log_skew) }}. Many models fit better to the log of a target like this.</p>
+              {% else %}
+              <div class="stat-label">Shape</div>
+              <p class="small">The skewness is small, so the target does not need a transform for its shape.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        {% set target_tabs = [] %}
+        {% if target.links %}{% set _ = target_tabs.append(('links', 'Link to target', 'link')) %}{% endif %}
+        {% if target.charts %}{% set _ = target_tabs.append(('charts', 'How the target changes', 'chart-line')) %}{% endif %}
+        {% if target.missing_links %}{% set _ = target_tabs.append(('missing', 'Missing values and the target', 'circle-dashed')) %}{% endif %}
+        {% if target_tabs %}
+        <div class="panel">
+          <div class="tab-list tab-list-header" role="tablist" aria-label="Target analysis" id="target-tabs">
+            {% for key, label, glyph in target_tabs %}
+            <button type="button" class="tab" role="tab" id="tab-target-{{ key }}" aria-controls="panel-target-{{ key }}" aria-selected="{{ 'true' if loop.first else 'false' }}" tabindex="{{ 0 if loop.first else -1 }}" title="{{ label }}" aria-label="{{ label }}">{{ icon(glyph, 14) }}<span class="tab-label">{{ label }}</span></button>
+            {% endfor %}
+          </div>
+        {% if target.links %}
+        <div role="tabpanel" id="panel-target-links" aria-labelledby="tab-target-links"{% if target_tabs[0][0] != 'links' %} hidden{% endif %}>
+          <p class="small muted p-3">Each bar shows how closely a column links to the target. The first number is Phi K, from 0 for no link to 1 for a perfect link.{% if target.links | selectattr('direction') | list %} The second number is the Spearman correlation. A plus sign means that the column rises with the target.{% endif %}{% if target.skipped %} {{ target.skipped | length }} category columns have more than 50 distinct values and are left out: {{ target.skipped[:5] | join(', ') }}{% if target.skipped | length > 5 %}, and more{% endif %}.{% endif %}</p>
+          <div>
+            <ul class="bar-list" id="target-links" data-limit="8">
+              {% for link in target.links %}
+              {% set tone = 'progress-error' if link.association >= leakage_limit else '' %}
+              <li class="bar-row bar-row-link">
+                <span class="code chip-label" title="{{ link.column }}">{{ link.column }}</span>
+                <div class="progress {{ tone }}" role="progressbar" aria-label="{{ link.column }}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ (link.association * 100) | round(0) }}">
+                  <div class="progress-fill" style="width: {{ (link.association * 100) | round(2) }}%"></div>
+                </div>
+                <span class="num">{{ '%.2f' | format(link.association) }}</span>
+                <span class="num muted">{% if link.direction is not none %}{{ '%+.2f' | format(link.direction) }}{% endif %}</span>
+              </li>
+              {% endfor %}
+            </ul>
+            {% if target.links | length > 8 %}
+            <div class="bar-more">
+              <button type="button" class="button" data-limit-toggle="target-links" aria-expanded="false" aria-controls="target-links">
+                {{ icon('chevron-down', 14) }}<span class="more-label">Show {{ (target.links | length) - 8 }} more</span>
+              </button>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if target.charts %}
+        <div role="tabpanel" id="panel-target-charts" aria-labelledby="tab-target-charts"{% if target_tabs[0][0] != 'charts' %} hidden{% endif %}>
+          <p class="small muted p-3">Each chart groups the rows by the values of one column. The bars count the rows in each group. The line shows "{{ summary.value_label }}" for each group. The dashed line shows the value for all rows: {% if target.percent %}{{ summary.overall | format_pct }}{% else %}{{ summary.overall | compact }}{% endif %}.</p>
+          <div class="chart-grid p-3">
+            {% for item in target.charts %}
+            <div class="chart-card">
+              <div class="chart-card-head"><span class="code chip-label" title="{{ item.column }}">{{ item.column }}</span><span class="muted">Phi K {{ '%.2f' | format(item.association) }}</span></div>
+              {{ item.chart_html | safe }}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if target.missing_links %}
+        <div role="tabpanel" id="panel-target-missing" aria-labelledby="tab-target-missing"{% if target_tabs[0][0] != 'missing' %} hidden{% endif %}>
+          <p class="small muted p-3">The table compares "{{ summary.value_label }}" in the rows where a column is missing with the other rows. A large gap means that the missing value says something about the target.</p>
+          <div class="overflow-x-auto">
+            <table class="table">
+              <thead>
+                <tr><th>Column</th><th class="num">Rows missing</th><th class="num">When missing</th><th class="num">When present</th><th class="num">Gap</th></tr>
+              </thead>
+              <tbody>
+                {% for link in target.missing_links %}
+                <tr>
+                  <td><span class="code">{{ link.column }}</span></td>
+                  <td class="num">{{ link.missing_rows | format_number }}</td>
+                  <td class="num">{% if target.percent %}{{ link.missing_value | format_pct }}{% else %}{{ link.missing_value | compact }}{% endif %}</td>
+                  <td class="num">{% if target.percent %}{{ link.present_value | format_pct }}{% else %}{{ link.present_value | compact }}{% endif %}</td>
+                  <td class="num muted">{% if target.percent %}{{ '%+.1f' | format(link.gap * 100) }} points{% else %}{{ link.gap | compact }}{% endif %}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% macro sort_th(label, kind, align='') -%}
+    <th class="{{ align }}" aria-sort="none"><button type="button" class="sort-button" data-sort-type="{{ kind }}">{{ label }}<span class="sort-icon">{{ icon('arrow-up', 12) }}</span></button></th>
+    {%- endmacro %}
+
+    {% if variables %}
+    <section aria-labelledby="sec-variables" id="variables-section">
+      <div class="section-head">
+        <h2 class="section-title" id="sec-variables">{{ icon('table-properties') }}Variables</h2>
+        <button type="button" class="icon-button" data-export="variables" aria-label="Download CSV" title="Download CSV">{{ icon('download') }}</button>
+      </div>
+      <div class="panel overflow-x-auto">
+        <table class="table" data-sortable>
+          <thead>
+            <tr>
+              {{ sort_th("Column", "text") }}
+              {{ sort_th("Type", "text") }}
+              {{ sort_th("Missing", "num", "num") }}
+              {{ sort_th("Distinct", "num", "num") }}
+              {{ sort_th("Min", "num", "num") }}
+              {{ sort_th("Max", "num", "num") }}
+              {{ sort_th("Mean", "num", "num") }}
+              {{ sort_th("Alerts", "num", "num") }}
+            </tr>
+          </thead>
+          <tbody id="variables-body"{% if variables | length > 15 %} data-limit="10"{% endif %}>
+            {% for v in variables %}
+            <tr>
+              <td data-value="{{ v.name }}"><a class="link code" href="#columns-section" data-open-column="{{ v.index }}">{{ v.name }}</a></td>
+              <td data-value="{{ v.type }}"><span class="badge {{ type_tone(v.type) }}">{{ v.type | humanize }}</span></td>
+              <td class="num" data-value="{{ v.missing_count }}"><span{% if not v.missing_count %} class="muted"{% endif %}>{{ v.missing_count | format_number }} ({{ v.missing_pct | format_pct }})</span></td>
+              <td class="num" data-value="{{ v.distinct if v.distinct is not none else '' }}">{{ v.distinct | format_number }}</td>
+              <td class="num" data-value="{{ v.min if v.min is number else '' }}">{{ v.min | compact }}</td>
+              <td class="num" data-value="{{ v.max if v.max is number else '' }}">{{ v.max | compact }}</td>
+              <td class="num" data-value="{{ v.mean if v.mean is number else '' }}">{{ v.mean | compact }}</td>
+              <td class="num" data-value="{{ v.alerts }}">{% if v.alerts %}<span class="count-badge">{{ v.alerts }}</span>{% else %}<span class="muted">&mdash;</span>{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% if variables | length > 15 %}
+        <div class="bar-more">
+          <button type="button" class="button" data-limit-toggle="variables-body" aria-expanded="false" aria-controls="variables-body">
+            {{ icon('chevron-down', 14) }}<span class="more-label">Show {{ (variables | length) - 10 }} more</span>
+          </button>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+    {% endif %}
+
+    <section aria-labelledby="sec-columns" id="columns-section" data-layout="list">
+      <div class="section-head">
+        <h2 class="section-title" id="sec-columns">{{ icon('list') }}Column Details</h2>
+        <div class="button-group" role="group" aria-label="Column layout">
+          <button type="button" class="icon-button" data-layout-choice="list" data-layout-target="columns-section" aria-pressed="true" aria-label="List layout" title="List layout">{{ icon('panel-left') }}</button>
+          <button type="button" class="icon-button" data-layout-choice="chips" data-layout-target="columns-section" aria-pressed="false" aria-label="Chip layout" title="Chip layout">{{ icon('layout-grid') }}</button>
+        </div>
+      </div>
+      <div class="panel columns">
+        <div class="columns-nav">
+          <div class="columns-filter">
+            <input type="search" id="col-filter" class="field" placeholder="Filter columns" aria-label="Filter columns" autocomplete="off">
+          </div>
+          <div class="chip-list" role="tablist" aria-label="Columns" aria-orientation="vertical" id="col-tabs">
+            {% for col_name, col_data in columns.items() %}
+            <button type="button" class="chip" role="tab" id="tab-col-{{ loop.index0 }}" aria-controls="panel-col-{{ loop.index0 }}" aria-selected="{{ 'true' if loop.first else 'false' }}" tabindex="{{ 0 if loop.first else -1 }}" title="{{ col_name }}">
+              {{ icon(type_icons.get(col_data.column_type, 'circle-help'), 14) }}
+              <span class="chip-label">{{ col_name }}</span>
+              {% if col_data.missing_count %}<span class="chip-meta">{{ col_data.missing_pct | format_pct }}</span>{% endif %}
+            </button>
+            {% endfor %}
+          </div>
+          <div class="columns-empty small" id="col-empty" hidden>No columns match.</div>
+        </div>
+
+        <div class="columns-detail min-w-0">
+        {% for col_name, col_data in columns.items() %}
+        <div role="tabpanel" class="col-panel" id="panel-col-{{ loop.index0 }}" aria-labelledby="tab-col-{{ loop.index0 }}"{% if not loop.first %} hidden{% endif %}>
+          <div class="panel-heading">
+            <h3 class="min-w-0 truncate" title="{{ col_name }}">{{ col_name }}</h3>
+            <span class="badge {{ type_tone(col_data.column_type) }}">{{ col_data.column_type | humanize }}</span>
+            {% for alert in col_data.alerts %}<span class="badge {{ alert_tone(alert.type) }}" title="{{ alert.title }}">{{ icon('triangle-alert', 12) }}{{ alert.label }}</span>{% endfor %}
+            {% if col_data.chart_html %}<button type="button" class="icon-button ml-auto" data-save-png="col_chart_{{ loop.index0 }}" data-name="{{ col_name }}" aria-label="Download chart as image" title="Download chart as image">{{ icon('save') }}</button>{% endif %}
+          </div>
+
+          <div class="tab-list view-tabs" role="tablist" aria-label="{{ col_name }} view">
+            {% for view in col_data.views %}
+            <button type="button" class="tab" role="tab" id="tab-view-{{ view.chart_id }}" aria-controls="pane-{{ view.chart_id }}" aria-selected="{{ 'true' if loop.first else 'false' }}" tabindex="{{ 0 if loop.first else -1 }}" data-chart-id="{{ view.chart_id }}" data-chart-name="{{ view.chart_name }}"{% if view.ok %} title="Skew within the limit"{% endif %}>{{ view.label }}{% if view.ok %}<span class="view-check">{{ icon('check', 12) }}</span>{% endif %}</button>
+            {% endfor %}
+          </div>
+          {% for view in col_data.views %}
+          <div role="tabpanel" class="col-pane" id="pane-{{ view.chart_id }}" aria-labelledby="tab-view-{{ view.chart_id }}"{% if not loop.first %} hidden{% endif %}>
+            <div class="grid grid-cols-1 lg:grid-cols-2 col-split">
+              <div class="p-3">
+                {{ column_table(view.stats or col_data) }}
+              </div>
+
+              <div class="panel-editor rule-l p-3">
+                {% if view.chart_html %}
+                <div>{{ view.chart_html | safe }}</div>
+                {% else %}
+                <div class="empty">No chart available</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    {% if correlation_charts %}
+    <section aria-labelledby="sec-correlations" id="correlations-section">
+      <div class="section-head">
+        <h2 class="section-title" id="sec-correlations">{{ icon('grid-3x3') }}Correlations</h2>
+        <div class="button-group" role="group" aria-label="Download the shown matrix" id="corr-tools" hidden>
+          <button type="button" class="icon-button" id="corr-save-csv" aria-label="Download matrix as CSV" title="Download matrix as CSV">{{ icon('download') }}</button>
+          <button type="button" class="icon-button" id="corr-save-png" aria-label="Download heatmap as image" title="Download heatmap as image">{{ icon('save') }}</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="tab-list" role="tablist" aria-label="Correlation method" id="corr-tabs">
+          {% for chart in correlation_charts %}
+          <button type="button" class="tab" role="tab" id="tab-{{ chart.div_id }}" aria-controls="panel-{{ chart.div_id }}" aria-selected="{{ 'true' if loop.first else 'false' }}" tabindex="{{ 0 if loop.first else -1 }}">{{ chart.name }}</button>
+          {% endfor %}
+        </div>
+        {% for chart in correlation_charts %}
+        <div class="panel-editor p-3" role="tabpanel" id="panel-{{ chart.div_id }}"{% if chart.chart_html %} data-heatmap="{{ chart.div_id }}" data-name="correlation-{{ chart.key }}"{% endif %} aria-labelledby="tab-{{ chart.div_id }}"{% if chart.mobile_hidden %} data-mobile-hidden{% endif %}{% if not loop.first %} hidden{% endif %}>
+          {% if chart.chart_html %}
+          <div class="heatmap-wrap">
+          {{ chart.chart_html | safe }}
+          </div>
+          {% if chart.mobile_hidden %}
+          <p class="small muted heatmap-mobile-note">This matrix has {{ chart.size }} columns. A narrow screen shows no heatmap above {{ heatmap_mobile_limit }} columns. The list shows the strongest pairs instead.</p>
+          {% endif %}
+          {% else %}
+          <p class="small muted">This matrix has {{ chart.size }} columns. The report shows no heatmap above {{ heatmap_limit }} columns. The list shows the strongest pairs instead.</p>
+          {% endif %}
+          {% if chart.pairs %}
+          <div class="pair-list">
+            <div class="stat-label">Strongest pairs</div>
+            <ul class="bar-list" id="pairs-{{ chart.div_id }}"{% if chart.pairs | length > 12 %} data-limit="10"{% endif %}>
+              {% for pair in chart.pairs %}
+              <li class="bar-row bar-row-pair">
+                <span class="code chip-label" title="{{ pair.a }} and {{ pair.b }}">{{ pair.a }} <span class="muted">↔</span> {{ pair.b }}</span>
+                <div class="progress {{ 'progress-info' if pair.value < 0 else '' }}" role="progressbar" aria-label="{{ pair.a }} and {{ pair.b }}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ (pair.value | abs * 100) | round(0) }}">
+                  <div class="progress-fill" style="width: {{ (pair.value | abs * 100) | round(2) }}%"></div>
+                </div>
+                <span class="num">{{ '%.2f' | format(pair.value) }}</span>
+              </li>
+              {% endfor %}
+            </ul>
+            {% if chart.pairs | length > 12 %}
+            <div class="bar-more">
+              <button type="button" class="button" data-limit-toggle="pairs-{{ chart.div_id }}" aria-expanded="false" aria-controls="pairs-{{ chart.div_id }}">
+                {{ icon('chevron-down', 14) }}<span class="more-label">Show {{ (chart.pairs | length) - 10 }} more</span>
+              </button>
+            </div>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if interactions %}
+    <section aria-labelledby="sec-interactions" id="interactions-section">
+      <h2 class="section-title" id="sec-interactions">
+        {{ icon('arrow-left-right') }}Interactions
+        {% if interactions.sampled %}
+        <span class="badge badge-warning">Showing {{ interactions.sample_size | format_number }} of {{ interactions.total_rows | format_number }} rows</span>
+        {% endif %}
+      </h2>
+      <div class="panel panel-open">
+        <template id="tpl-chevron">{{ icon('chevron-down', 14) }}</template>
+        <template id="tpl-check">{{ icon('check', 14) }}</template>
+        <div class="toolbar">
+          <div class="flex items-center gap-2">
+            <label for="interact-x" class="muted">X</label>
+            <select id="interact-x" class="field">
+              {% for col in interactions.numeric_columns %}
+              <option value="{{ col }}" data-type="numeric"{% if loop.first %} selected{% endif %}>{{ col }} (#)</option>
+              {% endfor %}
+              {% for col in interactions.categorical_columns %}
+              <option value="{{ col }}" data-type="categorical">{{ col }} (Aa)</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <label for="interact-y" class="muted">Y</label>
+            <select id="interact-y" class="field">
+              {% for col in interactions.numeric_columns %}
+              <option value="{{ col }}" data-type="numeric"{% if loop.index0 == 1 %} selected{% elif loop.first and interactions.numeric_columns | length == 1 %} selected{% endif %}>{{ col }} (#)</option>
+              {% endfor %}
+              {% for col in interactions.categorical_columns %}
+              <option value="{{ col }}" data-type="categorical">{{ col }} (Aa)</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div id="interact-msg" class="muted" role="status" hidden></div>
+          <span class="small muted ml-auto">Scroll to zoom, drag to pan</span>
+          <div class="button-group" role="group" aria-label="Zoom">
+            <button type="button" class="icon-button" id="zoom-in" aria-label="Zoom in" title="Zoom in" disabled>{{ icon('zoom-in') }}</button>
+            <button type="button" class="icon-button" id="zoom-out" aria-label="Zoom out" title="Zoom out" disabled>{{ icon('zoom-out') }}</button>
+            <button type="button" class="icon-button" id="zoom-reset" aria-label="Reset zoom" title="Reset zoom" disabled>{{ icon('rotate-ccw') }}</button>
+          </div>
+          <button type="button" class="icon-button" data-save-png="interact-chart" data-name-from="interact-x,interact-y" aria-label="Download plot as image" title="Download plot as image">{{ icon('save') }}</button>
+        </div>
+        <div class="panel-editor panel-foot p-3">
+          <div id="interact-chart" style="width:100%;height:450px"></div>
+        </div>
+      </div>
+    </section>
+    <script>
+    (function(){
+      var numData = {{ interactions.numeric_data_json | safe }};
+      var boxData = {{ interactions.boxplot_stats_json | safe }};
+      var selX = document.getElementById('interact-x');
+      var selY = document.getElementById('interact-y');
+      var chartDom = document.getElementById('interact-chart');
+      var msgEl = document.getElementById('interact-msg');
+      var chart = null;
+      var dot = reportTheme.token('primary');
+      var stale = false;
+
+      function fmtNum(v) {
+        if (Math.abs(v) >= 1e6) return (v/1e6).toFixed(1) + 'M';
+        if (Math.abs(v) >= 1e3) return (v/1e3).toFixed(1) + 'K';
+        return Number.isInteger(v) ? v.toString() : v.toFixed(2);
+      }
+      function fmtAxis(v) {
+        if (Math.abs(v) >= 1e6) return (v/1e6).toFixed(0) + 'M';
+        if (Math.abs(v) >= 1e3) return (v/1e3).toFixed(0) + 'K';
+        return v;
+      }
+
+      var numCols = {{ interactions.numeric_columns | tojson }};
+      var catCols = {{ interactions.categorical_columns | tojson }};
+
+      function getType(sel) {
+        return sel.options[sel.selectedIndex].getAttribute('data-type');
+      }
+
+      function buildOptions(cols, type, symbol) {
+        return cols.map(function(c) {
+          return '<option value="' + c + '" data-type="' + type + '">' + c + ' (' + symbol + ')</option>';
+        }).join('');
+      }
+
+      function updateYOptions() {
+        var xCol = selX.value;
+        var xType = getType(selX);
+        var prev = selY.value;
+        var avail = numCols.filter(function(c) { return c !== xCol; });
+        var html = buildOptions(avail, 'numeric', '#');
+        if (xType === 'numeric') {
+          html += buildOptions(catCols, 'categorical', 'Aa');
+        }
+        selY.innerHTML = html;
+        var found = false;
+        for (var i = 0; i < selY.options.length; i++) {
+          if (selY.options[i].value === prev) { selY.selectedIndex = i; found = true; break; }
+        }
+        if (!found && selY.options.length > 0) selY.selectedIndex = 0;
+      }
+
+      function renderInteraction() {
+        var xCol = selX.value, yCol = selY.value;
+        var xType = getType(selX), yType = getType(selY);
+
+        msgEl.hidden = true;
+        msgEl.textContent = '';
+        setZoomEnabled(false);
+
+        if (xCol === yCol) {
+          msgEl.textContent = 'Select two different columns.';
+          msgEl.hidden = false;
+          if (chart) { chart.clear(); }
+          return;
+        }
+
+        if (!chart) { chart = echarts.init(chartDom, 'report'); }
+
+        if (xType === 'numeric' && yType === 'numeric') {
+          renderScatter(xCol, yCol);
+          setZoomEnabled(true);
+        } else {
+          var catCol = xType === 'categorical' ? xCol : yCol;
+          var numCol = xType === 'categorical' ? yCol : xCol;
+          var flipped = (yType === 'categorical');
+          renderBoxPlot(catCol, numCol, flipped);
+        }
+      }
+
+      var zoomButtons = document.querySelectorAll('#zoom-in, #zoom-out, #zoom-reset');
+
+      function setZoomEnabled(on) {
+        zoomButtons.forEach(function (button) { button.disabled = !on; });
+      }
+
+      function zoomTo(scale) {
+        var zoom = chart.getOption().dataZoom;
+        [0, 1].forEach(function (i) {
+          var mid = (zoom[i].start + zoom[i].end) / 2;
+          var half = scale === null ? 50 : Math.min((zoom[i].end - zoom[i].start) / 2 * scale, 50);
+          chart.dispatchAction({
+            type: 'dataZoom',
+            dataZoomIndex: i,
+            start: scale === null ? 0 : Math.max(0, mid - half),
+            end: scale === null ? 100 : Math.min(100, mid + half)
+          });
+        });
+      }
+
+      function renderScatter(xCol, yCol) {
+        var xVals = numData[xCol], yVals = numData[yCol];
+        var len = Math.min(xVals.length, yVals.length);
+        var data = new Array(len);
+        for (var i = 0; i < len; i++) { data[i] = [xVals[i], yVals[i]]; }
+
+        var sz = len > 50000 ? 3 : len > 10000 ? 4 : len > 1000 ? 5 : 6;
+        var op = len > 50000 ? 0.6 : len > 10000 ? 0.5 : len > 1000 ? 0.6 : 0.8;
+
+        var isLarge = len > 2000;
+        chart.setOption({
+          animation: false,
+          hoverLayerThreshold: 1000,
+          title: {text: xCol + '  vs  ' + yCol, left: 'center', textStyle: {fontSize: 13}},
+          tooltip: isLarge ? {show: false} : {trigger: 'item', formatter: function(p) {
+            return xCol + ': ' + fmtNum(p.data[0]) + '<br>' + yCol + ': ' + fmtNum(p.data[1]);
+          }},
+          grid: {left: '12%', right: '5%', bottom: '12%', top: '12%'},
+          xAxis: {type: 'value', name: xCol, nameLocation: 'center', nameGap: 30, nameTextStyle: {fontSize: 12, fontWeight: 600}, axisLabel: {formatter: fmtAxis}},
+          yAxis: {type: 'value', name: yCol, nameLocation: 'center', nameGap: 50, nameTextStyle: {fontSize: 12, fontWeight: 600}, axisLabel: {formatter: fmtAxis}},
+          dataZoom: [
+            {type: 'inside', xAxisIndex: 0, zoomOnMouseWheel: true, moveOnMouseMove: true, moveOnMouseWheel: false},
+            {type: 'inside', yAxisIndex: 0, zoomOnMouseWheel: true, moveOnMouseMove: true, moveOnMouseWheel: false}
+          ],
+          series: [{
+            type: 'scatter',
+            data: data,
+            large: true,
+            largeThreshold: 50000,
+            progressive: isLarge ? 5000 : 0,
+            progressiveThreshold: 10000,
+            symbol: 'circle',
+            symbolSize: sz,
+            itemStyle: {color: dot, opacity: op},
+            emphasis: {disabled: isLarge}
+          }]
+        }, true);
+
+        var zoomTimer = null;
+        chart.off('datazoom');
+        chart.on('datazoom', function() {
+          if (zoomTimer) clearTimeout(zoomTimer);
+          zoomTimer = setTimeout(function() {
+            var dz = chart.getOption().dataZoom;
+            var xSpan = (dz[0].end - dz[0].start) / 100;
+            var ySpan = (dz[1].end - dz[1].start) / 100;
+            var zoom = 1 / Math.max(Math.min(xSpan, ySpan), 0.01);
+            var newSz = Math.min(Math.max(sz * Math.sqrt(zoom), sz), 14);
+            var newOp = Math.min(op + 0.08 * Math.sqrt(zoom), 0.9);
+            chart.setOption({series: [{symbolSize: newSz, itemStyle: {color: dot, opacity: newOp}}]});
+          }, 150);
+        });
+      }
+
+      function renderBoxPlot(catCol, numCol, flipped) {
+        var groups = boxData[catCol] && boxData[catCol][numCol];
+        if (!groups || groups.length === 0) {
+          msgEl.textContent = 'No box plot data for this pair.';
+          msgEl.hidden = false;
+          chart.clear();
+          return;
+        }
+
+        var categories = [], boxItems = [], outlierPts = [];
+        for (var i = 0; i < groups.length; i++) {
+          var g = groups[i];
+          categories.push(g.category);
+          boxItems.push([g.min, g.q1, g.median, g.q3, g.max]);
+          for (var j = 0; j < g.outliers.length; j++) {
+            outlierPts.push(flipped ? [g.outliers[j], i] : [i, g.outliers[j]]);
+          }
+        }
+
+        var catAxis = {type: 'category', data: categories, axisLabel: {fontSize: 11}};
+        var valAxis = {type: 'value', name: numCol, nameLocation: 'center', nameGap: 45, nameTextStyle: {fontSize: 12, fontWeight: 600}};
+
+        var option = {
+          title: {text: catCol + '  vs  ' + numCol, left: 'center', textStyle: {fontSize: 13}},
+          tooltip: {trigger: 'item'},
+          grid: {left: '12%', right: '5%', bottom: '12%', top: '12%'},
+          xAxis: flipped ? valAxis : catAxis,
+          yAxis: flipped ? catAxis : valAxis,
+          series: [
+            {
+              type: 'boxplot',
+              data: boxItems,
+              itemStyle: {color: reportTheme.token('border-selected'), borderColor: reportTheme.token('primary')},
+              emphasis: {itemStyle: {borderColor: reportTheme.token('text')}}
+            },
+            {
+              type: 'scatter',
+              data: outlierPts,
+              symbolSize: 5,
+              itemStyle: {color: reportTheme.token('warning'), opacity: 0.7}
+            }
+          ]
+        };
+        chart.setOption(option, true);
+      }
+
+      function enhance(select) {
+        var wrap = document.createElement('div');
+        var button = document.createElement('button');
+        var value = document.createElement('span');
+        var menu = document.createElement('ul');
+        var label = document.querySelector('label[for="' + select.id + '"]');
+        var chevron = document.getElementById('tpl-chevron').innerHTML;
+        var check = document.getElementById('tpl-check').innerHTML;
+        var active = -1;
+
+        wrap.className = 'select';
+        button.type = 'button';
+        button.className = 'field select-button';
+        button.id = select.id + '-button';
+        button.setAttribute('aria-haspopup', 'listbox');
+        button.setAttribute('aria-expanded', 'false');
+        value.className = 'select-value';
+        button.appendChild(value);
+        button.insertAdjacentHTML('beforeend', chevron);
+        menu.className = 'menu';
+        menu.id = select.id + '-menu';
+        menu.setAttribute('role', 'listbox');
+        menu.setAttribute('aria-labelledby', button.id);
+        menu.tabIndex = -1;
+        menu.hidden = true;
+        if (label) label.htmlFor = button.id;
+
+        select.parentNode.insertBefore(wrap, select);
+        wrap.append(select, button, menu);
+        select.className = 'select-native';
+        select.tabIndex = -1;
+        select.setAttribute('aria-hidden', 'true');
+
+        function sync() {
+          var option = select.options[select.selectedIndex];
+          value.textContent = option ? option.text : '';
+        }
+
+        function paint() {
+          menu.innerHTML = '';
+          Array.prototype.forEach.call(select.options, function (option, i) {
+            var item = document.createElement('li');
+            var text = document.createElement('span');
+            item.className = 'menu-item';
+            item.id = menu.id + '-' + i;
+            item.setAttribute('role', 'option');
+            item.setAttribute('aria-selected', String(i === select.selectedIndex));
+            text.className = 'chip-label';
+            text.textContent = option.text;
+            item.appendChild(text);
+            if (i === select.selectedIndex) item.insertAdjacentHTML('beforeend', check);
+            item.addEventListener('mouseenter', function () { setActive(i); });
+            item.addEventListener('click', function () { choose(i); });
+            menu.appendChild(item);
+          });
+        }
+
+        function setActive(i) {
+          active = i;
+          Array.prototype.forEach.call(menu.children, function (item, n) {
+            item.dataset.active = String(n === i);
+          });
+          var current = menu.children[i];
+          if (!current) return;
+          menu.setAttribute('aria-activedescendant', current.id);
+          current.scrollIntoView({block: 'nearest'});
+        }
+
+        function open() {
+          paint();
+          menu.hidden = false;
+          button.setAttribute('aria-expanded', 'true');
+          setActive(select.selectedIndex);
+          menu.focus();
+        }
+
+        function close(refocus) {
+          menu.hidden = true;
+          button.setAttribute('aria-expanded', 'false');
+          if (refocus) button.focus();
+        }
+
+        function choose(i) {
+          var changed = i !== select.selectedIndex;
+          select.selectedIndex = i;
+          sync();
+          close(true);
+          if (changed) select.dispatchEvent(new Event('change', {bubbles: true}));
+        }
+
+        button.addEventListener('click', function () {
+          if (menu.hidden) open(); else close(true);
+        });
+        button.addEventListener('keydown', function (e) {
+          if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+          e.preventDefault();
+          if (menu.hidden) open();
+        });
+        menu.addEventListener('keydown', function (e) {
+          var last = select.options.length - 1;
+          if (e.key === 'Tab') { close(false); return; }
+          if (e.key === 'ArrowDown') setActive(Math.min(active + 1, last));
+          else if (e.key === 'ArrowUp') setActive(Math.max(active - 1, 0));
+          else if (e.key === 'Home') setActive(0);
+          else if (e.key === 'End') setActive(last);
+          else if (e.key === 'Enter' || e.key === ' ') choose(active);
+          else if (e.key === 'Escape') close(true);
+          else return;
+          e.preventDefault();
+        });
+        document.addEventListener('click', function (e) {
+          if (!menu.hidden && !wrap.contains(e.target)) close(false);
+        });
+        select.addEventListener('change', sync);
+        new MutationObserver(function () {
+          sync();
+          if (!menu.hidden) close(false);
+        }).observe(select, {childList: true});
+
+        sync();
+      }
+
+      enhance(selX);
+      enhance(selY);
+
+      function refreshIfVisible() {
+        if (stale && chartDom.offsetWidth) {
+          stale = false;
+          renderInteraction();
+        }
+      }
+
+      document.addEventListener('reporttheme', function () {
+        dot = reportTheme.token('primary');
+        if (chart) {
+          chart.dispose();
+          chart = null;
+        }
+        stale = true;
+        refreshIfVisible();
+      });
+      document.addEventListener('reportshown', refreshIfVisible);
+
+      document.getElementById('zoom-in').addEventListener('click', function () { zoomTo(0.5); });
+      document.getElementById('zoom-out').addEventListener('click', function () { zoomTo(2); });
+      document.getElementById('zoom-reset').addEventListener('click', function () { zoomTo(null); });
+
+      selX.addEventListener('change', function() { updateYOptions(); renderInteraction(); });
+      selY.addEventListener('change', renderInteraction);
+
+      updateYOptions();
+      renderInteraction();
+
+      window.addEventListener('resize', function() {
+        if (chart) chart.resize();
+      });
+    })();
+    </script>
+    {% endif %}
+
+    {% if tables.missing_patterns %}
+    <section aria-labelledby="sec-patterns" id="patterns-section">
+      <h2 class="section-title" id="sec-patterns">{{ icon('blocks') }}Missing Patterns</h2>
+      <div class="panel">
+        <div class="overflow-x-auto">
+          <table class="table">
+            <thead>
+              <tr><th>Columns missing together</th><th class="num">Rows</th><th class="num">Share</th></tr>
+            </thead>
+            <tbody>
+              {% for pattern in tables.missing_patterns %}
+              <tr>
+                <td><span class="tag-list">{% for column in pattern.columns %}<span class="tag">{{ column }}</span>{% endfor %}</span></td>
+                <td class="num">{{ pattern.rows | format_number }}</td>
+                <td class="num muted">{{ pattern.pct | format_pct }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if tables.outliers %}
+    <section aria-labelledby="sec-outliers" id="outliers-section">
+      <h2 class="section-title" id="sec-outliers">{{ icon('activity') }}Outliers</h2>
+      <div class="panel">
+        <div class="overflow-x-auto">
+          <table class="table table-outliers">
+            <thead>
+              <tr><th>Column</th><th class="num">Outliers</th><th class="num">Share</th><th class="num">Normal range</th></tr>
+            </thead>
+            <tbody id="outlier-list" data-limit="5">
+              {% for row in tables.outliers %}
+              <tr>
+                <td><span class="code chip-label" title="{{ row.column }}">{{ row.column }}</span></td>
+                <td class="num">{{ row.count | format_number }}</td>
+                <td class="num muted">{{ row.pct | format_pct }}</td>
+                <td class="num muted">{{ row.lower | compact }} to {{ row.upper | compact }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if tables.outliers | length > 5 %}
+        <div class="bar-more">
+          <button type="button" class="button" data-limit-toggle="outlier-list" aria-expanded="false" aria-controls="outlier-list">
+            {{ icon('chevron-down', 14) }}<span class="more-label">Show {{ (tables.outliers | length) - 5 }} more</span>
+          </button>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if overview.sample_head %}
+    <section aria-labelledby="sec-sample" id="sample-section">
+      <h2 class="section-title" id="sec-sample">{{ icon('table') }}Sample</h2>
+      <div class="panel" id="sample-panel" data-truncate="on">
+        <div class="tab-bar">
+          <div class="tab-list" role="tablist" aria-label="Sample rows">
+            <button type="button" class="tab" role="tab" id="tab-sample-head" aria-controls="panel-sample-head" aria-selected="true" tabindex="0">Head</button>
+            <button type="button" class="tab" role="tab" id="tab-sample-tail" aria-controls="panel-sample-tail" aria-selected="false" tabindex="-1">Tail</button>
+            {% if overview.sample_random %}
+            <button type="button" class="tab" role="tab" id="tab-sample-random" aria-controls="panel-sample-random" aria-selected="false" tabindex="-1">Random</button>
+            {% endif %}
+            {% if overview.sample_most_missing %}
+            <button type="button" class="tab" role="tab" id="tab-sample-missing" aria-controls="panel-sample-missing" aria-selected="false" tabindex="-1">Most Missing <span class="count-badge">{{ overview.rows_with_missing | format_number }}</span></button>
+            {% endif %}
+            {% if overview.duplicate_rows_sample %}
+            <button type="button" class="tab" role="tab" id="tab-sample-dups" aria-controls="panel-sample-dups" aria-selected="false" tabindex="-1">Duplicate Rows <span class="count-badge">{{ overview.duplicate_rows | format_number }}</span></button>
+            {% endif %}
+          </div>
+          <div class="tab-bar-tools">
+            {{ truncate_switch("sample-panel") }}
+            <button type="button" class="icon-button" data-save-table="sample-panel" aria-label="Download shown rows as CSV" title="Download shown rows as CSV">{{ icon('download') }}</button>
+          </div>
+        </div>
+        <div class="panel-editor" role="tabpanel" id="panel-sample-head" aria-labelledby="tab-sample-head">
+          {{ data_table(overview.sample_head) }}
+        </div>
+        <div class="panel-editor" role="tabpanel" id="panel-sample-tail" aria-labelledby="tab-sample-tail" hidden>
+          {% if overview.sample_tail %}{{ data_table(overview.sample_tail) }}{% endif %}
+        </div>
+        {% if overview.sample_random %}
+        <div class="panel-editor" role="tabpanel" id="panel-sample-random" aria-labelledby="tab-sample-random" hidden>
+          {{ data_table(overview.sample_random) }}
+        </div>
+        {% endif %}
+        {% if overview.sample_most_missing %}
+        <div class="panel-editor" role="tabpanel" id="panel-sample-missing" aria-labelledby="tab-sample-missing" hidden>
+          {{ data_table(overview.sample_most_missing) }}
+        </div>
+        {% endif %}
+        {% if overview.duplicate_rows_sample %}
+        <div class="panel-editor" role="tabpanel" id="panel-sample-dups" aria-labelledby="tab-sample-dups" hidden>
+          {{ data_table(overview.duplicate_rows_sample) }}
+        </div>
+        {% endif %}
+      </div>
+    </section>
+    {% endif %}
+
+    </div>
+
+    <div role="tabpanel" id="page-guide" aria-labelledby="tab-page-guide" class="space-y-6" hidden>
+
+      <section aria-labelledby="sec-guide-reading" id="guide-reading">
+        <h2 class="section-title" id="sec-guide-reading">{{ icon('book-open') }}Reading the report</h2>
+        <div class="panel">
+          <p class="guide-text">This page explains each part of the report.</p>
+          <div class="overflow-x-auto">
+            <table class="table guide-table">
+              <thead><tr><th>Section</th><th>What it shows</th></tr></thead>
+              <tbody>
+                <tr><td class="guide-term">Dataset Overview</td><td>The number of rows and columns, the memory use, the duplicate rows, and the column types.</td></tr>
+                <tr><td class="guide-term">Alerts</td><td>Possible problems in the data, grouped by type.</td></tr>
+                <tr><td class="guide-term">Target</td><td>How closely each column links to the target, and how the target changes with the values of a column. This section appears when you set a target.</td></tr>
+                <tr><td class="guide-term">Variables</td><td>One row for each column, with its type, its missing values, and summary numbers. Click a heading to sort the rows. Click a column name to open its details.</td></tr>
+                <tr><td class="guide-term">Column Details</td><td>The statistics and a chart for one column. Choose the column in the list. A column with a Skewed alert has tabs above the chart. They show the values after log1p, after Yeo-Johnson, and without the zeros.</td></tr>
+                <tr><td class="guide-term">Correlations</td><td>How closely two columns change together. Each tab uses one method.</td></tr>
+                <tr><td class="guide-term">Interactions</td><td>A plot of one column against another column.</td></tr>
+                <tr><td class="guide-term">Missing Patterns</td><td>Groups of columns that are missing in the same rows. The Rows value counts the rows that have exactly that pattern.</td></tr>
+                <tr><td class="guide-term">Outliers</td><td>Values far from the other values in a numeric column. A value is an {{ ext("https://en.wikipedia.org/wiki/Outlier", "outlier") }} when it lies more than 1.5 times the {{ ext("https://en.wikipedia.org/wiki/Interquartile_range", "IQR") }} below the first quartile or above the third quartile. A {{ ext("https://en.wikipedia.org/wiki/Quartile", "quartile") }} marks a quarter of the sorted values. The IQR is the distance between the first and the third quartile.</td></tr>
+                <tr><td class="guide-term">Sample</td><td>The first rows, the last rows, a random set of rows, the rows with the most missing values, and the duplicate rows of the data.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="sec-guide-alerts" id="guide-alerts">
+        <h2 class="section-title" id="sec-guide-alerts">{{ icon('triangle-alert') }}Alerts</h2>
+        {% set fes = 'https://feat.engineering/' %}
+        {% set skl = 'https://scikit-learn.org/stable/' %}
+        {% set guide_alerts = [
+          {
+            'name': 'High Missing',
+            'meaning': 'A column has many missing values.',
+            'threshold': '> 5%',
+            'limit': 'of the values are missing.',
+            'fixes': [
+              ['The value is absent by design, such as no garage', 'Fill it with None in a category column. Fill it with 0 in a count or an area column.'],
+              ['The value exists but was not recorded', 'Impute it, for example with the median of a group. Fit the imputer on the train data only.'],
+              ['Your model accepts missing values', 'Leave the gaps. Gradient boosting trees in scikit-learn handle them without help.'],
+              ['The gaps can carry meaning', 'Add a flag that marks the missing rows. For prediction, the pattern of gaps can help the model.'],
+              ['Several columns are missing in the same rows', 'Open the Missing Patterns section. One cause can explain several columns at once.'],
+              ['About 20% or more is missing', 'Imputation is doubtful. Keep only a flag, or drop the column. Treat 20% as a rough guide.'],
+            ],
+            'sources': [
+              ['Kuhn and Johnson, chapter 8', fes ~ '08-Handling_Missing_Data.html'],
+              ['scikit-learn: imputation', skl ~ 'modules/impute.html'],
+              ['Sperrin and others, 2020', 'https://doi.org/10.1016/j.jclinepi.2020.03.028'],
+            ],
+          },
+          {
+            'name': 'Constant',
+            'meaning': 'A column has only one value.',
+            'threshold': '≤ 1',
+            'limit': 'distinct value.',
+            'fixes': [
+              ['Every row has the same value', 'Drop the column. A model cannot learn from a column that never changes.'],
+              ['Every value is missing', 'The column is empty. Look at the data source, then drop the column.'],
+              ['Your data is a filtered or small sample', 'Look at how you took the sample. Keep the column if it changes in the full data.'],
+            ],
+            'sources': [
+              ['Kuhn and Johnson, chapter 5', fes ~ '05-Encoding_Categorical_Predictors.html'],
+              ['scikit-learn: VarianceThreshold', skl ~ 'modules/feature_selection.html#removing-features-with-low-variance'],
+            ],
+          },
+          {
+            'name': 'High Cardinality',
+            'meaning': 'Almost every value in a column is different. ' ~ ext('https://en.wikipedia.org/wiki/Cardinality_(data_modeling)', 'Cardinality') ~ ' is the count of distinct values.',
+            'threshold': '> 95%',
+            'limit': 'of the values are distinct.',
+            'fixes': [
+              ['A unique ID', 'Drop it from the features. Keep it only to join tables.'],
+              ['A real category with many levels, such as zip code', 'Use target encoding. It replaces each level with the average target value. Fit it on the train data with cross fitting, so the target does not leak.'],
+              ['Rare levels hold few rows', 'Pool the rare levels into Other. In scikit-learn, set min_frequency.'],
+              ['You want fewer columns without using the target', 'Use feature hashing. It maps many levels to a fixed number of columns.'],
+            ],
+            'sources': [
+              ['scikit-learn: encoding categorical features', skl ~ 'modules/preprocessing.html#encoding-categorical-features'],
+              ['Kuhn and Johnson, chapter 5', fes ~ '05-Encoding_Categorical_Predictors.html'],
+              ['Micci-Barreca, 2001', 'https://doi.org/10.1145/507533.507538'],
+            ],
+          },
+          {
+            'name': 'Duplicates',
+            'meaning': 'Some rows appear more than once.',
+            'threshold': 'any',
+            'limit': 'duplicate row.',
+            'fixes': [
+              ['The copies are mistakes', 'Drop the extra copies before you split the data. A row in both the train set and the test set inflates the score.'],
+              ['Near copies exist', 'Look for near duplicates too. They inflate the score in the same way.'],
+              ['The repeats are real, such as repeat visits by one person', 'Keep them. Split by group, so that one person stays in one set. In scikit-learn, use GroupKFold.'],
+            ],
+            'sources': [
+              ['Kapoor and Narayanan, 2023', 'https://doi.org/10.1016/j.patter.2023.100804'],
+              ['Barz and Denzler, 2020', 'https://arxiv.org/abs/1902.00423'],
+              ['scikit-learn: GroupKFold', skl ~ 'modules/generated/sklearn.model_selection.GroupKFold.html'],
+            ],
+          },
+          {
+            'name': 'High Zeros',
+            'meaning': 'A numeric column has many zeros.',
+            'threshold': '> 5%',
+            'limit': 'of the values are zero.',
+            'fixes': [
+              ['Zero means the thing does not exist, such as no pool', 'Keep the zeros. Add a HasX flag, for example HasPool.'],
+              ['Zero is a real measurement', 'Keep it as a number. Do not treat it as missing.'],
+              ['Zero stands in for a missing value', 'Replace the zeros with missing values. Then follow the High Missing advice.'],
+              ['Almost all values are zero', 'Test the link to the target. If the link is weak, keep only the flag, or drop the column.'],
+            ],
+            'sources': [
+              ['scikit-learn: Binarizer, to build a flag', skl ~ 'modules/generated/sklearn.preprocessing.Binarizer.html'],
+            ],
+          },
+          {
+            'name': 'Skewed',
+            'meaning': 'The values of a numeric column lean to one side. The alert value is the ' ~ ext('https://en.wikipedia.org/wiki/Skewness', 'skewness') ~ '.',
+            'threshold': '|skew| > 2',
+            'limit': 'The skewness, without the sign.',
+            'fixes': [
+              ['You use a linear model, a neural network, a support vector machine, or nearest neighbors', 'Transform the column. The long tail can dominate the fit. Fit the transform on the train data only.'],
+              ['You use a tree model', 'Skip the transform. Trees are not affected by skew.'],
+              ['The values are positive', 'Use log1p, which is log(1 + x). It also accepts zeros.'],
+              ['Some values are negative', 'Use the Yeo-Johnson power transform. Box-Cox needs strictly positive values.'],
+              ['A few extreme values cause the skew', 'Open the Outliers section first. Fix a data error at its source.'],
+              ['You are not sure', 'Compare the score with and without the transform. A transform does not always improve the model.'],
+            ],
+            'sources': [
+              ['Kuhn and Johnson, chapter 6', fes ~ '06-Engineering_Numeric_Predictors.html'],
+              ['scikit-learn: power transforms', skl ~ 'modules/preprocessing.html#non-linear-transformation'],
+              ['NumPy: log1p', 'https://numpy.org/doc/stable/reference/generated/numpy.log1p.html'],
+            ],
+          },
+          {
+            'name': 'Imbalanced',
+            'meaning': 'One value fills most of a column.',
+            'threshold': '> 90%',
+            'limit': 'of the column is one value.',
+            'fixes': [
+              ['About 99% of the rows share one value', 'The column likely holds little information. Test its link to the target before you drop it.'],
+              ['A rare value marks the event that you want to predict, such as fraud', 'Keep the column. The rare value can be the signal.'],
+              ['A category column has rare levels', 'Pool the rare levels into Other.'],
+              ['A rare level can vanish in a split', 'Pool the level, or make sure that each split has it. A split without the level creates an empty column.'],
+              ['You need a cutoff', 'Kuhn and Johnson suggest a rough cutoff of 19 for the ratio of the top value to the second value. Context can change it.'],
+            ],
+            'sources': [
+              ['Kuhn and Johnson, chapter 5', fes ~ '05-Encoding_Categorical_Predictors.html'],
+              ['caret: nearZeroVar', 'https://rdrr.io/cran/caret/man/nearZeroVar.html'],
+            ],
+          },
+          {
+            'name': 'High Correlation',
+            'meaning': 'Two columns change together. The alert value is the correlation.',
+            'threshold': '|r| > 0.8',
+            'limit': 'The correlation, without the sign.',
+            'fixes': [
+              ['You use linear regression or a neural network', 'Keep one column of the pair. Highly correlated columns hurt these models.'],
+              ['You read feature importance', 'Group the correlated columns and keep one from each group. Correlated columns share their importance, so each one looks weak.'],
+              ['Many columns move together', 'Combine them with principal component analysis (PCA).'],
+              ['One column links more closely to the target', 'Keep that column.'],
+              ['One column is computed from the other', 'Drop the computed column.'],
+              ['A very sparse column is in the pair', 'Few values can create a link by chance. Do not rely on the correlation.'],
+            ],
+            'sources': [
+              ['scikit-learn: correlated features', skl ~ 'auto_examples/inspection/plot_permutation_importance_multicollinear.html'],
+              ['Kuhn and Johnson, chapter 6', fes ~ '06-Engineering_Numeric_Predictors.html'],
+            ],
+          },
+          {
+            'name': 'Uniform',
+            'meaning': 'The values of a column look ' ~ ext('https://en.wikipedia.org/wiki/Discrete_uniform_distribution', 'evenly spread') ~ '. The alert value is a p-value.',
+            'threshold': 'p > 0.05',
+            'limit': 'The p-value of the test for an even spread.',
+            'fixes': [
+              ['The column holds row numbers or IDs', 'A sequential ID looks evenly spread. Treat it like High Cardinality.'],
+              ['The column has few values', 'The test is not valid for small samples. Each bin needs an expected count of at least 5. Look at the missing values first.'],
+              ['You want to confirm the spread', 'Open the chart in Column Details. A flat histogram confirms it.'],
+            ],
+            'sources': [
+              ['NIST handbook: chi-square test', 'https://www.itl.nist.gov/div898/handbook/eda/section3/eda35f.htm'],
+              ['ASA statement on p-values', 'https://doi.org/10.1080/00031305.2016.1154108'],
+            ],
+          },
+          {
+            'name': 'Target Leakage',
+            'meaning': 'A column links so closely to the target that it can hold the answer. The alert value is Phi K. This alert needs a target.',
+            'threshold': 'Phi K ≥ 0.95',
+            'limit': 'The link between the column and the target.',
+            'fixes': [
+              ['The value is known only after the outcome', 'Drop the column. The model cannot use it when it predicts new cases.'],
+              ['The column is a copy or a proxy of the target', 'Drop it. A proxy for the outcome gives the answer away.'],
+              ['The link is real and known in advance', 'Keep it. You can use a strong link when you know the value at prediction time. Look at how the value is recorded.'],
+              ['You prepared the data before the split', 'Fit scalers, encoders, and selectors on the train data only. Use a Pipeline, so that each fold stays clean.'],
+              ['The rows have a time order', 'Split by time. Train on the past and test on the future.'],
+            ],
+            'sources': [
+              ['Kapoor and Narayanan, 2023', 'https://doi.org/10.1016/j.patter.2023.100804'],
+              ['Kaufman and others, 2012', 'https://doi.org/10.1145/2382577.2382579'],
+              ['scikit-learn: common pitfalls', skl ~ 'common_pitfalls.html'],
+            ],
+          },
+        ] %}
+        <div class="panel">
+          <p class="guide-text">An alert marks a possible problem. The limit decides when the report raises the alert. Open an alert to see its limit, some possible fixes, and the sources behind them. The Feedback tab lists the limits that this report used.</p>
+          <p class="guide-text">The advice uses three terms. To impute a value is to fill a gap with an estimate. A flag is a new column that holds 1 where a condition is true and 0 everywhere else. The train data is the part of the data that fits the model.</p>
+          <div class="alert-list">
+            {% for alert in guide_alerts %}
+            <details class="alert-row"{% if loop.first %} open{% endif %}>
+              <summary class="alert-summary">
+                <span class="alert-chevron">{{ icon('chevron-down', 14) }}</span>
+                <span class="alert-term">{{ alert.name }}</span>
+                <span class="alert-meaning">{{ alert.meaning }}</span>
+              </summary>
+              <div class="alert-body">
+                <div class="alert-limit">
+                  <span class="alert-label">Raised when</span>
+                  <span class="alert-limit-value"><code class="alert-threshold">{{ alert.threshold }}</code> {{ alert.limit }}</span>
+                </div>
+                <div class="alert-fixes">
+                  <h3 class="alert-label">Possible fix</h3>
+                  <ol class="fix-steps">
+                    {% for when, then in alert.fixes %}
+                    <li class="fix-step"><span class="fix-when">{{ when }}</span><span class="fix-then">{{ then }}</span></li>
+                    {% endfor %}
+                  </ol>
+                </div>
+                <div class="alert-limit">
+                  <span class="alert-label">Sources</span>
+                  <span class="alert-limit-value">{% for label, url in alert.sources %}{{ ext(url, label) }}{% if not loop.last %}, {% endif %}{% endfor %}</span>
+                </div>
+              </div>
+            </details>
+            {% endfor %}
+          </div>
+          <p class="guide-text">A {{ ext("https://en.wikipedia.org/wiki/P-value", "p-value") }} is the chance that a pattern appears by luck. A high p-value means that the test cannot rule out an even spread.</p>
+        </div>
+      </section>
+
+      <section aria-labelledby="sec-guide-correlations" id="guide-correlations">
+        <h2 class="section-title" id="sec-guide-correlations">{{ icon('grid-3x3') }}Correlation methods</h2>
+        <div class="panel">
+          <p class="guide-text">A {{ ext("https://en.wikipedia.org/wiki/Correlation", "correlation") }} is a number that shows how closely two columns change together. A value near 0 means no link. A value near 1 means a strong link. The tabs run from the most useful method to the least useful method. A matrix with more than {{ heatmap_limit }} columns shows its strongest pairs and no heatmap. On a narrow screen, such as a phone, the limit is {{ heatmap_mobile_limit }} columns.</p>
+          <div class="overflow-x-auto">
+            <table class="table guide-table">
+              <thead><tr><th>Method</th><th>What it measures</th><th>Range</th></tr></thead>
+              <tbody>
+                <tr><td class="guide-term">{{ ext("https://en.wikipedia.org/wiki/Pearson_correlation_coefficient", "Pearson") }}</td><td>The straight-line link between two numeric columns.</td><td>-1 to 1</td></tr>
+                <tr><td class="guide-term">{{ ext("https://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient", "Spearman") }}</td><td>The link between the rank order of two numeric columns. It also finds curves that only rise or only fall.</td><td>-1 to 1</td></tr>
+                <tr><td class="guide-term">{{ ext("https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient", "Kendall") }}</td><td>Like Spearman, but it compares pairs of rows. It works well on small data. With more than 10,000 rows, it uses a random sample of 10,000 rows. The report skips it when the data has more than 50 numeric columns.</td><td>-1 to 1</td></tr>
+                <tr><td class="guide-term">{{ ext("https://en.wikipedia.org/wiki/Cram%C3%A9r%27s_V", "Cramers V") }}</td><td>The link between two category columns.</td><td>0 to 1</td></tr>
+                <tr><td class="guide-term">{{ ext("https://arxiv.org/abs/1811.11440", "Phik") }}</td><td>The link between any two columns, numeric or category.</td><td>0 to 1</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="guide-text">For Pearson, Spearman, and Kendall, a negative value means that one column rises when the other column falls.</p>
+        </div>
+      </section>
+
+    </div>
+
+    <div role="tabpanel" id="page-feedback" aria-labelledby="tab-page-feedback" class="space-y-6" hidden>
+
+      <section aria-labelledby="sec-feature" id="feature-section">
+        <h2 class="section-title" id="sec-feature">{{ icon('lightbulb') }}Request a feature</h2>
+        <div class="panel">
+          <p class="guide-text">Missing something? Ask for it on GitHub. Say what you need and why you need it.</p>
+          <ol class="steps">
+            <li>Choose Open feature request. The link opens a new issue with the template filled in.</li>
+            <li>Describe the problem that you want to solve.</li>
+            <li>Show how you would like to use the feature. A short code example helps.</li>
+            <li>Name any other way that you considered.</li>
+          </ol>
+          <div class="export-actions">
+            <a class="button" href="{{ feature_url }}" target="_blank" rel="noopener">{{ icon('external-link', 14) }}<span>Open feature request</span></a>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="sec-problem" id="problem-section">
+        <h2 class="section-title" id="sec-problem">{{ icon('bug') }}Report a problem</h2>
+        <div class="panel">
+          <p class="guide-text">Something looks wrong? Tell us on GitHub. A complete report helps us find the cause fast.</p>
+          <ol class="steps">
+            <li>Choose Open GitHub issue. The link opens a new issue with the first part filled in.</li>
+            <li>Describe what you did, what you expected, and what happened.</li>
+            <li>Choose Copy details in the Reproduction Details section below.</li>
+            <li>Paste the copied details at the end of the issue.</li>
+          </ol>
+          <div class="export-actions">
+            <a class="button" href="{{ issue_url }}" target="_blank" rel="noopener">{{ icon('external-link', 14) }}<span>Open GitHub issue</span></a>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="sec-reproduction" id="reproduction-section">
+        <h2 class="section-title" id="sec-reproduction">{{ icon('settings') }}Reproduction Details</h2>
+        <div class="panel">
+          <div class="code-bar">
+            <span class="code-bar-label">Details for the issue</span>
+            <button type="button" class="button" data-copy-target="reproduction-text">
+              <span class="copy-idle">{{ icon('copy', 14) }}</span>
+              <span class="copy-done" hidden>{{ icon('check', 14) }}</span>
+              <span class="copy-label">Copy details</span>
+            </button>
+          </div>
+          <pre class="code-block" id="reproduction-text">{% set ns = namespace(group='') %}{% for key, val in overview.reproduction.items() %}{% set group = key.split('.')[0] if '.' in key else 'general' %}{% if loop.index0 and group != ns.group %}{{ "\n" }}{% endif %}{% set ns.group = group %}{{ key }}: {{ val }}{{ "\n" }}{% endfor %}{{ "\n" }}rows: {{ overview.n_rows }}{{ "\n" }}columns: {{ overview.n_columns }}{{ "\n" }}column_types: {% for type_name, count in overview.type_distribution.items() %}{{ type_name | lower }}={{ count }}{% if not loop.last %}, {% endif %}{% endfor %}{{ "\n" }}alerts: {% if alerts %}{% for group in alerts | groupby('alert_type') %}{{ group.grouper | lower }}={{ group.list | length }}{% if not loop.last %}, {% endif %}{% endfor %}{% else %}none{% endif %}{{ "\n" }}<span id="diagnostic-ui"></span></pre>
+        </div>
+      </section>
+
+      <section aria-labelledby="sec-about" id="about-section">
+        <h2 class="section-title" id="sec-about">{{ icon('info') }}About</h2>
+        <div class="panel">
+          <div class="overflow-x-auto">
+            <table class="table guide-table">
+              <thead><tr><th>Item</th><th>Value</th></tr></thead>
+              <tbody>
+                <tr><td class="guide-term">Package</td><td>{{ package_name }}</td></tr>
+                <tr><td class="guide-term">Version</td><td>{{ version }}</td></tr>
+                <tr><td class="guide-term">Report created</td><td>{{ generated_at }}</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="guide-text">This report uses the open source projects below.</p>
+          <div class="overflow-x-auto">
+            <table class="table guide-table">
+              <thead><tr><th>Project</th><th>Used for</th></tr></thead>
+              <tbody>
+                {% for name, url, use in credits %}
+                <tr><td class="guide-term">{{ ext(url, name) }}</td><td>{{ use }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      function select(tab) {
+        var tabs = tab.closest('[role="tablist"]').querySelectorAll('[role="tab"]');
+        tabs.forEach(function (t) {
+          var on = t === tab;
+          t.setAttribute('aria-selected', String(on));
+          t.tabIndex = on ? 0 : -1;
+          document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+        });
+        if (tab.closest('#page-tabs')) {
+          window.scrollTo(0, 0);
+        }
+        document.dispatchEvent(new Event('reportshown'));
+        if (!window.echarts) return;
+        var panel = document.getElementById(tab.getAttribute('aria-controls'));
+        reportTheme.flush(panel);
+        panel
+          .querySelectorAll('[_echarts_instance_]')
+          .forEach(function (el) {
+            var chart = echarts.getInstanceByDom(el);
+            if (chart) chart.resize();
+          });
+      }
+
+      document.addEventListener('click', function (e) {
+        var tab = e.target.closest('[role="tab"]');
+        if (tab) select(tab);
+      });
+
+      document.addEventListener('keydown', function (e) {
+        var tab = e.target.closest('[role="tab"]');
+        if (!tab) return;
+        var tabs = Array.prototype.slice.call(
+          tab.closest('[role="tablist"]').querySelectorAll('[role="tab"]')
+        ).filter(function (t) { return !t.hidden; });
+        var i = tabs.indexOf(tab);
+        var next = {
+          ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1,
+          Home: 0, End: tabs.length - 1
+        }[e.key];
+        if (next === undefined) return;
+        e.preventDefault();
+        var target = tabs[(next + tabs.length) % tabs.length];
+        target.focus();
+        select(target);
+      });
+
+      document.querySelectorAll('[data-layout-choice]').forEach(function (choice) {
+        choice.addEventListener('click', function () {
+          var target = document.getElementById(choice.dataset.layoutTarget);
+          var layout = choice.dataset.layoutChoice;
+          target.dataset.layout = layout;
+          var tablist = target.querySelector('[aria-orientation]');
+          if (tablist) {
+            tablist.setAttribute('aria-orientation', layout === 'list' ? 'vertical' : 'horizontal');
+          }
+          choice.parentNode.querySelectorAll('[data-layout-choice]').forEach(function (other) {
+            other.setAttribute('aria-pressed', String(other === choice));
+          });
+          target.querySelectorAll('[data-layout-show]').forEach(function (el) {
+            el.hidden = el.dataset.layoutShow !== layout;
+          });
+          if (!window.echarts) return;
+          reportTheme.flush(target);
+          target.querySelectorAll('[_echarts_instance_]').forEach(function (el) {
+            var chart = echarts.getInstanceByDom(el);
+            if (chart && el.offsetWidth) chart.resize();
+          });
+        });
+      });
+
+      document.querySelectorAll('[data-truncate-target]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          var on = button.getAttribute('aria-pressed') !== 'true';
+          button.setAttribute('aria-pressed', String(on));
+          button.title = 'Compact cells: ' + (on ? 'on' : 'off');
+          button.querySelector('.truncate-on').hidden = !on;
+          button.querySelector('.truncate-off').hidden = on;
+          document.getElementById(button.dataset.truncateTarget).dataset.truncate = on ? 'on' : 'off';
+        });
+      });
+
+      function legacyCopy(text) {
+        var area = document.createElement('textarea');
+        area.value = text;
+        area.setAttribute('readonly', '');
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.appendChild(area);
+        area.select();
+        var copied = false;
+        try { copied = document.execCommand('copy'); } catch (err) { copied = false; }
+        document.body.removeChild(area);
+        return copied;
+      }
+
+      document.querySelectorAll('[data-copy-target]').forEach(function (button) {
+        var idle = button.querySelector('.copy-idle');
+        var done = button.querySelector('.copy-done');
+        var label = button.querySelector('.copy-label');
+
+        function markCopied() {
+          idle.hidden = true;
+          done.hidden = false;
+          label.textContent = 'Copied';
+          setTimeout(function () {
+            idle.hidden = false;
+            done.hidden = true;
+            label.textContent = 'Copy';
+          }, 2000);
+        }
+
+        button.addEventListener('click', function () {
+          var text = document.getElementById(button.dataset.copyTarget).textContent;
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(markCopied, function () {
+              if (legacyCopy(text)) markCopied();
+            });
+          } else if (legacyCopy(text)) {
+            markCopied();
+          }
+        });
+      });
+
+      var filter = document.getElementById('col-filter');
+      filter.addEventListener('input', function () {
+        var query = filter.value.trim().toLowerCase();
+        var shown = 0;
+        document.querySelectorAll('#col-tabs [role="tab"]').forEach(function (tab) {
+          var match = tab.title.toLowerCase().indexOf(query) !== -1;
+          tab.hidden = !match;
+          if (match) shown += 1;
+        });
+        document.getElementById('col-empty').hidden = shown !== 0;
+      });
+
+      var settingsButton = document.getElementById('settings-button');
+      var settingsMenu = document.getElementById('settings-menu');
+      var settingItems = settingsMenu.querySelectorAll('[data-setting]');
+
+      function syncSettings() {
+        settingItems.forEach(function (item) {
+          var current = reportSettings.get(item.dataset.setting) === item.dataset.value;
+          item.setAttribute('aria-checked', String(current));
+        });
+      }
+
+      function toggleSettings(open) {
+        settingsMenu.hidden = !open;
+        settingsButton.setAttribute('aria-expanded', String(open));
+      }
+
+      settingsButton.addEventListener('click', function () { toggleSettings(settingsMenu.hidden); });
+      settingItems.forEach(function (item) {
+        item.addEventListener('click', function () {
+          reportSettings.set(item.dataset.setting, item.dataset.value);
+          syncSettings();
+        });
+      });
+      document.getElementById('settings-reset').addEventListener('click', function () {
+        reportSettings.reset();
+        syncSettings();
+      });
+      document.addEventListener('click', function (e) {
+        var outside = !settingsMenu.contains(e.target) && !settingsButton.contains(e.target);
+        if (!settingsMenu.hidden && outside) toggleSettings(false);
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape' || settingsMenu.hidden) return;
+        toggleSettings(false);
+        settingsButton.focus();
+      });
+      syncSettings();
+
+      var diagnosticUi = document.getElementById('diagnostic-ui');
+
+      function fillDiagnostics() {
+        diagnosticUi.textContent = 'theme: ' + reportSettings.get('theme') + '\n' +
+          'density: ' + reportSettings.get('density') + '\n' +
+          'viewport: ' + window.innerWidth + 'x' + window.innerHeight + '\n' +
+          'browser: ' + navigator.userAgent + '\n';
+      }
+
+      fillDiagnostics();
+      document.addEventListener('reportshown', fillDiagnostics);
+
+      function saveLink(name, href) {
+        var link = document.createElement('a');
+        link.href = href;
+        link.download = name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      function saveCsv(name, rows) {
+        var lines = rows.map(function (row) {
+          return row.map(function (cell) {
+            return '"' + String(cell).replace(/"/g, '""') + '"';
+          }).join(',');
+        });
+        var blob = new Blob(['\uFEFF' + lines.join('\n')], {type: 'text/csv;charset=utf-8'});
+        var href = URL.createObjectURL(blob);
+        saveLink(name + '.csv', href);
+        URL.revokeObjectURL(href);
+      }
+
+      function fileStem(text) {
+        return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'report';
+      }
+
+      function chartOf(id) {
+        var el = document.getElementById(id);
+        return el ? echarts.getInstanceByDom(el) : null;
+      }
+
+      document.querySelectorAll('[data-export]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          var table = document.querySelector('#variables-section table');
+          if (!table) return;
+          saveCsv('variables', Array.prototype.map.call(table.rows, function (row) {
+            return Array.prototype.map.call(row.cells, function (cell) {
+              return cell.textContent.replace(/\s+/g, ' ').trim();
+            });
+          }));
+        });
+      });
+
+      document.querySelectorAll('[data-save-table]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          var panel = document.getElementById(button.dataset.saveTable);
+          var view = panel.querySelector('[role="tabpanel"]:not([hidden])');
+          var table = view && view.querySelector('table');
+          if (!table) return;
+          var rows = Array.prototype.map.call(table.rows, function (row) {
+            return Array.prototype.map.call(row.cells, function (cell) {
+              if (cell.tagName === 'TH') return cell.title;
+              return cell.querySelector('.muted') ? '' : cell.title;
+            });
+          });
+          saveCsv(view.id.replace(/^panel-/, ''), rows);
+        });
+      });
+
+      function saveMatrix(id, name) {
+        var chart = chartOf(id);
+        if (!chart) return;
+        var labels = chart.getOption().xAxis[0].data;
+        var rows = labels.map(function (label) {
+          return [label].concat(labels.map(function () { return ''; }));
+        });
+        chart.getOption().series[0].data.forEach(function (item) {
+          var cell = item.value || item;
+          if (cell[2] !== null && !isNaN(cell[2])) rows[cell[1]][cell[0] + 1] = cell[2];
+        });
+        saveCsv(name, [[''].concat(labels)].concat(rows));
+      }
+
+      function savePng(id, name) {
+        var chart = chartOf(id);
+        if (!chart) return;
+        var href = chart.getDataURL({type: 'png', pixelRatio: 2, backgroundColor: reportTheme.token('editor')});
+        saveLink(fileStem(name) + '.png', href);
+      }
+
+      document.querySelectorAll('[data-save-png]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          var name = button.dataset.name;
+          if (button.dataset.nameFrom) {
+            name = button.dataset.nameFrom.split(',').map(function (id) {
+              return document.getElementById(id).value;
+            }).join(' vs ');
+          }
+          savePng(button.dataset.savePng, name);
+        });
+      });
+
+      var corrTools = document.getElementById('corr-tools');
+      var narrowScreen = window.matchMedia('(max-width: 40rem)');
+
+      function shownHeatmap() {
+        var panel = document.querySelector('#correlations-section [role="tabpanel"]:not([hidden])');
+        if (!panel || !panel.dataset.heatmap) return null;
+        if (narrowScreen.matches && 'mobileHidden' in panel.dataset) return null;
+        return panel;
+      }
+
+      function syncCorrelationTools() {
+        if (corrTools) corrTools.hidden = !shownHeatmap();
+      }
+
+      if (corrTools) {
+        document.getElementById('corr-save-csv').addEventListener('click', function () {
+          var panel = shownHeatmap();
+          if (panel) saveMatrix(panel.dataset.heatmap, panel.dataset.name);
+        });
+        document.getElementById('corr-save-png').addEventListener('click', function () {
+          var panel = shownHeatmap();
+          if (panel) savePng(panel.dataset.heatmap, panel.dataset.name);
+        });
+        document.addEventListener('reportshown', syncCorrelationTools);
+        narrowScreen.addEventListener('change', syncCorrelationTools);
+        syncCorrelationTools();
+      }
+
+      document.querySelectorAll('[data-chart-id]').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          var panel = tab.closest('[id^="panel-col-"]');
+          var save = panel && panel.querySelector('[data-save-png]');
+          if (!save) return;
+          save.dataset.savePng = tab.dataset.chartId;
+          save.dataset.name = tab.dataset.chartName;
+        });
+      });
+
+      (function () {
+        var detail = document.querySelector('.columns-detail');
+        if (!detail) return;
+        var rows = 0;
+        detail.querySelectorAll('table.table-dense').forEach(function (table) {
+          rows = Math.max(rows, table.rows.length);
+        });
+        detail.style.setProperty('--detail-rows', String(rows));
+      })();
+
+      function applyLimit(box) {
+        var limit = parseInt(box.dataset.limit, 10);
+        var open = box.dataset.expanded === 'true';
+        var items = Array.prototype.filter.call(box.children, function (child) {
+          return !child.hasAttribute('data-limit-skip');
+        });
+        items.forEach(function (item, index) { item.hidden = !open && index >= limit; });
+        var button = document.querySelector('[data-limit-toggle="' + box.id + '"]');
+        if (!button) return;
+        button.setAttribute('aria-expanded', String(open));
+        button.querySelector('.more-label').textContent =
+          open ? 'Show less' : 'Show ' + (items.length - limit) + ' more';
+      }
+
+      document.querySelectorAll('[data-limit]').forEach(function (box) {
+        applyLimit(box);
+        var toggle = document.querySelector('[data-limit-toggle="' + box.id + '"]');
+        if (!toggle) return;
+        toggle.addEventListener('click', function () {
+          box.dataset.expanded = String(box.dataset.expanded !== 'true');
+          applyLimit(box);
+        });
+      });
+
+      window.matchMedia('(max-width: 40rem)').addEventListener('change', function () {
+        reportTheme.flush();
+      });
+
+      document.querySelectorAll('[data-sortable]').forEach(function (table) {
+        var body = table.tBodies[0];
+        var heads = table.querySelectorAll('th');
+        heads.forEach(function (head, col) {
+          var button = head.querySelector('.sort-button');
+          if (!button) return;
+          button.addEventListener('click', function () {
+            var ascending = head.getAttribute('aria-sort') !== 'ascending';
+            var numeric = button.dataset.sortType === 'num';
+            heads.forEach(function (other) { other.setAttribute('aria-sort', 'none'); });
+            head.setAttribute('aria-sort', ascending ? 'ascending' : 'descending');
+            var rows = Array.prototype.slice.call(body.rows);
+            rows.sort(function (a, b) {
+              var x = a.cells[col].dataset.value;
+              var y = b.cells[col].dataset.value;
+              var blankX = x === undefined || x === '';
+              var blankY = y === undefined || y === '';
+              if (blankX || blankY) return blankX === blankY ? 0 : (blankX ? 1 : -1);
+              var diff = numeric ? parseFloat(x) - parseFloat(y) : x.localeCompare(y);
+              return ascending ? diff : -diff;
+            });
+            rows.forEach(function (row) { body.appendChild(row); });
+            if (body.dataset.limit) applyLimit(body);
+          });
+        });
+      });
+
+      document.querySelectorAll('[data-open-column]').forEach(function (link) {
+        link.addEventListener('click', function () {
+          var tab = document.getElementById('tab-col-' + link.dataset.openColumn);
+          if (!tab) return;
+          if (tab.hidden) {
+            filter.value = '';
+            filter.dispatchEvent(new Event('input'));
+          }
+          select(tab);
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>

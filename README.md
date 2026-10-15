@@ -1,0 +1,142 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo/wordmark-on-dark.svg">
+    <img src="assets/logo/wordmark-on-light.svg" alt="shirabe" width="240">
+  </picture>
+</p>
+
+# shirabe-profiling
+
+[![PyPI version](https://img.shields.io/pypi/v/shirabe-profiling.svg)](https://pypi.org/project/shirabe-profiling/)
+[![Python versions](https://img.shields.io/pypi/pyversions/shirabe-profiling.svg)](https://pypi.org/project/shirabe-profiling/)
+[![License](https://img.shields.io/pypi/l/shirabe-profiling.svg)](https://github.com/shuretokki/shirabe-profiling/blob/main/LICENSE)
+
+Fast, Polars-native data profiling with interactive HTML reports and data quality alerts.
+
+## Quickstart
+
+```python
+import polars as pl
+from shirabe_profiling import ProfileReport
+
+df = pl.read_csv("data.csv")
+report = ProfileReport(df)
+report.to_html("report.html")
+```
+
+Pandas works too:
+
+```python
+report = ProfileReport(pd.read_csv("data.csv"))
+```
+
+## Report Preview
+
+**Dataset overview** — row/column counts, missing cells, duplicates, memory usage, and column type distribution at a glance.
+
+<p align="center">
+  <img src="docs/report-overview.png" alt="Dataset overview and alerts" width="700">
+</p>
+
+**Column details** — per-column statistics, top value distribution with an explicit "Other" rollup for the long tail, and word clouds for categorical data.
+
+<p align="center">
+  <img src="docs/report-columns.png" alt="Column details with charts and word cloud" width="700">
+</p>
+
+**Correlations** — interactive heatmap showing relationships between numeric columns.
+
+<p align="center">
+  <img src="docs/report-correlations.png" alt="Correlation heatmap" width="700">
+</p>
+
+**Interactions** — scatter plots for numeric pairs and box plots for categorical × numeric pairs, with dynamic column selection.
+
+## Highlights
+
+- Built on Polars — fast, memory-efficient, Rust-powered
+- 3 lines to profile any dataset
+- Programmatic-first: `.to_dict()`, `.stats`, `.alerts`
+- Interactive HTML reports with ECharts
+- Accepts Polars, Pandas, CSV, and Parquet
+- 5 column types: numeric, categorical, boolean, datetime, text
+- 7 data quality alerts out of the box
+- 5 correlation types: Pearson, Spearman, Kendall, Cramér's V, Phi K
+- Interactions: scatter plot + box plot with dynamic column selection
+- Categorical value counts keep the long tail via an explicit "Other" rollup (`other_values`)
+- Two modes: `"complete"` for deep analysis, `"overview"` for speed
+- Fully typed
+
+## Installation
+
+```bash
+pip install shirabe-profiling
+```
+
+## Usage
+
+### Programmatic access
+
+```python
+report = ProfileReport(df, title="Customer Data Profile")
+
+stats = report.to_dict()
+alerts = report.alerts
+column_stats = report.stats["age"]
+correlations = report.correlations
+```
+
+### JSON export
+
+```python
+report.to_json("report.json")
+```
+
+### Configuration
+
+```python
+from shirabe_profiling import ProfileReport, ProfileConfig
+
+config = ProfileConfig(
+    title="Customer Data Profile",
+    mode="overview",
+    missing_threshold=0.1,
+    histogram_bins=30,
+)
+report = ProfileReport(df, config=config)
+```
+
+### Modes
+
+| Feature | `"complete"` | `"overview"` |
+|---|:-:|:-:|
+| Basic stats | ✓ | ✓ |
+| Histograms & value counts | ✓ | ✓ |
+| Correlations | ✓ | ✗ |
+| Interactions | ✓ | ✗ |
+| Character analysis | ✓ | ✗ |
+| Duplicate rows table | ✓ | ✗ |
+
+## Output formats
+
+| Format | Method | Use case |
+|---|---|---|
+| HTML | `report.to_html("report.html")` | Interactive report |
+| JSON | `report.to_json("report.json")` | Machine-readable |
+| Dict | `report.to_dict()` | Python-native |
+
+## Contributing
+
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+## Links
+
+- [PyPI](https://pypi.org/project/shirabe-profiling/)
+- [Changelog](CHANGELOG.md)
+- [GitHub Issues](https://github.com/shuretokki/shirabe-profiling/issues)
+
+## License
+
+[Apache-2.0](LICENSE)
+
+This project began as a copy of [dataxid-profiling](https://github.com/dataxid/dataxid-profiling) by DataXID, which is also Apache-2.0.

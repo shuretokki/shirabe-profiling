@@ -1,0 +1,28 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/),
+and this project adheres to [Semantic Versioning](https://semver.org/).
+
+## [0.1.0] - 2026-10-15
+
+First release as `shirabe-profiling`. The project began as a copy of [dataxid-profiling](https://github.com/dataxid/dataxid-profiling) 0.4.0 (Apache-2.0).
+
+### Changed
+
+- The package is now `shirabe-profiling` and the import is `shirabe_profiling`
+- The internal modules lost their leading underscore (`alerts.py`, `report/html.py`, and so on)
+- The report has a new design: a dark Charcoal theme, a light theme, and a compact density for touch screens
+- The report has a new logo and favicon
+
+### Added
+
+- Guide tab: what each alert means, when the report raises it, possible fixes, and sources
+- Feedback tab: request a feature, report a problem with a prefilled GitHub issue, and copy the reproduction details
+- Skew tabs in Column Details (`log1p`, Yeo-Johnson, and non-zero) with statistics for each version
+- Timeline chart for datetime columns
+- Alert tags and a highlighted row in Column Details for the statistic that raised the alert
+- Random and Most Missing tabs in Sample
+- Download buttons for the correlation matrices
+- A target section and leakage check when you pass `target=`
