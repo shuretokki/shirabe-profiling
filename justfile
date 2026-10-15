@@ -207,7 +207,8 @@ update:
 @_version:
     grep -m1 '^version' pyproject.toml | cut -d'"' -f2
 
-# Check the rules that a release must follow.
+# Check the rules that PyPI enforces when you upload, and the ones of this repository.
+# The PyPI rules come from the upload code of Warehouse, see scripts/check_package.py.
 [script("bash")]
 _validate:
     set -euo pipefail
@@ -219,22 +220,28 @@ _validate:
     [ "$init" = "$version" ] || fail "pyproject.toml says $version but __init__.py says $init, run just bump"
     grep -q "^## \[$version\]" CHANGELOG.md || fail "CHANGELOG.md has no section for $version"
 
-    # The package must build, and the wheel must hold the typing marker and the report assets.
     tmp=$(mktemp -d)
     trap 'rm -rf "$tmp"' EXIT
     if uv build --out-dir "$tmp" >/dev/null 2>&1; then
+      # The wheel must hold the typing marker and the report assets.
       listing=$(uv run python -m zipfile -l "$tmp"/*.whl)
       for needed in py.typed report/templates/report.html.j2 report/templates/logo-mark.svg report/templates/favicon.svg; do
         grep -q "$needed" <<<"$listing" || fail "the wheel does not hold $needed"
       done
+      # twine is the check that the Python Packaging guide names for the README and the metadata.
+      uvx twine check --strict "$tmp"/* >/dev/null 2>&1 || fail "twine check failed, run uvx twine check --strict dist/*"
+      uv run python scripts/check_package.py "$tmp" || status=1
     else
       fail "uv build failed"
     fi
 
-    # PyPI cannot show a relative image, so a release without absolute image links has broken pictures there.
-    if grep -nE '(src="|\]\()(docs|assets)/' README.md >/dev/null; then
-      echo "warning: README.md uses relative image links, PyPI will not show them" >&2
-    fi
+    # PyPI refuses a file name that it has seen before, even after a delete.
+    code=$(curl -s -o /dev/null -w '%{http_code}' "https://pypi.org/pypi/shirabe-profiling/$version/json" || true)
+    case "$code" in
+      200) fail "shirabe-profiling $version is already on PyPI, bump the version" ;;
+      404) ;;
+      *) echo "warning: could not ask PyPI about $version (HTTP $code)" >&2 ;;
+    esac
 
     [ "$status" -eq 0 ] && echo "release rules ok"
     exit "$status"
