@@ -1013,3 +1013,35 @@ class TestLogo:
 
         assert not (_TEMPLATE_DIR / "icon.png").exists()
         assert not (_TEMPLATE_DIR / "dataxid_logo.png").exists()
+
+
+class TestScrollContainment:
+    def test_inner_scroll_areas_do_not_pass_their_scroll_to_the_page(self, mixed_df: pl.DataFrame):
+        html = _render(mixed_df)
+        start = html.index(".tab-list-header,")
+        block = html[
+            start : html.index(
+                "}",
+                start,
+            )
+        ]
+
+        for selector in (
+            ".view-tabs",
+            ".chart-scroll",
+            ".code-block",
+            ".menu",
+            ".overflow-x-auto",
+            '[data-layout="list"] .chip-list',
+        ):
+            assert selector in block
+        assert "overscroll-behavior: contain;" in block
+
+    def test_the_page_itself_keeps_the_default_scroll_chaining(self, mixed_df: pl.DataFrame):
+        html = _render(mixed_df)
+
+        assert "overscroll-behavior: none" not in html
+        assert not re.search(
+            r"(?m)^(html|body)\s*\{[^}]*overscroll-behavior",
+            html,
+        )

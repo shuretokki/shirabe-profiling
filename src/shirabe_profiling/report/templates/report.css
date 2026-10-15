@@ -766,6 +766,19 @@ a {
   color: var(--icon-muted);
 }
 
+/* Inner scroll areas keep their scroll, so the page behind them stays put in a notebook frame. */
+.tab-list-header,
+.tab-bar .tab-list,
+#corr-tabs,
+.view-tabs,
+.chart-scroll,
+.code-block,
+.menu,
+.overflow-x-auto,
+[data-layout="list"] .chip-list {
+  overscroll-behavior: contain;
+}
+
 .select-value {
   min-width: 0;
   overflow: hidden;
