@@ -1980,6 +1980,25 @@
 
   <script>
     (function () {
+      var areas = document.querySelectorAll('.chip-list, .menu');
+
+      function mark(area) {
+        area.toggleAttribute('data-scrolls', area.scrollHeight - area.clientHeight > 1);
+      }
+
+      var observer = new ResizeObserver(function (entries) {
+        entries.forEach(function (entry) { mark(entry.target); });
+      });
+      areas.forEach(function (area) {
+        observer.observe(area);
+        mark(area);
+      });
+      document.addEventListener('reportshown', function () { areas.forEach(mark); });
+    })();
+  </script>
+
+  <script>
+    (function () {
       var frame = null;
       try { frame = window.frameElement; } catch (err) { return; }
       if (!frame || String(frame.getAttribute('onload')).indexOf('__resizeIframe') === -1) return;

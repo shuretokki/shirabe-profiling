@@ -766,17 +766,20 @@ a {
   color: var(--icon-muted);
 }
 
-/* Inner scroll areas keep their scroll, so the page behind them stays put in a notebook frame. */
+/* A sideways swipe stays inside a wide area, and a vertical scroll still reaches the page. */
 .tab-list-header,
 .tab-bar .tab-list,
 #corr-tabs,
 .view-tabs,
 .chart-scroll,
 .code-block,
-.menu,
-.overflow-x-auto,
-[data-layout="list"] .chip-list {
-  overscroll-behavior: contain;
+.overflow-x-auto {
+  overscroll-behavior-x: contain;
+}
+
+/* A list keeps its vertical scroll only while it has more rows than fit, and the page script marks that. */
+[data-scrolls] {
+  overscroll-behavior-y: contain;
 }
 
 .select-value {

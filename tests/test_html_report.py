@@ -1016,7 +1016,7 @@ class TestLogo:
 
 
 class TestScrollContainment:
-    def test_inner_scroll_areas_do_not_pass_their_scroll_to_the_page(self, mixed_df: pl.DataFrame):
+    def test_wide_areas_keep_only_the_sideways_swipe_inside_them(self, mixed_df: pl.DataFrame):
         html = _render(mixed_df)
         start = html.index(".tab-list-header,")
         block = html[
@@ -1030,12 +1030,33 @@ class TestScrollContainment:
             ".view-tabs",
             ".chart-scroll",
             ".code-block",
-            ".menu",
             ".overflow-x-auto",
-            '[data-layout="list"] .chip-list',
         ):
             assert selector in block
-        assert "overscroll-behavior: contain;" in block
+        assert "overscroll-behavior-x: contain;" in block
+        assert "overscroll-behavior-y" not in block
+
+    def test_a_vertical_scroll_over_a_wide_table_still_reaches_the_page(
+        self,
+        mixed_df: pl.DataFrame,
+    ):
+        html = _render(mixed_df)
+
+        assert "overscroll-behavior: contain" not in html
+
+    def test_only_a_list_that_overflows_keeps_its_vertical_scroll(self, mixed_df: pl.DataFrame):
+        html = _render(mixed_df)
+        start = html.index("[data-scrolls] {")
+        block = html[
+            start : html.index(
+                "}",
+                start,
+            )
+        ]
+
+        assert "overscroll-behavior-y: contain;" in block
+        assert "area.toggleAttribute('data-scrolls'" in html
+        assert "area.scrollHeight - area.clientHeight > 1" in html
 
     def test_the_page_itself_keeps_the_default_scroll_chaining(self, mixed_df: pl.DataFrame):
         html = _render(mixed_df)
