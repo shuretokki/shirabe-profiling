@@ -56,7 +56,7 @@ def only(*ids: str) -> str:
 GUIDE_CSS = (
     "#page-report{display:none}#page-guide[hidden]{display:block !important}"
     "#page-guide>section:not(#guide-alerts){display:none}"
-    "#guide-alerts details:nth-of-type(n+5){display:none}"
+    "#guide-alerts details:nth-of-type(n+4){display:none}"
 )
 
 
@@ -353,7 +353,7 @@ def crop(
     ).getbbox()
     bottom = box[3] if box else image.height
     height = min(max(bottom + BOTTOM_PAD, MIN_HEIGHT), MAX_HEIGHT)
-    if bottom + BOTTOM_PAD > MAX_HEIGHT:
+    if bottom > MAX_HEIGHT:
         print(f"  warning: the content of {target.name} is cut at {MAX_HEIGHT} pixels")
     canvas = Image.new(
         "RGB",
