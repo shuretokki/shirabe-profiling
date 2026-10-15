@@ -118,7 +118,7 @@ publish: _guard-tagged build
     v=$(just _version)
     uv publish "dist/shirabe_profiling-$v"*
 
-# Run every check: lock file, lint, format, types, docs and tests
+# Run every check: lock file, lint, format, types, docs, licenses and tests
 [group("checks")]
 @full-check:
     just _run-with-status lock-check
@@ -126,6 +126,7 @@ publish: _guard-tagged build
     just _run-with-status fmt-check
     just _run-with-status typecheck
     just _run-with-status docs-check
+    just _run-with-status license-check
     just _run-with-status test -q
     echo ""
     echo "All checks passed."
@@ -168,6 +169,11 @@ alias commas := fmt-write
 [group("checks")]
 @docs-check:
     uv run python scripts/docs_check.py
+
+# Check that every file has a license and a copyright holder, and that LICENSES/ matches (REUSE)
+[group("checks")]
+@license-check:
+    uvx reuse lint
 
 # Run the tests, or only some: just test tests/test_target.py -k leakage
 [group("test")]
