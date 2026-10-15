@@ -968,16 +968,17 @@ class TestAbout:
             section,
         )
 
-    def test_about_credits_every_bundled_project_without_licenses(self, mixed_df: pl.DataFrame):
+    def test_about_has_no_credits_or_license_text(self, mixed_df: pl.DataFrame):
         section = self._section(
             _render(mixed_df),
             "about-section",
         )
 
+        assert section.count("<table") == 1
+        assert "open source projects" not in section
         for name in ("IBM Plex Sans", "Lilex", "Lucide", "Apache ECharts", "Tailwind CSS"):
-            assert f">{name}</a></td>" in section
-        assert "License" not in section
-        assert "<th>License</th>" not in section
+            assert name not in section
+        assert "icense" not in section
 
 
 class TestLogo:

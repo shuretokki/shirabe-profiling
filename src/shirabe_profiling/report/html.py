@@ -39,14 +39,6 @@ PACKAGE_NAME = "shirabe-profiling"
 BRAND_NAME = "shirabe"
 REPOSITORY_URL = "https://github.com/shuretokki/shirabe-profiling"
 
-_CREDITS = (
-    ("IBM Plex Sans", "https://github.com/IBM/plex", "Text font"),
-    ("Lilex", "https://github.com/mishamyrt/Lilex", "Code font"),
-    ("Lucide", "https://lucide.dev", "Icons"),
-    ("Apache ECharts", "https://echarts.apache.org", "Charts"),
-    ("Tailwind CSS", "https://tailwindcss.com", "Layout"),
-)
-
 
 _FONTS = (
     ("IBM Plex Sans", 400, "IBMPlexSans-Regular.woff"),
@@ -132,7 +124,6 @@ def render_html(
         leakage_limit=config.leakage_threshold if config else 0.95,
         repository_url=REPOSITORY_URL,
         package_name=PACKAGE_NAME,
-        credits=_CREDITS,
         issue_url=_issue_url(
             ov_dict["reproduction"],
             code,
