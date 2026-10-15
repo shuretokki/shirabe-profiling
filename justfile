@@ -1,64 +1,21 @@
 set default-list := true
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
+# https://docs.astral.sh/uv
+uv := require("uv")
+# https://git-cliff.org
+git-cliff := require("git-cliff")
+# https://cli.github.com
+gh := require("gh")
+
 PATHS := "src tests scripts"
 
 # Install the project and its dev tools
 sync:
     uv sync
 
-# Run the tests, or only some: just test tests/test_target.py -k leakage
-[group("checks")]
-test *args:
-    uv run pytest {{ args }}
-alias t := test
-
-# Run the tests with a coverage report
-[group("checks")]
-cov:
-    uv run pytest --cov=shirabe_profiling --cov-report=term-missing
-
-# Type-check the project, or only the given files: just typecheck src/shirabe_profiling/target.py
-[group("checks")]
-typecheck *files:
-    uv run basedpyright {{ files }}
-
-# Lint with ruff; pass --fix to apply safe fixes: just lint --fix
-[group("checks")]
-lint *args:
-    uv run ruff check {{ args }} {{ PATHS }}
-
-# Add trailing commas to calls and signatures with 2 or more arguments, then format
-[group("checks")]
-commas:
-    uv run python scripts/add_commas.py {{ PATHS }}
-    uv run ruff format {{ PATHS }}
-    uv run ruff check --fix --select COM812 {{ PATHS }}
-    uv run ruff format {{ PATHS }}
-
-# Format all code: add trailing commas, then ruff format
-[group("checks")]
-fmt: commas
-
-# Read-only gate: lock file, lint, format check, trailing commas, type check, tests (no files changed)
-[group("checks")]
-check:
-    uv lock --check
-    uv run ruff check {{ PATHS }}
-    uv run ruff format --check {{ PATHS }}
-    uv run python scripts/add_commas.py --check {{ PATHS }}
-    uv run basedpyright
-    uv run pytest -q
-alias c := check
-
-# Build the wheel and the source archive into dist/
-[group("release")]
-build:
-    uv build
-
 # Remake the README screenshots in docs/ (needs Chrome, Chromium, or Edge, and internet access)
-[group("docs")]
-readme-images:
+@readme-images:
     uv run python scripts/readme_images.py docs
 
 # Print a CHANGELOG.md draft for the commits since the last tag
@@ -87,44 +44,62 @@ bump version:
     uv lock --quiet
     echo "$old -> $new in pyproject.toml, src/shirabe_profiling/__init__.py and uv.lock"
     echo "next: write the CHANGELOG.md section for $new (just changelog prints a draft)"
+    echo "then commit both as chore(release): $new, and run just release"
 
-# Print the CHANGELOG.md section of the version in pyproject.toml
+# Build the wheel and the source archive into dist/
+[group("release")]
+build:
+    uv build
+
+# Tag the version in pyproject.toml, push it and create the GitHub Release
 [group("release")]
 [script("bash")]
-release-notes:
+release *flags:
     set -euo pipefail
-    v=$(just _version)
-    awk -v v="$v" '$0 ~ "^## \\[" v "\\]" { found = 1; next } /^## \[/ { found = 0 } found' CHANGELOG.md
+    dry=false
+    [ "{{ flags }}" = "--dry-run" ] && dry=true
+    version=$(just _version)
+    tag="v$version"
+    fail() { echo "error: $*" >&2; exit 1; }
 
-# Commit the version bump and the changelog as a release, then tag it (nothing is pushed)
-[group("release")]
-[script("bash")]
-release: _release-guards check build
-    set -euo pipefail
-    v=$(just _version)
-    git add pyproject.toml uv.lock src/shirabe_profiling/__init__.py CHANGELOG.md
-    git commit -m "chore(release): v$v"
-    just tag
-    echo "next: just push, then just publish and just gh-release"
+    [ "$(git branch --show-current)" = main ] || fail "release from main, not $(git branch --show-current)"
+    [ -z "$(git status --porcelain)" ] || fail "commit or stash these first: $(git status --short | tr '\n' ' ')"
+    git rev-parse -q --verify "refs/tags/$tag" >/dev/null && fail "the tag $tag already exists"
+    [ -z "$(git ls-remote --tags origin "$tag")" ] || fail "the tag $tag already exists on origin"
+    git fetch -q origin main
+    [ "$(git rev-list --count HEAD..origin/main)" -eq 0 ] || fail "origin/main has commits that this branch does not have, pull first"
 
-# Tag HEAD as v<version> with an annotated tag (just release does this for you)
-[group("release")]
-[script("bash")]
-tag:
-    set -euo pipefail
-    v=$(just _version)
-    if git rev-parse -q --verify "refs/tags/v$v" >/dev/null; then
-      echo "error: the tag v$v already exists" >&2
-      exit 1
+    # The release notes are the CHANGELOG.md section for this version.
+    notes=$(mktemp)
+    trap 'rm -f "$notes"' EXIT
+    awk -v v="$version" '
+      $0 ~ "^## \\[" v "\\]" { on = 1; next }
+      /^## \[/ { on = 0 }
+      /^\[[^]]+\]: / { on = 0 }
+      on
+    ' CHANGELOG.md > "$notes"
+    grep -q '[^[:space:]]' "$notes" || fail "CHANGELOG.md has no section for $version, add \"## [$version] - $(date +%F)\""
+
+    just _validate
+    just full-check
+
+    echo ""
+    echo "release notes:"
+    cat "$notes"
+    echo ""
+    echo "ready: tag $tag at $(git rev-parse --short HEAD), push main and $tag, create the GitHub Release"
+    if [ "$dry" = true ]; then
+      echo "dry run, nothing was changed"
+      exit 0
     fi
-    git tag -a "v$v" -m "v$v"
-    echo "tagged v$v at $(git rev-parse --short HEAD)"
+    read -r -p "continue? [y/N] " answer
+    [ "$answer" = y ] || fail "stopped, nothing was changed"
 
-# Push main and the release tag to origin
-[group("release")]
-[confirm("Push main and its tags to origin?")]
-push:
-    git push origin main --follow-tags
+    git tag -a "$tag" -m "shirabe-profiling $version"
+    git push origin main
+    git push origin "$tag"
+    gh release create "$tag" --verify-tag --title "shirabe-profiling $version" --notes-file "$notes"
+    echo "next: just publish-test, then just publish"
 
 # Upload this version to TestPyPI, the practice index (needs UV_PUBLISH_TOKEN for TestPyPI)
 [group("release")]
@@ -143,21 +118,71 @@ publish: _guard-tagged build
     v=$(just _version)
     uv publish "dist/shirabe_profiling-$v"*
 
-# Create the GitHub release from the tag, with the built files and the changelog section
-[group("release")]
-[confirm("Create the GitHub release for this version?")]
-[script("bash")]
-gh-release: _need-gh _guard-tagged build
-    set -euo pipefail
-    v=$(just _version)
-    notes=$(mktemp)
-    just release-notes > "$notes"
-    gh release create "v$v" "dist/shirabe_profiling-$v"* --title "v$v" --notes-file "$notes"
-    rm -f "$notes"
+# Run every check: lock file, lint, format, types, docs and tests
+[group("checks")]
+@full-check:
+    just _run-with-status lock-check
+    just _run-with-status lint
+    just _run-with-status fmt-check
+    just _run-with-status typecheck
+    just _run-with-status docs-check
+    just _run-with-status test -q
+    echo ""
+    echo "All checks passed."
+alias check := full-check
+alias c := full-check
+alias fc := full-check
+
+# Check that uv.lock matches pyproject.toml
+[group("checks")]
+@lock-check:
+    uv lock --check
+
+# Lint with ruff, and pass --fix to apply safe fixes: just lint --fix
+[group("checks")]
+@lint *args:
+    uv run ruff check {{ args }} {{ PATHS }}
+
+# Check the formatting and the trailing commas without changing files
+[group("checks")]
+@fmt-check:
+    uv run ruff format --check {{ PATHS }}
+    uv run python scripts/add_commas.py --check {{ PATHS }}
+
+# Add trailing commas to calls and signatures with 2 or more arguments, then format
+[group("checks")]
+@fmt-write:
+    uv run python scripts/add_commas.py {{ PATHS }}
+    uv run ruff format {{ PATHS }}
+    uv run ruff check --fix --select COM812 {{ PATHS }}
+    uv run ruff format {{ PATHS }}
+alias fmt := fmt-write
+alias commas := fmt-write
+
+# Type-check the project, or only the given files: just typecheck src/shirabe_profiling/target.py
+[group("checks")]
+@typecheck *files:
+    uv run basedpyright {{ files }}
+
+# Check that the README code blocks parse and that its local images and links exist
+[group("checks")]
+@docs-check:
+    uv run python scripts/docs_check.py
+
+# Run the tests, or only some: just test tests/test_target.py -k leakage
+[group("test")]
+@test *args:
+    uv run pytest {{ args }}
+alias t := test
+
+# Run the tests with a coverage report
+[group("test")]
+@cov:
+    uv run pytest --cov=shirabe_profiling --cov-report=term-missing
 
 # Delete the build output and the tool caches
 [group("maintenance")]
-clean:
+@clean:
     rm -rf dist build .pytest_cache .ruff_cache .basedpyright
 
 # Upgrade the locked versions of the dependencies, then reinstall
@@ -168,47 +193,51 @@ update:
 
 # List the direct dependencies that have a newer version
 [group("maintenance")]
-outdated:
+@outdated:
     uv tree --outdated --depth 1
+
+# Run a recipe with a status line before and after
+@_run-with-status recipe *args:
+    echo ""
+    echo "→ {{ recipe }}"
+    just {{ recipe }} {{ args }}
+    echo "✓ {{ recipe }}"
 
 # The version in pyproject.toml.
 @_version:
     grep -m1 '^version' pyproject.toml | cut -d'"' -f2
 
-# Stops a release unless it starts from an up-to-date main with only the release files changed.
+# Check the rules that a release must follow.
 [script("bash")]
-_release-guards:
+_validate:
     set -euo pipefail
-    v=$(just _version)
+    version=$(just _version)
+    status=0
+    fail() { echo "error: $*" >&2; status=1; }
+
     init=$(grep -m1 '^__version__' src/shirabe_profiling/__init__.py | cut -d'"' -f2)
-    if [ "$init" != "$v" ]; then
-      echo "error: pyproject.toml says $v but __init__.py says $init, run just bump" >&2
-      exit 1
+    [ "$init" = "$version" ] || fail "pyproject.toml says $version but __init__.py says $init, run just bump"
+    grep -q "^## \[$version\]" CHANGELOG.md || fail "CHANGELOG.md has no section for $version"
+
+    # The package must build, and the wheel must hold the typing marker and the report assets.
+    tmp=$(mktemp -d)
+    trap 'rm -rf "$tmp"' EXIT
+    if uv build --out-dir "$tmp" >/dev/null 2>&1; then
+      listing=$(uv run python -m zipfile -l "$tmp"/*.whl)
+      for needed in py.typed report/templates/report.html.j2 report/templates/logo-mark.svg report/templates/favicon.svg; do
+        grep -q "$needed" <<<"$listing" || fail "the wheel does not hold $needed"
+      done
+    else
+      fail "uv build failed"
     fi
-    branch=$(git branch --show-current)
-    if [ "$branch" != "main" ]; then
-      echo "error: a release starts from main, but this is $branch" >&2
-      exit 1
+
+    # PyPI cannot show a relative image, so a release without absolute image links has broken pictures there.
+    if grep -nE '(src="|\]\()(docs|assets)/' README.md >/dev/null; then
+      echo "warning: README.md uses relative image links, PyPI will not show them" >&2
     fi
-    if git rev-parse -q --verify "refs/tags/v$v" >/dev/null; then
-      echo "error: the tag v$v already exists, run just bump first" >&2
-      exit 1
-    fi
-    if ! grep -q "^## \[$v\]" CHANGELOG.md; then
-      echo "error: CHANGELOG.md has no section for $v (just changelog prints a draft)" >&2
-      exit 1
-    fi
-    git fetch --quiet origin main
-    if [ "$(git rev-list --count HEAD..origin/main)" -gt 0 ]; then
-      echo "error: origin/main has commits that this branch does not have, pull first" >&2
-      exit 1
-    fi
-    other=$(git status --porcelain --untracked-files=no | grep -v -E ' (pyproject\.toml|uv\.lock|CHANGELOG\.md|src/shirabe_profiling/__init__\.py)$' || true)
-    if [ -n "$other" ]; then
-      echo "error: these files changed outside the release files:" >&2
-      echo "$other" >&2
-      exit 1
-    fi
+
+    [ "$status" -eq 0 ] && echo "release rules ok"
+    exit "$status"
 
 # Stops unless HEAD carries the tag of the version in pyproject.toml.
 [script("bash")]
@@ -219,7 +248,3 @@ _guard-tagged:
       echo "error: HEAD is not tagged v$v, run just release first" >&2
       exit 1
     fi
-
-# Stops with a clear message when the GitHub command line is missing.
-@_need-gh:
-    : {{ require("gh") }}
