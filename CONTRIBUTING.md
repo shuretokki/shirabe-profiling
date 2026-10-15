@@ -48,7 +48,9 @@ Rewrite the draft as plain sentences and put it in `CHANGELOG.md`.
 6. `just publish-test` and `just publish` upload to TestPyPI and PyPI.
 
 The release stops unless you are on main with a clean tree that is not behind origin.
-It also needs agreeing version files, a changelog section, a package that builds, and a passing full check.
+It also needs agreeing version files and a changelog section.
+The package must meet the PyPI upload rules, and its version must not be on PyPI yet.
+The full check must pass.
 The uploads need `UV_PUBLISH_TOKEN`.
 
 ## README Screenshots
