@@ -1,5 +1,5 @@
 .local/
-.local.*
+*.local.*
 .direnv/
 result
 __pycache__/
