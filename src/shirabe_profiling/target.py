@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright © 2026 shuretokki
+# SPDX-License-Identifier: Apache-2.0
+
 """Target analysis: how each column relates to the column that a model will predict."""
 
 from __future__ import annotations

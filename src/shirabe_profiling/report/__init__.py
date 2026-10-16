@@ -1,1 +1,4 @@
+# SPDX-FileCopyrightText: Copyright © 2026 shuretokki
+# SPDX-License-Identifier: Apache-2.0
+
 """Report generation — HTML, charts, templates."""

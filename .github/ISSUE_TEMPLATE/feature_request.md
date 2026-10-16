@@ -1,4 +1,7 @@
 ---
+# SPDX-FileCopyrightText: Copyright © 2026 shuretokki
+# SPDX-License-Identifier: Apache-2.0
+
 name: Feature Request
 about: Suggest an improvement or new feature
 labels: enhancement

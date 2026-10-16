@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: Copyright © 2026 shuretokki
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/assets/logo/wordmark-on-dark.svg">

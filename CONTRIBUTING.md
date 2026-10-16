@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: Copyright © 2026 shuretokki
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Contributing to shirabe-profiling
 
 Thanks for your interest in contributing! Here's how to get started.

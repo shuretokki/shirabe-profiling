@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright © 2026 shuretokki
+# SPDX-License-Identifier: Apache-2.0
+
 # https://git-cliff.org/docs/configuration
 # `just changelog` prints a draft for the next version.
 # Rewrite the draft as plain sentences, then put it in CHANGELOG.md.

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright © 2026 shuretokki
+# SPDX-License-Identifier: Apache-2.0
+
 """Extra report tables: outliers and missing-value patterns."""
 
 from __future__ import annotations

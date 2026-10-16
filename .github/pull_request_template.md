@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: Copyright © 2026 shuretokki
+SPDX-License-Identifier: Apache-2.0
+-->
+
 ## What
 
 Brief description of the change.

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright © 2026 shuretokki
+# SPDX-License-Identifier: Apache-2.0
+
 """Interaction data for scatter and box plots — Polars-native.
 
 Scatter: numeric × numeric raw data (columnar).

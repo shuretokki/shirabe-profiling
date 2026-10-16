@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright © 2026 shuretokki
+# SPDX-License-Identifier: Apache-2.0
+
 """Correlation matrices.
 
 Pearson and Spearman come from one matrix product over all numeric columns.
