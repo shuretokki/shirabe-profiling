@@ -12,6 +12,17 @@ SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]
 path = [
+  "src/shirabe_profiling/report/templates/favicon.svg",
+  "src/shirabe_profiling/report/templates/logo-mark.svg",
+]
+SPDX-FileCopyrightText = [
+  "2026 shuretokki",
+  "DataXID and the dataxid-profiling contributors",
+]
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = [
   "src/shirabe_profiling/report/templates/fonts/IBMPlexSans-Regular-Latin1.woff",
   "src/shirabe_profiling/report/templates/fonts/IBMPlexSans-SemiBold-Latin1.woff",
   "src/shirabe_profiling/report/templates/fonts/IBMPlexSans-LICENSE.txt",
