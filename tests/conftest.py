@@ -138,7 +138,7 @@ def datetime_df() -> pl.DataFrame:
 
 @pytest.fixture
 def mixed_df() -> pl.DataFrame:
-    """Tüm kolon tiplerini içeren gerçekçi bir DataFrame."""
+    """A realistic DataFrame with every column type."""
     from datetime import date
 
     return pl.DataFrame(
@@ -252,7 +252,7 @@ def empty_df() -> pl.DataFrame:
 
 @pytest.fixture
 def constant_df() -> pl.DataFrame:
-    """Tek değer içeren kolonlar — CONSTANT alert testi için."""
+    """Columns with a single value, for the CONSTANT alert test."""
     return pl.DataFrame(
         {
             "status": ["active"] * 10,
@@ -264,7 +264,7 @@ def constant_df() -> pl.DataFrame:
 
 @pytest.fixture
 def high_cardinality_df() -> pl.DataFrame:
-    """Her satır unique — HIGH_CARDINALITY alert testi için."""
+    """Every row is unique, for the HIGH_CARDINALITY alert test."""
     return pl.DataFrame(
         {
             "user_id": [f"user_{i}" for i in range(100)],
