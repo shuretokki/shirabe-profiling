@@ -5,8 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/assets/logo/wordmark-on-dark.svg">
-    <img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/assets/logo/wordmark-on-light.svg" alt="shirabe" width="240">
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo/wordmark-on-dark.svg">
+    <img src="assets/logo/wordmark-on-light.svg" alt="shirabe" width="240">
   </picture>
 </p>
 
@@ -29,10 +29,10 @@ Polars data profiling that writes one HTML report, with quality alerts and a gui
 </p>
 
 <p align="center">
-  <a href="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-overview.png">
+  <a href="docs/report-overview.png">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-overview-dark.png">
-      <img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-overview.png" alt="The overview of a report, with the facts of the dataset and the list of alerts" width="880">
+      <source media="(prefers-color-scheme: dark)" srcset="docs/report-overview-dark.png">
+      <img src="docs/report-overview.png" alt="The overview of a report, with the facts of the dataset and the list of alerts" width="880">
     </picture>
   </a>
 </p>
@@ -78,13 +78,21 @@ The report loads ECharts and Tailwind CSS from a CDN, so it needs an internet co
 
 Click any picture to open it full size.
 
-| Target | Column details |
-|:--|:--|
-| <a href="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-target.png"><img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-target.png" alt="Target section with the link of each column to the target" width="100%"></a> | <a href="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-columns.png"><img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-columns.png" alt="Column details with alert tags and skew tabs" width="100%"></a> |
+| Target |
+|:--|
+| <a href="docs/report-target.png"><img src="docs/report-target.png" alt="Target section with the link of each column to the target" width="100%"></a> |
 
-| Correlations | Guide |
-|:--|:--|
-| <a href="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-correlations.png"><img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-correlations.png" alt="Correlation heatmap with the strongest pairs" width="100%"></a> | <a href="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-guide.png"><img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-guide.png" alt="The Guide tab with the High Missing alert open" width="100%"></a> |
+| Column details |
+|:--|
+| <a href="docs/report-columns.png"><img src="docs/report-columns.png" alt="Column details with alert tags and skew tabs" width="100%"></a> |
+
+| Correlations |
+|:--|
+| <a href="docs/report-correlations.png"><img src="docs/report-correlations.png" alt="Correlation heatmap with the strongest pairs" width="100%"></a> |
+
+| Guide |
+|:--|
+| <a href="docs/report-guide.png"><img src="docs/report-guide.png" alt="The Guide tab with the High Missing alert open" width="100%"></a> |
 
 The report also has:
 
