@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright © 2026 shuretokki
+# SPDX-License-Identifier: Apache-2.0
+
 set default-list := true
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
