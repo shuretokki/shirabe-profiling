@@ -70,7 +70,10 @@ class TestLicenseLayout:
     def test_the_license_field_names_every_license_in_reuse_toml(self):
         pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
         line = next(row for row in pyproject.splitlines() if row.startswith("license ="))
-        expression = re.search(r'"([^"]+)"', line)
+        expression = re.search(
+            r'"([^"]+)"',
+            line,
+        )
 
         assert expression
         assert set(expression.group(1).split(" AND ")) == _identifiers()
