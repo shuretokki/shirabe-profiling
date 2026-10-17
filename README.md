@@ -49,10 +49,10 @@ The report shows the facts of each column, flags quality problems as alerts, and
 
 ## Quickstart
 
-The package is not on PyPI yet, so install it from GitHub:
+Install the package from PyPI:
 
 ```bash
-pip install git+https://github.com/shuretokki/shirabe-profiling.git
+pip install shirabe-profiling
 ```
 
 Then write a report:
