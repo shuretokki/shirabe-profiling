@@ -20,13 +20,15 @@ HEADER_LINES = 40
 
 # a tag in any comment style tells that a file has a header.
 ANY_TAG = re.compile(
-    r"^\s*(?:#|//|--|;|%|/\*+|\*|<!--|\{#)\s*SPDX-(?:FileCopyrightText|License-Identifier):",
+    r"^\s*(?:#|//|--|;|%|/\*+|\*|<!--|\{#)?\s*SPDX-(?:FileCopyrightText|License-Identifier):",
 )
 # only line comments can be removed line by line without breaking the file.
 LINE_TAG = re.compile(r"^\s*(?:#|//|--|;|%)\s*SPDX-[A-Za-z-]+:")
 EMPTY_COMMENT = re.compile(r"^\s*(?:#|//|--|;|%)\s*$")
 # font and license texts carry their own copyright text, so they get no header.
 LICENSE_TEXT = re.compile(r"(?i)(?:^|[-_.])(?:licen[cs]e|copying|ofl|notice)(?:[-_.]|$)")
+# these formats have no comment syntax, so they get no header.
+NO_COMMENT = re.compile(r"(?:^|/)(?:\.python-version|[^/]*\.lock)$")
 
 Rule = tuple[tuple[str, ...], tuple[str, ...]]
 Original = tuple[list[str], list[str]]
@@ -46,9 +48,11 @@ def excluded(path: str) -> bool:
     )[-1]
     return (
         path.startswith("LICENSES/")
+        or path.startswith(".reuse/")
         or path == "REUSE.toml"
         or path.endswith(".license")
         or bool(LICENSE_TEXT.search(name))
+        or bool(NO_COMMENT.search(path))
     )
 
 
@@ -109,7 +113,7 @@ def rules_from_toml(
         )
         for file in files:
             if any(pattern.fullmatch(file) for pattern in patterns):
-                # The last matching block wins, which is what reuse lint reports.
+                # the last matching block wins, which is what reuse lint reports.
                 rules[file] = rule
     return rules
 
@@ -201,7 +205,7 @@ def strip_header(lines: list[str]) -> list[str] | None:
     end = first
     while end < len(lines) and (LINE_TAG.match(lines[end]) or EMPTY_COMMENT.match(lines[end])):
         end += 1
-    # The blank line after the header goes too, so the new header brings its own.
+    # the blank line after the header goes too, so the new header brings its own.
     if end < len(lines) and not lines[end].strip():
         end += 1
     return lines[:start] + lines[end:]
@@ -219,7 +223,10 @@ def plan(
         if not all(rule):
             continue
         lines = read_lines(file)
-        if lines is None or not has_header(lines):
+        if not lines:
+            # binary and empty files take no header, REUSE.toml covers them.
+            continue
+        if not has_header(lines):
             groups[rule].append(file)
             continue
         stripped = strip_header(lines)
