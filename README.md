@@ -13,17 +13,49 @@ SPDX-License-Identifier: Apache-2.0
 <h1 align="center">shirabe-profiling</h1>
 
 <p align="center">
-  <a href="LICENSE">
-    <img src="https://img.shields.io/github/license/shuretokki/shirabe-profiling.svg" alt="License">
-  </a>
-  <img src="https://img.shields.io/badge/python-3.10%2B-red.svg" alt="Python 3.10+">
+Polars data profiling that writes one HTML report, with quality alerts and a guide to fix each one.
 </p>
 
 <p align="center">
-High-performance Polars data profiling with web reports and quality warnings.
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="License: Apache 2.0"></a>
+  <a href="https://github.com/shuretokki/shirabe-profiling"><img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white" alt="Python 3.10+"></a>
 </p>
 
+<p align="center">
+  <a href="#quickstart">Quickstart</a> |
+  <a href="#report-tour">Report tour</a> |
+  <a href="#use-it-in-code">Use it in code</a> |
+  <a href="#license">License</a>
+</p>
+
+<p align="center">
+  <a href="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-overview.png">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-overview-dark.png">
+      <img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-overview.png" alt="The overview of a report, with the facts of the dataset and the list of alerts" width="880">
+    </picture>
+  </a>
+</p>
+
+shirabe-profiling reads a Polars DataFrame and writes one HTML report that you open in a browser.
+The report shows the facts of each column, flags quality problems as alerts, and explains how to fix each alert.
+
+- **Fast,** the engine is Polars, and overview mode skips the slow parts for a quick first look.
+- **A guide for every alert,** the Guide tab covers all 10 alerts, with each limit, some possible fixes, and the sources.
+- **Made for modeling,** the target section shows how columns link to the target and warns about leakage, and skewed columns get `log1p` and Yeo-Johnson tabs.
+- **Easy to use in code,** read the numbers with `.to_dict()`, `.to_json()`, `.stats`, and `.alerts`, and the package is fully typed.
+- **Easy on the eyes,** the report follows the theme of your system, and you can switch between dark and light in the settings menu.
+- **Open to many inputs,** Polars frames, pandas frames, CSV paths, and Parquet paths all work.
+
 ## Quickstart
+
+The package is not on PyPI yet, so install it from GitHub:
+
+```bash
+pip install git+https://github.com/shuretokki/shirabe-profiling.git
+```
+
+Then write a report:
 
 ```python
 import polars as pl
@@ -34,56 +66,27 @@ report = ProfileReport(df)
 report.to_html("report.html")
 ```
 
-Pandas frames, CSV paths, and Parquet paths work too, and you can name the column that you want to predict to add a target section:
+You can name the column that you want to predict to add a target section:
 
 ```python
 report = ProfileReport(df, target="churned")
 ```
 
-## Highlights
+The report loads ECharts and Tailwind CSS from a CDN, so it needs an internet connection to display correctly.
 
-- **Fast,** the engine is Polars, and a complete report for the Kaggle House Prices file (1,460 rows, 81 columns) took 8 to 11 seconds. Overview mode took about 1 second, in single runs on one machine.
-- **A guide for every alert,** the Guide tab covers all 10 alerts, with each limit, some possible fixes, and the sources.
-- **Made for modeling,** the target section shows how columns link to the target and warns about leakage, and skewed columns get `log1p` and Yeo-Johnson tabs.
-- **Easy to use in code,** read the numbers with `.to_dict()`, `.to_json()`, `.stats`, and `.alerts`, and the package is fully typed.
+## Report tour
 
-## What the report shows
+Click any picture to open it full size.
 
-**Overview,** row and column counts, missing cells, duplicate rows, memory, the column types, and the alerts.
+| Target | Column details |
+|:--|:--|
+| <a href="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-target.png"><img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-target.png" alt="Target section with the link of each column to the target" width="100%"></a> | <a href="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-columns.png"><img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-columns.png" alt="Column details with alert tags and skew tabs" width="100%"></a> |
+| How each column links to the target, how the target changes across a column, and how missing values relate to the target. | Statistics for each column, with a tag and a mark for each alert. |
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-overview.png" alt="Dataset overview and alerts" width="700">
-</p>
-
-**Target,** how each column links to the target, how the target changes across a column, and how missing values relate to the target.
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-target.png" alt="Target section with the link of each column to the target" width="700">
-</p>
-
-**Column details,** statistics for each column, a tag and a mark for each alert, and tabs for `log1p` and Yeo-Johnson on a skewed column.
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-columns.png" alt="Column details with alert tags and skew tabs" width="700">
-</p>
-
-**Correlations,** a heatmap for each method (Phik, Pearson, Spearman, Cramér's V, and Kendall), and a list of the strongest pairs.
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-correlations.png" alt="Correlation heatmap with the strongest pairs" width="700">
-</p>
-
-**Guide,** an alert marks a possible problem, so open it in the Guide tab to see its limit, some possible fixes, and the sources.
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-guide.png" alt="The Guide tab with the High Missing alert open" width="700">
-</p>
-
-**Dark theme,** the theme follows your system, and you can pick dark or light in the settings menu.
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-dark.png" alt="Column details in the dark theme" width="700">
-</p>
+| Correlations | Guide |
+|:--|:--|
+| <a href="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-correlations.png"><img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-correlations.png" alt="Correlation heatmap with the strongest pairs" width="100%"></a> | <a href="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-guide.png"><img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-guide.png" alt="The Guide tab with the High Missing alert open" width="100%"></a> |
+| A heatmap for each method (Phik, Pearson, Spearman, Cramér's V, and Kendall) plus the strongest pairs. | When an alert shows a possible problem, the Guide tab shows the limit, fixes, and sources. |
 
 The report also has:
 
@@ -91,17 +94,10 @@ The report also has:
 - A Missing Patterns table and an Outliers table.
 - A Sample section with the first rows, the last rows, random rows, and the rows with the most gaps.
 
-## Installation
+## Use it in code
 
-The package is not on PyPI yet, so install it from GitHub:
-
-```bash
-pip install git+https://github.com/shuretokki/shirabe-profiling.git
-```
-
-## Usage
-
-### Read the results in code
+<details>
+<summary>Read the results</summary>
 
 ```python
 report = ProfileReport(df, title="Customer Data Profile")
@@ -112,7 +108,10 @@ column_stats = report.stats["age"]
 correlations = report.correlations
 ```
 
-### Settings
+</details>
+
+<details>
+<summary>Change the settings</summary>
 
 ```python
 from shirabe_profiling import ProfileReport, ProfileConfig
@@ -126,7 +125,10 @@ config = ProfileConfig(
 report = ProfileReport(df, config=config)
 ```
 
-### Modes
+</details>
+
+<details>
+<summary>Pick a mode</summary>
 
 Use `"overview"` when you want a fast first look, because it skips the slow parts of the report.
 
@@ -142,7 +144,10 @@ Use `"overview"` when you want a fast first look, because it skips the slow part
 | Character analysis | ✓ | ✗ |
 | Duplicate rows table | ✓ | ✗ |
 
-### Output formats
+</details>
+
+<details>
+<summary>Choose an output format</summary>
 
 | Format | Method | Use |
 |---|---|---|
@@ -150,8 +155,12 @@ Use `"overview"` when you want a fast first look, because it skips the slow part
 | JSON | `report.to_json("report.json")` | Other programs |
 | Dict | `report.to_dict()` | Python code |
 
+</details>
+
 ## License
 
-[Apache-2.0](LICENSE), and the work of others that this project includes or loads is listed in [LICENSES.md](LICENSES.md).
-
 This project is a derivative work based on [dataxid-profiling](https://github.com/dataxid/dataxid-profiling) by DataXID, originally licensed under the Apache License 2.0.
+
+- [LICENSE](LICENSE), the Apache-2.0 grant for the whole repository
+- [LICENSES/](LICENSES), the full text of each license that the files use
+- [REUSE.toml](REUSE.toml), the license and the copyright holder of each file
