@@ -253,7 +253,7 @@ class ProfileReport:
         indent: int = 2,
     ) -> str:
         data = self.to_dict()
-        # ColumnType enum → string for JSON serialization
+        # turn the ColumnType enum into a string for JSON
         for col_data in data["columns"].values():
             if "column_type" in col_data:
                 col_data["column_type"] = col_data["column_type"].name

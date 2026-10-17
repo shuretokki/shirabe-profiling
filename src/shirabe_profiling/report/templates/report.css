@@ -148,7 +148,7 @@
   color-scheme: light;
 }
 
-/* Touch sizes follow the pointer, not the screen width. */
+/* touch sizes follow the pointer, not the screen width. */
 @media (pointer: coarse) {
   :root:not([data-density="default"]) {
     --h-compact: 1.625rem;
@@ -771,7 +771,7 @@ a {
   color: var(--icon-muted);
 }
 
-/* A sideways swipe stays inside a wide area, and a vertical scroll still reaches the page. */
+/* a sideways swipe stays inside a wide area, and a vertical scroll still reaches the page. */
 .tab-list-header,
 .tab-bar .tab-list,
 #corr-tabs,
@@ -782,7 +782,7 @@ a {
   overscroll-behavior-x: contain;
 }
 
-/* A list keeps its vertical scroll only while it has more rows than fit, and the page script marks that. */
+/* a list keeps its vertical scroll only while it has more rows than fit, and the page script marks that. */
 [data-scrolls] {
   overscroll-behavior-y: contain;
 }
@@ -1707,7 +1707,7 @@ button.menu-item:focus-visible {
   }
 }
 
-/* A phone narrower than 412px scrolls its tabs and moves the tools to a second row. */
+/* a phone narrower than 412px scrolls its tabs and moves the tools to a second row. */
 @media (max-width: 25.75rem) {
   .tab-bar {
     flex-wrap: wrap;

@@ -239,7 +239,7 @@ class EChartsRenderer:
             option,
             ensure_ascii=False,
         )
-        # Inject JS formatter function (can't be in JSON)
+        # inject a JS formatter function, because JSON cannot hold one
         tooltip_fn = (
             f"function(p){{var x={json.dumps(x_labels, ensure_ascii=False)},"
             f"y={json.dumps(y_labels, ensure_ascii=False)};"

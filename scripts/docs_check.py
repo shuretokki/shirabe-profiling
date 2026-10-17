@@ -54,7 +54,7 @@ def check_target(target: str) -> str | None:
     """Return a problem for one link, or None when it is fine."""
     raw = RAW_IMAGE.match(target)
     if raw:
-        # The README uses raw URLs, because PyPI cannot show a relative image.
+        # the README uses raw URLs, because PyPI cannot show a relative image.
         found = Path(raw.group(1)).exists()
         return (
             None if found else f"{target} points to {raw.group(1)}, which is not in this checkout"

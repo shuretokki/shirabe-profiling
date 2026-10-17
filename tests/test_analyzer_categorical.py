@@ -54,7 +54,7 @@ class TestCategoricalBasicStats:
             "city",
             config,
         )
-        assert stats.distinct_count == 3  # Istanbul, Ankara, Izmir
+        assert stats.distinct_count == 3  # istanbul, ankara, izmir
         assert stats.distinct_pct == pytest.approx(3 / 10)
 
 

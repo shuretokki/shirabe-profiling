@@ -53,7 +53,7 @@ def _numeric_index_expr(
     n = len(edges)
     if n <= 1:
         return pl.lit(0)
-    # Assign the lowest matching bin: value <= edges[i] -> i (checked ascending).
+    # assign the lowest matching bin: value <= edges[i] -> i (checked ascending).
     expr = pl.lit(n - 1)
     for i in range(n - 1, -1, -1):
         expr = pl.when(pl.col(col) <= edges[i]).then(pl.lit(i)).otherwise(expr)
@@ -232,8 +232,8 @@ def compute_joint_scatter(
         return result
 
     if z_type is not None and _axis_is_numeric(z_type):
-        # DATETIME is treated as a numeric axis; cast temporal z to an integer
-        # epoch so per-point values and min/max are plain numbers.
+        # a DATETIME column counts as a numeric axis.
+        # cast temporal z to an integer epoch, so per-point values and min/max are plain numbers.
         z_series = sub.get_column(z)
         if z_series.dtype.is_temporal():
             z_series = z_series.dt.epoch("ms")

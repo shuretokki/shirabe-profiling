@@ -13,9 +13,7 @@ if TYPE_CHECKING:
     import polars as pl
 
 
-# ---------------------------------------------------------------------------
-# Base stats — shared across all column types
-# ---------------------------------------------------------------------------
+# base stats, shared by all column types
 
 
 @dataclass(frozen=True)
@@ -27,9 +25,7 @@ class BaseStats:
     missing_pct: float
 
 
-# ---------------------------------------------------------------------------
-# Type-specific stats
-# ---------------------------------------------------------------------------
+# stats for a single column type
 
 
 @dataclass(frozen=True)
@@ -120,9 +116,7 @@ class TextStats(BaseStats):
 ColumnStats = NumericStats | CategoricalStats | BooleanStats | DatetimeStats | TextStats
 
 
-# ---------------------------------------------------------------------------
-# Dispatcher
-# ---------------------------------------------------------------------------
+# dispatcher
 
 
 def analyze(

@@ -186,7 +186,7 @@ class TestHighZeros:
 
 class TestSkewed:
     def test_skewed_triggers(self):
-        # Highly right-skewed distribution
+        # highly right-skewed distribution
         df = pl.DataFrame({"a": [1] * 90 + [1000] * 10})
         alerts = _get_alerts(
             df,

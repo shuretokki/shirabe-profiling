@@ -15,10 +15,10 @@ class ProfileConfig:
 
     title: str = "Dataset Report"
 
-    # Type inference
+    # type inference
     text_unique_ratio: float = 0.5  # unique/count > this → text-like, not categorical
 
-    # Alert thresholds
+    # alert thresholds
     missing_threshold: float = 0.05  # > 5% missing → HIGH_MISSING alert
     cardinality_threshold: float = 0.95  # unique/count > 95% → HIGH_CARDINALITY alert
     correlation_threshold: float = 0.8  # |corr| > 0.8 → HIGH_CORRELATION alert
@@ -27,31 +27,31 @@ class ProfileConfig:
     skewness_threshold: float = 2.0  # |skewness| > 2 → SKEWED alert
     imbalance_threshold: float = 0.9  # top_value_pct > 90% → IMBALANCED alert
     duplicate_threshold: float = 0.0  # any duplicate → DUPLICATES alert
-    uniform_pvalue_threshold: float = 0.05  # p > 0.05 → UNIFORM alert (can't reject uniform H0)
+    uniform_pvalue_threshold: float = 0.05  # p > 0.05 → UNIFORM alert (cannot reject uniform H0)
 
-    # Interactions
+    # interactions
     interaction_sample_size: int = 100_000  # sample above this row count
     interaction_sample_seed: int = 42  # reproducible sampling
     interaction_cardinality_limit: int = 50  # skip categorical cols with more unique values
 
-    # Correlations
+    # correlations
     kendall_max_columns: int = 50  # skip Kendall above this many numeric columns
     correlation_heatmap_max_columns: int = 100  # above this, show strongest pairs, no heatmap
     correlation_heatmap_max_columns_mobile: int = 20  # same, for screens narrower than 40rem
 
-    # Target: the column that a model will predict
+    # target, the column that a model will predict
     target: str | None = None
     target_max_features: int = 8  # how many columns get a breakdown chart
     leakage_threshold: float = 0.95  # link to the target above this → TARGET_LEAKAGE alert
 
-    # Display
-    n_top_values: int = 5  # value_counts'ta gösterilecek top N
+    # display
+    n_top_values: int = 5  # how many top values to show
     histogram_bins: int = 50
 
-    # Profiling depth: "complete" (default) or "overview" (skip expensive computations)
+    # profiling depth, "complete" (default) or "overview" to skip the slow parts
     mode: Literal["complete", "overview"] = "complete"
 
-    # Kolon bazlı override
+    # settings for single columns
     column_overrides: dict[str, dict] = field(default_factory=dict)
 
     @property
