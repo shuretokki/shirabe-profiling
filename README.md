@@ -81,15 +81,14 @@ Click any picture to open it full size.
 | Target | Column details |
 |:--|:--|
 | <a href="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-target.png"><img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-target.png" alt="Target section with the link of each column to the target" width="100%"></a> | <a href="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-columns.png"><img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-columns.png" alt="Column details with alert tags and skew tabs" width="100%"></a> |
-| How each column links to the target, how the target changes across a column, and how missing values relate to the target. | Statistics for each column, with a tag and a mark for each alert. |
 
 | Correlations | Guide |
 |:--|:--|
 | <a href="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-correlations.png"><img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-correlations.png" alt="Correlation heatmap with the strongest pairs" width="100%"></a> | <a href="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-guide.png"><img src="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/docs/report-guide.png" alt="The Guide tab with the High Missing alert open" width="100%"></a> |
-| A heatmap for each method (Phik, Pearson, Spearman, Cramér's V, and Kendall) plus the strongest pairs. | When an alert shows a possible problem, the Guide tab shows the limit, fixes, and sources. |
 
 The report also has:
 
+- A correlation heatmap for each method (Phik, Pearson, Spearman, Cramér's V, and Kendall), with a list of the strongest pairs.
 - An Interactions section with scatter plots, box plots, and a column picker.
 - A Missing Patterns table and an Outliers table.
 - A Sample section with the first rows, the last rows, random rows, and the rows with the most gaps.
