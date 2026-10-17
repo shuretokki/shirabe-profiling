@@ -10,7 +10,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [0.1.0] - 2026-10-15
+## [0.1.0] - 2026-10-17
 
 First release as `shirabe-profiling`. This project is a derivative work based on [dataxid-profiling](https://github.com/dataxid/dataxid-profiling) 0.4.0 (Apache-2.0).
 
@@ -19,7 +19,8 @@ First release as `shirabe-profiling`. This project is a derivative work based on
 - The package is now `shirabe-profiling` and the import is `shirabe_profiling`
 - The internal modules lost their leading underscore (`alerts.py`, `report/html.py`, and so on)
 - The report has a new design: a dark Charcoal theme, a light theme, and a compact density for touch screens
-- The report has a new logo and favicon
+- The report has a new favicon
+- The report uses the official IBM Plex Sans font files, so the arrows and the signs ≥ and ≤ come from a system font
 
 ### Added
 
@@ -31,3 +32,4 @@ First release as `shirabe-profiling`. This project is a derivative work based on
 - Random and Most Missing tabs in Sample
 - Download buttons for the correlation matrices
 - A target section and leakage check when you pass `target=`
+- The full text of each license that the package uses, in `LICENSES/`, and a `license` field that lists all of them
