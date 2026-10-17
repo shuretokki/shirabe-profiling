@@ -266,7 +266,13 @@ class TestRegression:
                 500,
             ),
         )
-        return pl.DataFrame({"price": price, "area": area, "junk": rng.normal(size=500)})
+        return pl.DataFrame(
+            {
+                "price": price,
+                "area": area,
+                "junk": rng.normal(size=500),
+            },
+        )
 
     def test_summary_has_the_usual_numbers(self):
         summary = _analyze(
