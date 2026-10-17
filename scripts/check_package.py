@@ -104,6 +104,7 @@ def check_metadata(
 
 def check_readme(
     meta: Metadata,
+    problems: list[str],
     warnings: list[str],
 ) -> None:
     text = meta.description or ""
@@ -127,11 +128,13 @@ def check_readme(
     if dropped:
         warnings.append(f"PyPI removes these README tags: {', '.join(dropped)}")
     relative = re.findall(
-        r'(?:src="|\]\()((?!https?:|#|mailto:)[^"\s)]+\.(?:png|svg|jpg|gif))',
+        r'(?:\b(?:src|srcset|href)="|\]\()((?!https?:|#|mailto:)[^"\s)]+)',
         text,
     )
     if relative:
-        warnings.append(f"PyPI does not show relative images, such as {relative[0]}")
+        problems.append(
+            f"the README has a relative link that PyPI cannot follow, such as {relative[0]}",
+        )
 
 
 def main() -> int:
@@ -165,6 +168,7 @@ def main() -> int:
             if not shown_readme:
                 check_readme(
                     meta,
+                    problems,
                     warnings,
                 )
                 shown_readme = True
