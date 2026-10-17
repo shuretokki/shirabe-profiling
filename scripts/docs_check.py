@@ -10,7 +10,6 @@ import sys
 from pathlib import Path
 
 README = Path("README.md")
-RAW_IMAGE = re.compile(r"^https://raw\.githubusercontent\.com/[^/]+/[^/]+/main/(.+)$")
 OUTSIDE = re.compile(r"^(https?:|mailto:|#)")
 
 
@@ -52,13 +51,6 @@ def check_blocks(blocks: list[str]) -> list[str]:
 
 def check_target(target: str) -> str | None:
     """Return a problem for one link, or None when it is fine."""
-    raw = RAW_IMAGE.match(target)
-    if raw:
-        # the README uses raw URLs, because PyPI cannot show a relative image.
-        found = Path(raw.group(1)).exists()
-        return (
-            None if found else f"{target} points to {raw.group(1)}, which is not in this checkout"
-        )
     if OUTSIDE.match(target):
         return None
     path = target.split(

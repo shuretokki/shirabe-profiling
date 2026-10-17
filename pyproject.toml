@@ -5,7 +5,7 @@
 name = "shirabe-profiling"
 version = "0.1.0"
 description = "High-performance Polars data profiling with web reports and quality warnings."
-readme = "README.md"
+dynamic = ["readme"]
 requires-python = ">=3.10"
 license = "Apache-2.0 AND OFL-1.1-RFN AND OFL-1.1-no-RFN AND ISC AND MIT"
 license-files = ["LICENSE", "LICENSES/*", "REUSE.toml"]
@@ -64,8 +64,26 @@ dev = [
 ]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-fancy-pypi-readme"]
 build-backend = "hatchling.build"
+
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/markdown"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+pattern = '(src|srcset|href)="((?:docs|assets)/[^"]+)"'
+replacement = '\1="https://raw.githubusercontent.com/shuretokki/shirabe-profiling/main/\2"'
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+pattern = 'href="(LICENSE)"'
+replacement = 'href="https://github.com/shuretokki/shirabe-profiling/blob/main/\1"'
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+pattern = '\[([^\]]+)\]\(((?!https?://|#)[^)\s]+)\)'
+replacement = '[\1](https://github.com/shuretokki/shirabe-profiling/tree/main/\g<2>)'
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/shirabe_profiling"]
