@@ -25,3 +25,4 @@ htmlcov/
 reports/
 .ipynb_checkpoints/
 .ruff_cache/
+.env

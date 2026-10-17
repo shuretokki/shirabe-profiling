@@ -70,7 +70,8 @@ The release stops unless you are on main with a clean tree that is not behind or
 It also needs agreeing version files and a changelog section.
 The package must meet the PyPI upload rules, and its version must not be on PyPI yet.
 The full check must pass.
-The uploads need `UV_PUBLISH_TOKEN`.
+The uploads read their tokens from a `.env` file, which git ignores.
+Copy `.env.example` to `.env` and fill in `UV_PUBLISH_TEST_TOKEN` for TestPyPI and `UV_PUBLISH_TOKEN` for PyPI.
 
 ## README Screenshots
 

@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 set default-list := true
+set dotenv-load := true
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
 # https://docs.astral.sh/uv
@@ -104,15 +105,16 @@ release *flags:
     gh release create "$tag" --verify-tag --title "shirabe-profiling $version" --notes-file "$notes"
     echo "next: just publish-test, then just publish"
 
-# Upload this version to TestPyPI, the practice index (needs UV_PUBLISH_TOKEN for TestPyPI)
+# Upload this version to TestPyPI, the practice index (needs UV_PUBLISH_TEST_TOKEN in .env)
 [group("release")]
 [script("bash")]
 publish-test: _guard-tagged build
     set -euo pipefail
+    : "${UV_PUBLISH_TEST_TOKEN:?add UV_PUBLISH_TEST_TOKEN to .env}"
     v=$(just _version)
-    uv publish --publish-url https://test.pypi.org/legacy/ "dist/shirabe_profiling-$v"*
+    uv publish --token "$UV_PUBLISH_TEST_TOKEN" --publish-url https://test.pypi.org/legacy/ "dist/shirabe_profiling-$v"*
 
-# Upload this version to PyPI (needs UV_PUBLISH_TOKEN, or trusted publishing)
+# Upload this version to PyPI (needs UV_PUBLISH_TOKEN in .env, or trusted publishing)
 [group("release")]
 [confirm("Upload this version to PyPI? A release cannot be changed or deleted afterwards.")]
 [script("bash")]
