@@ -73,6 +73,11 @@ The full check must pass.
 The uploads read their tokens from a `.env` file, which git ignores.
 Copy `.env.example` to `.env` and fill in `UV_PUBLISH_TEST_TOKEN` for TestPyPI and `UV_PUBLISH_TOKEN` for PyPI.
 
+To practice a release, use a pre-release version such as `0.2.0rc1`.
+`just bump` accepts it, and `just release` marks the GitHub release as a pre-release.
+Upload it with `just publish-test` only, and install it with `pip install --pre --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple shirabe-profiling`.
+A PyPI release never changes, so delete the changelog section of the pre-release when you release the final version.
+
 ## README Screenshots
 
 `just readme-images` makes the pictures in `docs/` again, so run it after a change to the report design.

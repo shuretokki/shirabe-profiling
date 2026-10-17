@@ -33,8 +33,8 @@ sync:
 bump version:
     set -euo pipefail
     new="{{ version }}"
-    if ! [[ "$new" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-      echo "error: the version must look like 1.2.3, not $new" >&2
+    if ! [[ "$new" =~ ^[0-9]+\.[0-9]+\.[0-9]+((a|b|rc)[0-9]+|\.dev[0-9]+)?$ ]]; then
+      echo "error: the version must look like 1.2.3 or 1.2.3rc1, not $new" >&2
       exit 1
     fi
     old=$(just _version)
@@ -64,6 +64,8 @@ release *flags:
     [ "{{ flags }}" = "--dry-run" ] && dry=true
     version=$(just _version)
     tag="v$version"
+    prerelease=""
+    if [[ "$version" =~ ((a|b|rc)[0-9]+|\.dev[0-9]+)$ ]]; then prerelease="--prerelease"; fi
     fail() { echo "error: $*" >&2; exit 1; }
 
     [ "$(git branch --show-current)" = main ] || fail "release from main, not $(git branch --show-current)"
@@ -102,7 +104,7 @@ release *flags:
     git tag -a "$tag" -m "shirabe-profiling $version"
     git push origin main
     git push origin "$tag"
-    gh release create "$tag" --verify-tag --title "shirabe-profiling $version" --notes-file "$notes"
+    gh release create "$tag" --verify-tag $prerelease --title "shirabe-profiling $version" --notes-file "$notes"
     echo "next: just publish-test, then just publish"
 
 # Upload this version to TestPyPI, the practice index (needs UV_PUBLISH_TEST_TOKEN in .env)
