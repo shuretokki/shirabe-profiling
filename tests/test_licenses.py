@@ -44,7 +44,7 @@ class TestLicenseLayout:
 
     def test_the_fonts_and_the_icons_are_not_covered_by_apache_alone(self):
         assert re.search(
-            r'IBMPlexSans-Regular\.woff".*?SPDX-License-Identifier = "OFL-1\.1-RFN"',
+            r'IBMPlexSans-Regular-Latin1\.woff".*?SPDX-License-Identifier = "OFL-1\.1-RFN"',
             REUSE,
             flags=re.S,
         )

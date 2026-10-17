@@ -44,8 +44,8 @@ REPOSITORY_URL = "https://github.com/shuretokki/shirabe-profiling"
 
 
 _FONTS = (
-    ("IBM Plex Sans", 400, "IBMPlexSans-Regular.woff"),
-    ("IBM Plex Sans", 600, "IBMPlexSans-SemiBold.woff"),
+    ("IBM Plex Sans", 400, "IBMPlexSans-Regular-Latin1.woff"),
+    ("IBM Plex Sans", 600, "IBMPlexSans-SemiBold-Latin1.woff"),
     ("Lilex", 400, "Lilex-Regular.woff"),
 )
 
