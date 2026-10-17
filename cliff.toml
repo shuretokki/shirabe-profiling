@@ -2,9 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # https://git-cliff.org/docs/configuration
-# `just changelog` prints a draft for the next version.
-# Rewrite the draft as plain sentences, then put it in CHANGELOG.md.
-
 [changelog]
 body = """
 ## [{{ version | default(value="Unreleased") | trim_start_matches(pat="v") }}] - {{ timestamp | default(value=now()) | date(format="%Y-%m-%d") }}
