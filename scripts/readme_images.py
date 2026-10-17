@@ -4,9 +4,9 @@
 """Make the screenshots for the README.
 
 The script builds a report from a synthetic customer dataset.
-It shows one view at a time in a headless browser and crops each picture to its content.
-Every picture is 1280 pixels wide and between 640 and 853 pixels high.
-The ratio stays between 3:2 and 2:1.
+It shows one view at a time in a headless browser and cuts each picture to one fixed size.
+Every picture is 1280 by 853 pixels (3:2), so the pictures in the README tables line up.
+A light and a dark overview exist, because the README swaps them with the theme of the reader.
 
 It needs Chrome, Chromium, or Edge. Set BROWSER to the program if the script cannot find it.
 The report loads ECharts and Tailwind from a CDN, so the script also needs an internet connection.
@@ -32,9 +32,7 @@ from shirabe_profiling import ProfileReport
 
 WIDTH = 1280
 VIEW_HEIGHT = 1100
-MIN_HEIGHT = 640
-MAX_HEIGHT = 853
-BOTTOM_PAD = 24
+HEIGHT = 853
 
 BROWSERS = (
     "google-chrome",
@@ -103,9 +101,12 @@ SHOTS = (
         tab="guide",
     ),
     Shot(
-        "report-dark",
+        "report-overview-dark",
         "dark",
-        only("columns-section"),
+        only(
+            "overview-section",
+            "alerts-section",
+        ),
     ),
 )
 
@@ -354,7 +355,7 @@ def crop(
     png: Path,
     target: Path,
 ) -> tuple[int, int]:
-    """Crop the picture to its content, then keep the height between the limits."""
+    """Cut the picture to one fixed size, so that every picture in the README table matches."""
     image = Image.open(png).convert("RGB")
     background = image.getpixel((4, image.height - 4))
     box = ImageChops.difference(
@@ -366,16 +367,15 @@ def crop(
         ),
     ).getbbox()
     bottom = box[3] if box else image.height
-    height = min(max(bottom + BOTTOM_PAD, MIN_HEIGHT), MAX_HEIGHT)
-    if bottom > MAX_HEIGHT:
-        print(f"  warning: the content of {target.name} is cut at {MAX_HEIGHT} pixels")
+    if bottom > HEIGHT:
+        print(f"  warning: the content of {target.name} is cut at {HEIGHT} pixels")
     canvas = Image.new(
         "RGB",
-        (WIDTH, height),
+        (WIDTH, HEIGHT),
         background,
     )
     canvas.paste(
-        image.crop((0, 0, WIDTH, min(height, image.height))),
+        image.crop((0, 0, WIDTH, min(HEIGHT, image.height))),
         (0, 0),
     )
     canvas.save(
