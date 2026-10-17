@@ -64,7 +64,7 @@ dev = [
 ]
 
 [build-system]
-requires = ["hatchling", "hatch-fancy-pypi-readme"]
+requires = ["hatchling", "hatch-fancy-pypi-readme>=25.1,<26"]
 build-backend = "hatchling.build"
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]

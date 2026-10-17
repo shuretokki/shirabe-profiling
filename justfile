@@ -233,6 +233,7 @@ _validate:
     init=$(grep -m1 '^__version__' src/shirabe_profiling/__init__.py | cut -d'"' -f2)
     [ "$init" = "$version" ] || fail "pyproject.toml says $version but __init__.py says $init, run just bump"
     grep -q "^## \[$version\]" CHANGELOG.md || fail "CHANGELOG.md has no section for $version"
+    ! grep -q "not on PyPI yet" README.md || fail "README.md still says that the package is not on PyPI yet, change the install line"
 
     tmp=$(mktemp -d)
     trap 'rm -rf "$tmp"' EXIT
