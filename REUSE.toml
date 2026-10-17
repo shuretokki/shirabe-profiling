@@ -43,6 +43,7 @@ SPDX-License-Identifier = "Apache-2.0 AND ISC AND MIT"
 path = [
   "assets/logo/wordmark-on-dark.svg",
   "assets/logo/wordmark-on-light.svg",
+  "assets/logo/wordmark-inline.svg",
 ]
 SPDX-FileCopyrightText = [
   "2026 shuretokki",

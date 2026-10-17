@@ -1216,17 +1216,15 @@ section[id] {
   color: var(--text);
 }
 
-.brand-mark {
+.brand-wordmark {
   display: flex;
   align-self: center;
-  width: 1.25rem;
-  height: 1.25rem;
-  margin-top: -0.25rem;
+  height: 0.875rem;
   color: var(--text);
 }
 
-.brand-mark svg {
-  width: 100%;
+.brand-wordmark svg {
+  width: auto;
   height: 100%;
 }
 
@@ -1425,7 +1423,7 @@ button.menu-item:focus-visible {
   min-width: 0;
 }
 
-.brand-mark,
+.brand-wordmark,
 .header-actions {
   flex: none;
 }

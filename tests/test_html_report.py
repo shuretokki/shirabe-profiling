@@ -985,16 +985,34 @@ class TestAbout:
 
 
 class TestLogo:
-    def test_the_header_mark_is_an_inline_svg_that_follows_the_text_color(
-        self,
-        mixed_df: pl.DataFrame,
-    ):
+    def test_the_header_has_no_logo_by_default(self, mixed_df: pl.DataFrame):
         html = _render(mixed_df)
         header = html[html.index('<header class="app-header"') : html.index("</header>")]
 
-        assert '<span class="brand-mark" role="img" aria-label="shirabe">' in header
+        assert "brand-wordmark" not in header
+        assert "<svg" not in header.split('id="page-tabs"')[0]
+
+    def test_a_logo_file_in_the_templates_folder_shows_in_the_header(
+        self,
+        mixed_df: pl.DataFrame,
+        monkeypatch,
+    ):
+        from shirabe_profiling.report import html as report_html
+
+        load = report_html._load_text
+        monkeypatch.setattr(
+            report_html,
+            "_load_text",
+            lambda name: (
+                '<svg fill="currentColor"></svg>' if name == "logo-wordmark.svg" else load(name)
+            ),
+        )
+        html = _render(mixed_df)
+        header = html[html.index('<header class="app-header"') : html.index("</header>")]
+
+        assert '<span class="brand-wordmark" role="img" aria-label="shirabe">' in header
         assert 'fill="currentColor"' in header
-        assert '<img class="brand-mark"' not in html
+        assert '<img class="brand-wordmark"' not in html
 
     def test_the_favicon_is_an_svg_tile(self, mixed_df: pl.DataFrame):
         import base64

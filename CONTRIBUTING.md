@@ -45,6 +45,12 @@ When you add work from someone else, such as a font or an icon, add an annotatio
 Then run `uvx reuse download --all` to fetch the license text, and run `just license-check` to make sure that every file is covered.
 Keep the root `LICENSE` and `LICENSES/Apache-2.0.txt` the same text, which a test checks.
 
+## Report logo
+
+The report header shows no logo for now, and the README holds the wordmark.
+To show one, copy `assets/logo/wordmark-inline.svg` to `src/shirabe_profiling/report/templates/logo-wordmark.svg`, and the header picks it up without a code change.
+That file uses `currentColor`, so the logo follows the light and the dark theme, and `.brand-wordmark` in `report.css` sets its height.
+
 ## Changelog
 
 `just changelog` prints a draft for the commits since the last tag.

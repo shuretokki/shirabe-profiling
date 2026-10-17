@@ -239,7 +239,7 @@ _validate:
     if uv build --out-dir "$tmp" >/dev/null 2>&1; then
       # The wheel must hold the typing marker and the report assets.
       listing=$(uv run python -m zipfile -l "$tmp"/*.whl)
-      for needed in py.typed report/templates/report.html.j2 report/templates/logo-mark.svg report/templates/favicon.svg; do
+      for needed in py.typed report/templates/report.html.j2 report/templates/favicon.svg; do
         grep -q "$needed" <<<"$listing" || fail "the wheel does not hold $needed"
       done
       # twine is the check that the Python Packaging guide names for the README and the metadata.

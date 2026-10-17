@@ -134,7 +134,7 @@ def render_html(
         feature_url=_feature_url(code),
         font_faces=_font_face_css(),
         favicon_b64=_load_asset_b64("favicon.svg"),
-        logo_mark=_load_text("logo-mark.svg"),
+        logo_wordmark=_load_text("logo-wordmark.svg"),
         brand_name=BRAND_NAME,
     )
 
