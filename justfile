@@ -22,12 +22,12 @@ sync:
 @readme-images:
     uv run python scripts/readme_images.py docs
 
-# Print a CHANGELOG.md draft for the commits since the last tag
+# Print a CHANGELOG.md draft for the commits since the last tag, without changing a file
 [group("release")]
 @changelog:
     git-cliff --unreleased --tag "v$(just _version)" 2>/dev/null
 
-# Set a new version in pyproject.toml and in __init__.py
+# Set a new version in pyproject.toml and in __init__.py, and draft the CHANGELOG.md section
 [group("release")]
 [script("bash")]
 bump version:
@@ -46,9 +46,17 @@ bump version:
     sed -i "s/^version = \"$o\"/version = \"$new\"/" pyproject.toml
     sed -i "s/^__version__ = \"$o\"/__version__ = \"$new\"/" src/shirabe_profiling/__init__.py
     uv lock --quiet
+    if ! grep -q "^## \[$new\]" CHANGELOG.md; then
+      draft=$(mktemp)
+      git-cliff --unreleased --tag "v$new" 2>/dev/null > "$draft"
+      awk -v f="$draft" '!done && /^## \[/ { while ((getline line < f) > 0) print line; print ""; done = 1 } { print }' CHANGELOG.md > CHANGELOG.md.new
+      mv CHANGELOG.md.new CHANGELOG.md
+      rm -f "$draft"
+      echo "drafted the CHANGELOG.md section for $new from the commits"
+    fi
     echo "$old -> $new in pyproject.toml, src/shirabe_profiling/__init__.py and uv.lock"
-    echo "next: write the CHANGELOG.md section for $new (just changelog prints a draft)"
-    echo "then commit both as chore(release): $new, and run just release"
+    echo "next: read the CHANGELOG.md section for $new and reword it if needed"
+    echo "then commit the files as chore(release): $new, and run just release"
 
 # Build the wheel and the source archive into dist/
 [group("release")]

@@ -59,8 +59,8 @@ Rewrite the draft as plain sentences and put it in `CHANGELOG.md`.
 
 ## Releasing
 
-1. `just bump 0.2.0` sets the version in `pyproject.toml`, `__init__.py`, and `uv.lock`.
-2. Write the `CHANGELOG.md` section for the version, and use `just changelog` for a draft.
+1. `just bump 0.2.0` sets the version in `pyproject.toml`, `__init__.py`, and `uv.lock`, and drafts the `CHANGELOG.md` section from the `feat`, `fix`, and `perf` commits since the last tag.
+2. Read the section and reword it if needed. `just changelog` prints a fresh draft without changing a file.
 3. Commit both as `chore(release): 0.2.0`.
 4. `just release --dry-run` checks everything and prints the release notes, and it changes nothing.
 5. `just release` does the same, asks for a `y`, then tags `v0.2.0`, pushes main and the tag, and creates the GitHub release from the changelog section.
