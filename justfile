@@ -109,7 +109,7 @@ release *flags:
     read -r -p "continue? [y/N] " answer
     [ "$answer" = y ] || fail "stopped, nothing was changed"
 
-    git tag -a "$tag" -m "shirabe-profiling $version"
+    git tag -a "$tag" -m "$version"
     git push origin main
     git push origin "$tag"
     gh release create "$tag" --verify-tag $prerelease --title "shirabe-profiling $version" --notes-file "$notes"
@@ -249,7 +249,7 @@ _validate:
     tmp=$(mktemp -d)
     trap 'rm -rf "$tmp"' EXIT
     if uv build --out-dir "$tmp" >/dev/null 2>&1; then
-      # The wheel must hold the typing marker and the report assets.
+      # the wheel must hold the typing marker and the report assets.
       listing=$(uv run python -m zipfile -l "$tmp"/*.whl)
       for needed in py.typed report/templates/report.html.j2 report/templates/favicon.svg; do
         grep -q "$needed" <<<"$listing" || fail "the wheel does not hold $needed"
@@ -261,7 +261,7 @@ _validate:
       fail "uv build failed"
     fi
 
-    # PyPI refuses a file name that it has seen before, even after a delete.
+    # pypi refuses a file name that it has seen before, even after a delete.
     code=$(curl -s -o /dev/null -w '%{http_code}' "https://pypi.org/pypi/shirabe-profiling/$version/json" || true)
     case "$code" in
       200) fail "shirabe-profiling $version is already on PyPI, bump the version" ;;
