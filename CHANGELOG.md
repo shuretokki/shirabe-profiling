@@ -17,10 +17,9 @@ First release as `shirabe-profiling`. This project is a derivative work based on
 ### Changed
 
 - The package is now `shirabe-profiling` and the import is `shirabe_profiling`
-- The internal modules lost their leading underscore (`alerts.py`, `report/html.py`, and so on)
-- The report has a new design: a dark Charcoal theme, a light theme, and a compact density for touch screens
+- The report has a new design: a dark theme, a light theme, and a compact density for touch screens
 - The report has a new favicon
-- The report uses the official IBM Plex Sans font files, so the arrows and the signs ≥ and ≤ come from a system font
+- The report uses the official IBM Plex Sans font files
 
 ### Added
 
