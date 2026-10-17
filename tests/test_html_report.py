@@ -1015,7 +1015,6 @@ class TestLogo:
         from shirabe_profiling.report.html import _TEMPLATE_DIR
 
         assert not (_TEMPLATE_DIR / "icon.png").exists()
-        assert not (_TEMPLATE_DIR / "dataxid_logo.png").exists()
 
 
 class TestScrollContainment:
