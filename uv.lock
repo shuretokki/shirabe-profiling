@@ -372,6 +372,18 @@ wheels = [
 ]
 
 [[package]]
+name = "dekit-cli"
+version = "0.10.2"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/af/88/13d79f596147ab1984278abf690067fc70d08ff9f0ab9d8caabb14491edc/dekit_cli-0.10.2-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:1f0813d6eb0b3a098d68704123e28fb80610c6f6111338a042f8c58c47cb78dd", size = 2151669, upload-time = "2026-10-11T19:25:43.334Z" },
+    { url = "https://files.pythonhosted.org/packages/56/3d/69d552cff71615b73541c9b710913f2f6ddadbbf8ff9871d7bcf192cde3d/dekit_cli-0.10.2-py3-none-macosx_11_0_arm64.whl", hash = "sha256:2d0e4316dfb212e2135001df2ee0917c33a5af81c794df4b818cab88131ea424", size = 2063586, upload-time = "2026-10-11T19:25:45.033Z" },
+    { url = "https://files.pythonhosted.org/packages/25/09/2a99228a0883d104ddcb6a31aeae4df9b4ccc29b59f2d8168dfe44006e5d/dekit_cli-0.10.2-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.musllinux_1_1_aarch64.whl", hash = "sha256:7a5cf778cf46cd390237ee0d20585820bff7ee57540ff1671d5339feef67247c", size = 2311103, upload-time = "2026-10-11T19:25:46.658Z" },
+    { url = "https://files.pythonhosted.org/packages/1a/69/c75b2b6c89634758b6ef27be4d0ea31ba9c4ccbba4238cb826d17053cb0f/dekit_cli-0.10.2-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.musllinux_1_1_x86_64.whl", hash = "sha256:a1561ae565a7d82a5e7fcae469dfdd1a2608420ea35c77e6ef64e954ed84d1e6", size = 2389394, upload-time = "2026-10-11T19:25:48.056Z" },
+    { url = "https://files.pythonhosted.org/packages/79/98/1b66eeca1f118cf0705a20b53dcf82bd65f183a10675ba39a43d399468e2/dekit_cli-0.10.2-py3-none-win_amd64.whl", hash = "sha256:b0fb808ed8384908b1373e33cf5fe6fa55bfe31596fc4048058d87bf10ce72ed", size = 2257172, upload-time = "2026-10-11T19:25:50.012Z" },
+]
+
+[[package]]
 name = "docutils"
 version = "0.23"
 source = { registry = "https://pypi.org/simple" }
@@ -1563,6 +1575,7 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "basedpyright" },
+    { name = "dekit-cli" },
     { name = "packaging" },
     { name = "pillow" },
     { name = "pytest" },
@@ -1585,6 +1598,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "basedpyright", specifier = ">=1.40" },
+    { name = "dekit-cli", specifier = ">=0.10.2" },
     { name = "packaging", specifier = ">=26.0" },
     { name = "pillow", specifier = ">=12.3.0" },
     { name = "pytest", specifier = ">=8.0" },

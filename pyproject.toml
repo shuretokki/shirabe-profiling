@@ -55,6 +55,7 @@ Issues = "https://github.com/shuretokki/shirabe-profiling/issues"
 [dependency-groups]
 dev = [
     "basedpyright>=1.40",
+    "dekit-cli>=0.10.2",
     "packaging>=26.0",
     "pillow>=12.3.0",
     "pytest>=8.0",

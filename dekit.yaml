@@ -1,0 +1,4 @@
+tasks:
+  docs:
+    cmd: ["just", "docs"]
+    autostart: true
