@@ -1551,6 +1551,8 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "jinja2" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.4.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "phik" },
     { name = "polars" },
     { name = "polars-statistics" },
@@ -1573,6 +1575,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "jinja2", specifier = ">=3.1" },
+    { name = "numpy", specifier = ">=1.22.4" },
     { name = "phik", specifier = ">=0.12" },
     { name = "polars", specifier = ">=1.0" },
     { name = "polars-statistics", specifier = ">=0.4" },
