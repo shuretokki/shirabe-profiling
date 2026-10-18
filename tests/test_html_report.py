@@ -580,15 +580,15 @@ class TestHeaderActionsAndGuide:
         html = _render(mixed_df)
         assert html.index("window.reportSettings") < html.index("<style>")
 
-    def test_palette_choice_is_gone_and_dark_is_charcoal(self, mixed_df: pl.DataFrame):
+    def test_palette_choice_is_gone_and_dark_is_the_default_palette(self, mixed_df: pl.DataFrame):
         html = _render(mixed_df)
         assert 'data-setting="palette"' not in html
         assert "data-palette" not in html
         assert "palette-label" not in html
-        assert "--editor: #1a1a1a;" in html
-        assert "--surface: #242424;" in html
-        assert "--text: #d4d4d4;" in html
-        assert "#092728;\n  --surface" not in html
+        assert "--editor: #091413;" in html
+        assert "--surface: #10221e;" in html
+        assert "--text: #ddece5;" in html
+        assert "--editor: #1a1a1a;" not in html
 
     def test_diagnostics_do_not_list_a_palette(self, mixed_df: pl.DataFrame):
         html = _render(mixed_df)
@@ -1025,8 +1025,8 @@ class TestLogo:
 
         assert match is not None
         favicon = base64.b64decode(match.group(1)).decode("utf-8")
-        assert 'fill="#1a1a1a"' in favicon
-        assert 'fill="#d4d4d4"' in favicon
+        assert 'fill="#091413"' in favicon
+        assert 'fill="#ddece5"' in favicon
         assert 'type="image/png"' not in html
 
     def test_the_old_png_logos_are_gone(self):

@@ -3,55 +3,59 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* the colors between the colors markers come from the design tokens. */
+/* change the tokens in the design folder and run its report script, and do not edit them here. */
 :root {
-  --primary: #83c092;
-  --on-primary: #092728;
+  /* colors:dark:start */
+  --primary: #b0e4cc;
+  --on-primary: #091413;
   --error: #e67e80;
   --warning: #dbbc7f;
   --success: #a7c080;
   --info: #7fbbb3;
   --number: #d699b6;
 
-  --editor: #1a1a1a;
-  --surface: #242424;
-  --background: #2e2e2e;
-  --header: #1a1a1a;
-  --element: #242424;
-  --element-hover: #2e2e2e;
-  --element-active: #383838;
-  --element-disabled: #242424;
-  --ghost-hover: #2e2e2e;
-  --ghost-active: #383838;
+  --editor: #091413;
+  --surface: #10221e;
+  --background: #142d26;
+  --header: #091413;
+  --element: #10221e;
+  --element-hover: #142d26;
+  --element-active: #1a392f;
+  --element-disabled: #10221e;
+  --ghost-hover: #142d26;
+  --ghost-active: #1a392f;
 
-  --text: #d4d4d4;
-  --text-muted: #a0a0a0;
-  --text-placeholder: #858585;
-  --text-disabled: #737373;
-  --icon: #d4d4d4;
-  --icon-muted: #a0a0a0;
+  --text: #ddece5;
+  --text-muted: #aabdb4;
+  --text-placeholder: #85978e;
+  --text-disabled: #62746b;
+  --icon: #ddece5;
+  --icon-muted: #aabdb4;
 
-  --border: #404040;
-  --border-variant: #2e2e2e;
-  --border-focused: #83c092;
-  --border-selected: #383b32;
-  --border-disabled: #383838;
+  --border: #21493c;
+  --border-variant: #142d26;
+  --border-focused: #408a71;
+  --border-selected: #285a48;
+  --border-disabled: #1a392f;
 
-  --selection: #344438;
-  --scrollbar-thumb: #8585854c;
+  --selection: #1d4034;
+  --scrollbar-thumb: #85978e4c;
 
-  --error-bg: #413232;
+  --error-bg: #493b40;
   --error-border: #e67e8066;
-  --warning-bg: #3f3b32;
+  --warning-bg: #45443c;
   --warning-border: #dbbc7f66;
-  --success-bg: #383b32;
+  --success-bg: #3c4841;
   --success-border: #a7c08066;
-  --info-bg: #323b39;
+  --info-bg: #384b55;
   --info-border: #7fbbb366;
-  --number-bg: #3f363a;
+  --number-bg: #463f48;
   --number-border: #d699b666;
 
-  --count-badge: #6c4243;
-  --on-count-badge: #d4d4d4;
+  --count-badge: #613e3f;
+  --on-count-badge: #ddece5;
+  /* colors:dark:end */
 
   --shadow-elevated: 0 2px 3px rgba(0, 0, 0, 0.12), 0 1px 0 rgba(0, 0, 0, 0.06);
 
@@ -95,7 +99,9 @@
 }
 
 :root[data-theme="light"] {
+  /* colors:light:start */
   --primary: #35a77c;
+  --on-primary: #092728;
   --error: #f85552;
   --warning: #dfa000;
   --success: #8da101;
@@ -142,6 +148,7 @@
 
   --count-badge: #fcb9b0;
   --on-count-badge: #092728;
+  /* colors:light:end */
 
   --shadow-elevated: 0 2px 3px rgba(0, 0, 0, 0.12), 0 1px 0 rgba(0, 0, 0, 0.03);
 
