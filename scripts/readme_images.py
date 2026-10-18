@@ -277,7 +277,7 @@ def main() -> None:
         "out",
         type=Path,
         nargs="?",
-        default=Path("docs"),
+        default=Path("assets/screenshots"),
         help="folder for the pictures",
     )
     args = parser.parse_args()

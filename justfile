@@ -18,9 +18,9 @@ PATHS := "src tests scripts"
 sync:
     uv sync
 
-# Remake the README screenshots in docs/ (needs Chrome, Chromium, or Edge, and internet access)
+# Remake the README screenshots in assets/screenshots/ (needs Chrome, Chromium, or Edge, and internet access)
 @readme-images:
-    uv run python scripts/readme_images.py docs
+    uv run python scripts/readme_images.py assets/screenshots
 
 # Print a CHANGELOG.md draft for the commits since the last tag, without changing a file
 [group("release")]
