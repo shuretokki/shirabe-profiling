@@ -69,7 +69,7 @@ report.to_html("report.html")
 You can name the column that you want to predict to add a target section:
 
 ```python
-report = ProfileReport(df, target="churned")
+report = ProfileReport(df, target="price")
 ```
 
 The report loads ECharts and Tailwind CSS from a CDN, so it needs an internet connection to display correctly.
@@ -107,11 +107,11 @@ The report also has:
 <summary>Read the results</summary>
 
 ```python
-report = ProfileReport(df, title="Customer Data Profile")
+report = ProfileReport(df, title="Home Prices Profile")
 
 stats = report.to_dict()
 alerts = report.alerts
-column_stats = report.stats["age"]
+column_stats = report.stats["area_m2"]
 correlations = report.correlations
 ```
 
@@ -124,7 +124,7 @@ correlations = report.correlations
 from shirabe_profiling import ProfileReport, ProfileConfig
 
 config = ProfileConfig(
-    title="Customer Data Profile",
+    title="Home Prices Profile",
     mode="overview",
     missing_threshold=0.1,
     histogram_bins=30,
