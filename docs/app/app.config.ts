@@ -323,7 +323,7 @@ export default defineAppConfig({
         description: 'text-base sm:text-lg',
         body: 'mt-6',
         footer: 'mt-6',
-        links: 'gap-x-3 gap-y-2'
+        links: 'gap-x-3 gap-y-2 items-center'
       }
     },
     pageSection: {
@@ -334,7 +334,7 @@ export default defineAppConfig({
         title: 'text-2xl sm:text-3xl lg:text-3xl font-semibold',
         description: 'text-sm sm:text-base',
         body: 'mt-6',
-        links: 'gap-x-3 gap-y-2'
+        links: 'gap-x-3 gap-y-2 items-center'
       }
     },
     pageCard: {
