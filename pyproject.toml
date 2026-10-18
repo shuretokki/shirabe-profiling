@@ -87,6 +87,9 @@ replacement = 'href="https://github.com/shuretokki/shirabe-profiling/blob/main/\
 pattern = '\[([^\]]+)\]\(((?!https?://|#)[^)\s]+)\)'
 replacement = '[\1](https://github.com/shuretokki/shirabe-profiling/tree/main/\g<2>)'
 
+[tool.hatch.build.targets.sdist]
+exclude = ["/docs"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/shirabe_profiling"]
 [tool.hatch.build.targets.wheel.force-include]
