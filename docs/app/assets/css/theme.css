@@ -1,0 +1,97 @@
+@theme static {
+  --color-jade-50: #f1f9f5;
+  --color-jade-100: #e1f4eb;
+  --color-jade-200: #d1efe0;
+  --color-jade-300: #c1e9d6;
+  --color-jade-400: #b0e4cc;
+  --color-jade-500: #35a77c;
+  --color-jade-600: #2d8665;
+  --color-jade-700: #24674f;
+  --color-jade-800: #1c493a;
+  --color-jade-900: #132d26;
+  --color-jade-950: #091413;
+
+  --color-forest-50: #fffbef;
+  --color-forest-100: #f8f5e4;
+  --color-forest-200: #e8e5d5;
+  --color-forest-300: #bec5b2;
+  --color-forest-400: #aabdb4;
+  --color-forest-500: #85978e;
+  --color-forest-600: #5c6a72;
+  --color-forest-700: #1a392f;
+  --color-forest-800: #10221e;
+  --color-forest-900: #0c1b18;
+  --color-forest-950: #091413;
+}
+
+:root {
+  --ui-bg: #fffbef;
+  --ui-bg-muted: #f8f5e4;
+  --ui-bg-elevated: #edeada;
+  --ui-bg-accented: #e8e5d5;
+  --ui-bg-inverted: #5c6a72;
+  --ui-border: #e8e5d5;
+  --ui-border-muted: #e8e5d5;
+  --ui-border-accented: #bec5b2;
+  --ui-border-inverted: #5c6a72;
+  --ui-text-dimmed: #939f91;
+  --ui-text-muted: #829181;
+  --ui-text-toned: #829181;
+  --ui-text: #5c6a72;
+  --ui-text-highlighted: #5c6a72;
+  --ui-text-inverted: #fffbef;
+  --ui-primary: #35a77c;
+  --ui-success: #8da101;
+  --ui-info: #3a94c5;
+  --ui-warning: #dfa000;
+  --ui-error: #f85552;
+  --ui-on-primary: #092728;
+  --ui-info-bg: #ecf5ed;
+  --ui-info-border: #3a94c566;
+  --ui-success-bg: #f3f5d9;
+  --ui-success-border: #8da10166;
+  --ui-warning-bg: #fef2d5;
+  --ui-warning-border: #dfa00066;
+  --ui-error-bg: #ffe7de;
+  --ui-error-border: #f8555266;
+  --scrollbar-thumb: #939f914c;
+  --selection: #f0f2d4;
+  --shadow-elev: 0 2px 3px rgb(0 0 0 / 0.12), 0 1px 0 rgb(0 0 0 / 0.03);
+  --shadow-modal: 0 2px 3px rgb(0 0 0 / 0.06), 0 3px 6px rgb(0 0 0 / 0.06), 0 6px 12px rgb(0 0 0 / 0.04), 0 1px 0 rgb(0 0 0 / 0.04);
+}
+
+.dark {
+  --ui-bg: #091413;
+  --ui-bg-muted: #10221e;
+  --ui-bg-elevated: #142d26;
+  --ui-bg-accented: #1a392f;
+  --ui-bg-inverted: #ddece5;
+  --ui-border: #142d26;
+  --ui-border-muted: #142d26;
+  --ui-border-accented: #21493c;
+  --ui-border-inverted: #ddece5;
+  --ui-text-dimmed: #85978e;
+  --ui-text-muted: #aabdb4;
+  --ui-text-toned: #aabdb4;
+  --ui-text: #ddece5;
+  --ui-text-highlighted: #ddece5;
+  --ui-text-inverted: #091413;
+  --ui-primary: #b0e4cc;
+  --ui-success: #a7c080;
+  --ui-info: #7fbbb3;
+  --ui-warning: #dbbc7f;
+  --ui-error: #e67e80;
+  --ui-on-primary: #091413;
+  --ui-info-bg: #384b55;
+  --ui-info-border: #7fbbb366;
+  --ui-success-bg: #3c4841;
+  --ui-success-border: #a7c08066;
+  --ui-warning-bg: #45443c;
+  --ui-warning-border: #dbbc7f66;
+  --ui-error-bg: #493b40;
+  --ui-error-border: #e67e8066;
+  --scrollbar-thumb: #85978e4c;
+  --selection: #1d4034;
+  --shadow-elev: 0 2px 3px rgb(0 0 0 / 0.12), 0 1px 0 rgb(0 0 0 / 0.06);
+  --shadow-modal: 0 2px 3px rgb(0 0 0 / 0.12), 0 3px 6px rgb(0 0 0 / 0.08), 0 6px 12px rgb(0 0 0 / 0.04), 0 1px 0 rgb(0 0 0 / 0.12);
+}

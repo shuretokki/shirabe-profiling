@@ -1,0 +1,73 @@
+@import "./assets/css/theme.css";
+@import "./assets/css/density.css";
+
+@font-face { font-family: "IBM Plex Sans"; font-weight: 400; font-display: swap; src: url("/fonts/IBMPlexSans-Regular.ttf") format("truetype"); }
+@font-face { font-family: "IBM Plex Sans"; font-weight: 600; font-display: swap; src: url("/fonts/IBMPlexSans-SemiBold.ttf") format("truetype"); }
+@font-face { font-family: "Lilex"; font-weight: 400; font-display: swap; src: url("/fonts/Lilex-Regular.ttf") format("truetype"); }
+
+@theme {
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Lilex", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+}
+
+body {
+  font-size: var(--body-size);
+  line-height: var(--body-lh);
+}
+
+::selection {
+  background: var(--selection);
+}
+
+html {
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a,
+button,
+[role="button"],
+input,
+select,
+textarea,
+label,
+summary {
+  touch-action: manipulation;
+}
+
+svg.iconify * {
+  stroke-width: 1.8;
+}
+
+*,
+::before,
+::after {
+  transition: none !important;
+}
+
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+*,
+::before,
+::after {
+  @apply outline-primary/25;
+}
+
+*:focus-visible,
+*:has(> a:focus-visible) {
+  --tw-ring-color: var(--ui-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

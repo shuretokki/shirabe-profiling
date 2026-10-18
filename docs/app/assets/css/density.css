@@ -1,0 +1,147 @@
+:root {
+  --body-size: 0.875rem;
+  --body-lh: 1.4;
+  --field-text: 0.875rem;
+
+  --ctl-compact: 1.125rem;
+  --ctl-default: 1.375rem;
+  --ctl-field-sm: 1.5rem;
+  --ctl-medium: 1.75rem;
+  --ctl-large: 2rem;
+  --ctl-touch: 2.5rem;
+
+  --row-head: 1.75rem;
+  --row: 2rem;
+  --row-menu: 1.5rem;
+  --header-h: 2.5rem;
+  --ui-header-height: var(--header-h);
+
+  --px-tight: 0.25rem;
+  --px-normal: 0.5rem;
+  --px-field: 0.5rem;
+  --px-tab: 0.75rem;
+  --gap-ctl: 0.25rem;
+  --ps-icon: 1.875rem;
+  --pad-card: 0.75rem;
+  --pad-modal: 0.75rem;
+  --pad-alert-x: 0.75rem;
+  --pad-alert-y: 0.5rem;
+
+  --icon-ui: 1rem;
+  --icon-sm: 0.875rem;
+
+  --sw-w: 2rem;
+  --sw-h: 1.25rem;
+  --sw-thumb: 0.75rem;
+  --sw-shift: 0.75rem;
+
+  --cb-size: 1rem;
+  --cb-icon: 0.875rem;
+  --rd-dot: 0.375rem;
+  --tap-min: 0rem;
+
+  --badge-h: 0.875rem;
+  --badge-text: 9px;
+}
+
+@media (pointer: coarse) {
+  :root:not([data-density="default"]) {
+    --body-size: 0.90625rem;
+    --body-lh: 1.45;
+    --field-text: 1rem;
+
+    --ctl-compact: 1.625rem;
+    --ctl-default: 2.25rem;
+    --ctl-field-sm: 2.25rem;
+    --ctl-medium: 2.25rem;
+    --ctl-large: 2.5rem;
+    --ctl-touch: 2.75rem;
+
+    --row-head: 2rem;
+    --row: 2.25rem;
+    --row-menu: 2.25rem;
+    --header-h: 3rem;
+
+    --px-tight: 0.5rem;
+    --px-normal: 0.75rem;
+    --px-field: 0.625rem;
+    --px-tab: 0.75rem;
+    --gap-ctl: 0.375rem;
+    --ps-icon: 2.125rem;
+    --pad-card: 0.75rem;
+    --pad-modal: 0.75rem;
+    --pad-alert-x: 0.75rem;
+    --pad-alert-y: 0.625rem;
+
+    --icon-ui: 1rem;
+    --icon-sm: 0.875rem;
+
+    --sw-w: 2.5rem;
+    --sw-h: 1.5rem;
+    --sw-thumb: 1rem;
+    --sw-shift: 1rem;
+
+    --cb-size: 1.125rem;
+    --cb-icon: 0.875rem;
+    --rd-dot: 0.375rem;
+    --tap-min: 2.25rem;
+
+    --badge-h: 0.9375rem;
+    --badge-text: 10px;
+
+    --text-xs: 0.78125rem;
+    --text-xs--line-height: 1.4;
+    --text-sm: 0.90625rem;
+    --text-sm--line-height: 1.45;
+  }
+}
+
+:root[data-density="touch"] {
+  --body-size: 0.90625rem;
+  --body-lh: 1.45;
+  --field-text: 1rem;
+
+  --ctl-compact: 1.625rem;
+  --ctl-default: 2.25rem;
+  --ctl-field-sm: 2.25rem;
+  --ctl-medium: 2.25rem;
+  --ctl-large: 2.5rem;
+  --ctl-touch: 2.75rem;
+
+  --row-head: 2rem;
+  --row: 2.25rem;
+  --row-menu: 2.25rem;
+  --header-h: 3rem;
+
+  --px-tight: 0.5rem;
+  --px-normal: 0.75rem;
+  --px-field: 0.625rem;
+  --px-tab: 0.75rem;
+  --gap-ctl: 0.375rem;
+  --ps-icon: 2.125rem;
+  --pad-card: 0.75rem;
+  --pad-modal: 0.75rem;
+  --pad-alert-x: 0.75rem;
+  --pad-alert-y: 0.625rem;
+
+  --icon-ui: 1rem;
+  --icon-sm: 0.875rem;
+
+  --sw-w: 2.5rem;
+  --sw-h: 1.5rem;
+  --sw-thumb: 1rem;
+  --sw-shift: 1rem;
+
+  --cb-size: 1.125rem;
+  --cb-icon: 0.875rem;
+  --rd-dot: 0.375rem;
+  --tap-min: 2.25rem;
+
+  --badge-h: 0.9375rem;
+  --badge-text: 10px;
+
+  --text-xs: 0.78125rem;
+  --text-xs--line-height: 1.4;
+  --text-sm: 0.90625rem;
+  --text-sm--line-height: 1.45;
+}

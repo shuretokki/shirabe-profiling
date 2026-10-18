@@ -15,6 +15,9 @@ path = [
   "src/shirabe_profiling/report/templates/fonts/IBMPlexSans-Regular-Latin1.woff",
   "src/shirabe_profiling/report/templates/fonts/IBMPlexSans-SemiBold-Latin1.woff",
   "src/shirabe_profiling/report/templates/fonts/IBMPlexSans-LICENSE.txt",
+  "docs/public/fonts/IBMPlexSans-Regular.ttf",
+  "docs/public/fonts/IBMPlexSans-SemiBold.ttf",
+  "docs/public/fonts/IBMPlexSans-LICENSE.txt",
 ]
 SPDX-FileCopyrightText = [
   "2017 IBM Corp. with Reserved Font Name \"Plex\"",
@@ -26,6 +29,8 @@ SPDX-License-Identifier = "OFL-1.1-RFN"
 path = [
   "src/shirabe_profiling/report/templates/fonts/Lilex-Regular.woff",
   "src/shirabe_profiling/report/templates/fonts/Lilex-OFL.txt",
+  "docs/public/fonts/Lilex-Regular.ttf",
+  "docs/public/fonts/Lilex-OFL.txt",
 ]
 SPDX-FileCopyrightText = "2019 The Lilex Project Authors (https://github.com/mishamyrt/Lilex)"
 SPDX-License-Identifier = "OFL-1.1-no-RFN"
