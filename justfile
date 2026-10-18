@@ -7,16 +7,32 @@ set shell := ["bash", "-euo", "pipefail", "-c"]
 
 # https://docs.astral.sh/uv
 uv := require("uv")
-# https://git-cliff.org
-git-cliff := require("git-cliff")
-# https://cli.github.com
-gh := require("gh")
 
 PATHS := "src tests scripts"
 
 # Install the project and its dev tools
 sync:
     uv sync
+
+# Run dekit, which starts the dev tasks in dekit.yaml: just dekit up
+[group("dev")]
+@dekit *args:
+    uv run dekit {{ args }}
+
+# Serve the documentation site in docs/ with live reload, using nub when it is installed and npm if not
+[group("dev")]
+[script("bash")]
+[working-directory("docs")]
+docs-dev:
+    set -euo pipefail
+    if command -v nub >/dev/null; then
+      nub run dev
+    elif command -v npm >/dev/null; then
+      npm run dev
+    else
+      echo "error: install node.js or nub to run the docs site" >&2
+      exit 1
+    fi
 
 # Remake the README screenshots in assets/screenshots/ (needs Chrome, Chromium, or Edge, and internet access)
 @readme-images:
@@ -25,7 +41,7 @@ sync:
 # Print a CHANGELOG.md draft for the commits since the last tag, without changing a file
 [group("release")]
 @changelog:
-    git-cliff --unreleased --tag "v$(just _version)" 2>/dev/null
+    {{ require("git-cliff") }} --unreleased --tag "v$(just _version)" 2>/dev/null
 
 # Set a new version in pyproject.toml and in __init__.py, and draft the CHANGELOG.md section
 [group("release")]
@@ -48,7 +64,7 @@ bump version:
     uv lock --quiet
     if ! grep -q "^## \[$new\]" CHANGELOG.md; then
       draft=$(mktemp)
-      git-cliff --unreleased --tag "v$new" 2>/dev/null > "$draft"
+      {{ require("git-cliff") }} --unreleased --tag "v$new" 2>/dev/null > "$draft"
       awk -v f="$draft" '!done && /^## \[/ { while ((getline line < f) > 0) print line; print ""; done = 1 } { print }' CHANGELOG.md > CHANGELOG.md.new
       mv CHANGELOG.md.new CHANGELOG.md
       rm -f "$draft"
@@ -83,7 +99,7 @@ release *flags:
     git fetch -q origin main
     [ "$(git rev-list --count HEAD..origin/main)" -eq 0 ] || fail "origin/main has commits that this branch does not have, pull first"
 
-    # The release notes are the CHANGELOG.md section for this version.
+    # release notes are the CHANGELOG.md section for this version.
     notes=$(mktemp)
     trap 'rm -f "$notes"' EXIT
     awk -v v="$version" '
@@ -112,7 +128,7 @@ release *flags:
     git tag -a "$tag" -m "$version"
     git push origin main
     git push origin "$tag"
-    gh release create "$tag" --verify-tag $prerelease --title "shirabe-profiling $version" --notes-file "$notes"
+    {{ require("gh") }} release create "$tag" --verify-tag $prerelease --title "shirabe-profiling $version" --notes-file "$notes"
     echo "next: just publish-test, then just publish"
 
 # Upload this version to TestPyPI, the practice index (needs UV_PUBLISH_TEST_TOKEN in .env)
@@ -133,7 +149,7 @@ publish: _guard-tagged build
     v=$(just _version)
     uv publish "dist/shirabe_profiling-$v"*
 
-# Run every check: lock file, lint, format, types, docs, licenses and tests
+# Run lock file, lint, format, types, docs, licenses and tests
 [group("checks")]
 @full-check:
     just _run-with-status lock-check
@@ -249,7 +265,7 @@ _validate:
     tmp=$(mktemp -d)
     trap 'rm -rf "$tmp"' EXIT
     if uv build --out-dir "$tmp" >/dev/null 2>&1; then
-      # the wheel must hold the typing marker and the report assets.
+      # wheel must hold the typing marker and the report assets.
       listing=$(uv run python -m zipfile -l "$tmp"/*.whl)
       for needed in py.typed report/templates/report.html.j2 report/templates/favicon.svg; do
         grep -q "$needed" <<<"$listing" || fail "the wheel does not hold $needed"
