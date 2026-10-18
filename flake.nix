@@ -23,6 +23,7 @@
             just
             git-cliff
             gh
+            nodejs
           ];
         };
       };

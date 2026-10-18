@@ -1,4 +1,4 @@
 tasks:
   docs:
-    cmd: ["just", "docs"]
+    cmd: ["just", "docs-dev"]
     autostart: true
