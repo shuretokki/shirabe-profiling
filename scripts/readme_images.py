@@ -3,7 +3,7 @@
 
 """Make the screenshots for the README.
 
-The script builds a report from a synthetic customer dataset.
+The script builds a report from the sample table of `make_homes`.
 It shows one view at a time in a headless browser and cuts each picture to one fixed size.
 Every picture is 1280 by 853 pixels (3:2), so the pictures in the README tables line up.
 A light and a dark overview exist, because the README swaps them with the theme of the reader.
@@ -21,14 +21,12 @@ import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass
-from datetime import date, timedelta
 from pathlib import Path
 
-import numpy as np
-import polars as pl
 from PIL import Image, ImageChops
 
 from shirabe_profiling import ProfileReport
+from shirabe_profiling.datasets import make_homes
 
 WIDTH = 1280
 VIEW_HEIGHT = 1100
@@ -109,118 +107,6 @@ SHOTS = (
         ),
     ),
 )
-
-
-def demo_frame() -> pl.DataFrame:
-    """Return a synthetic customer table with a skewed column, gaps, and a target."""
-    rng = np.random.default_rng(7)
-    n = 2000
-    age = np.clip(
-        rng.normal(
-            38,
-            11,
-            n,
-        ),
-        18,
-        80,
-    ).round()
-    income = rng.lognormal(
-        10.4,
-        0.8,
-        n,
-    ).round(-2)
-    spend = (
-        (
-            income * 0.012
-            + rng.normal(
-                0,
-                40,
-                n,
-            )
-        )
-        .clip(5)
-        .round(0)
-    )
-    tenure = np.where(
-        rng.random(n) < 0.07,
-        0,
-        rng.exponential(
-            22,
-            n,
-        ),
-    ).round()
-    visits = (
-        (
-            spend / 18
-            + rng.normal(
-                0,
-                2,
-                n,
-            )
-        )
-        .clip(0)
-        .round()
-    )
-    segment = rng.choice(
-        ["Basic", "Plus", "Pro"],
-        n,
-        p=[0.6, 0.28, 0.12],
-    )
-    cities = [
-        "Jakarta",
-        "Bandung",
-        "Surabaya",
-        "Medan",
-        "Makassar",
-        "Semarang",
-        "Bali",
-        "Palembang",
-    ]
-    city = rng.choice(
-        cities,
-        n,
-        p=[0.28, 0.16, 0.14, 0.1, 0.09, 0.09, 0.08, 0.06],
-    )
-    first_day = date(
-        2022,
-        1,
-        1,
-    )
-    signup = [
-        first_day + timedelta(days=int(d))
-        for d in rng.integers(
-            0,
-            1400,
-            n,
-        )
-    ]
-    churn_chance = 1 / (1 + np.exp(0.05 * tenure - 0.9 + 0.4 * (segment == "Basic")))
-    churned = rng.random(n) < churn_chance
-    notes = ["fast delivery", "great support", "too expensive", "app is slow", "love the offers"]
-    feedback = rng.choice(
-        notes,
-        n,
-    )
-    income_gaps = income.astype(float)
-    income_gaps[rng.random(n) < 0.09] = np.nan
-    return pl.DataFrame(
-        {
-            "income": pl.Series(income_gaps).fill_nan(None),
-            "age": age,
-            "monthly_spend": spend,
-            "tenure_months": tenure,
-            "visits": visits,
-            "segment": segment,
-            "city": city,
-            "signup_date": signup,
-            "churned": churned,
-            "feedback": feedback,
-            "customer_id": np.arange(
-                100000,
-                100000 + n,
-            ),
-        },
-    )
 
 
 def find_browser() -> str:
@@ -403,9 +289,9 @@ def main() -> None:
     browser = find_browser()
     print(f"Browser: {browser}")
     html = ProfileReport(
-        demo_frame(),
-        title="Customer Data Profile",
-        target="churned",
+        make_homes(),
+        title="Home Prices Profile",
+        target="price",
     ).to_html()
     folder = work_dir(browser)
     try:
