@@ -40,7 +40,7 @@ A fast, Polars-native data profiling tool that generates interactive HTML report
 shirabe-profiling reads a Polars DataFrame and writes one HTML report that you open in a browser.
 The report shows the facts of each column, flags quality problems as alerts, and explains how to fix each alert.
 
-- **Fast,** the engine is Polars, and overview mode skips the slow parts for a quick first look.
+- **Fast,** the engine is Polars, and overview mode skips the slow parts for a quick first look. See the [benchmarks](benchmarks/README.md).
 - **A guide for every alert,** the Guide tab covers all 12 alerts, with each limit, and with some possible fixes and the sources for most of them.
 - **Made for modeling,** the target section shows how columns link to the target and warns about leakage, and skewed columns get `log1p` and Yeo-Johnson tabs.
 - **Easy to use in code,** read the numbers with `.to_dict()`, `.to_json()`, `.stats`, and `.alerts`, and the package is fully typed.

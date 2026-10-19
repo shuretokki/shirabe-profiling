@@ -90,6 +90,21 @@ class TestTable:
         assert lines[3] == "| ames | 2.0 s |  |"
 
 
+class TestReadAmes:
+    def test_a_question_mark_is_a_missing_value(self, tmp_path: Path) -> None:
+        import polars as pl
+
+        csv = tmp_path / "ames.csv"
+        csv.write_text(
+            '"Id","LotFrontage","Alley"\n1,65.0,?\n2,?,Pave\n3,80.0,Grvl\n',
+            encoding="utf-8",
+        )
+        table = benchmark_run.read_ames(csv)
+        assert table.schema["LotFrontage"] == pl.Float64
+        assert table["LotFrontage"].null_count() == 1
+        assert table["Alley"].null_count() == 1
+
+
 class TestCommand:
     def test_shirabe_runs_in_the_project_environment(self) -> None:
         cmd = benchmark_run.command(

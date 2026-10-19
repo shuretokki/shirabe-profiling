@@ -1,6 +1,6 @@
 {
   "date": "2026-10-19",
-  "commit": "9355e2c",
+  "commit": "878c784",
   "hardware": {
     "cpu": "AMD Ryzen 5 5600 6-Core Processor",
     "threads": 12,
@@ -234,110 +234,6 @@
     },
     {
       "status": "ok",
-      "rows": 1460,
-      "columns": 81,
-      "warmup_s": 55.509,
-      "runs_s": [
-        5.132,
-        5.078,
-        5.088,
-        5.18,
-        5.084
-      ],
-      "peak_rss_mb": 283.1,
-      "rss_after_load_mb": 57.6,
-      "report_mb": 3.21,
-      "versions": {
-        "shirabe-profiling": "0.1.0",
-        "polars": "1.39.3"
-      },
-      "dataset": "ames",
-      "tool": "shirabe complete"
-    },
-    {
-      "status": "ok",
-      "rows": 1460,
-      "columns": 81,
-      "warmup_s": 0.608,
-      "runs_s": [
-        0.593,
-        0.583,
-        0.617,
-        0.582,
-        0.599
-      ],
-      "peak_rss_mb": 234.9,
-      "rss_after_load_mb": 57.7,
-      "report_mb": 0.82,
-      "versions": {
-        "shirabe-profiling": "0.1.0",
-        "polars": "1.39.3"
-      },
-      "dataset": "ames",
-      "tool": "shirabe overview"
-    },
-    {
-      "status": "ok",
-      "rows": 1460,
-      "columns": 81,
-      "warmup_s": 78.918,
-      "runs_s": [],
-      "peak_rss_mb": 1358.5,
-      "rss_after_load_mb": 149.2,
-      "report_mb": 46.82,
-      "versions": {
-        "fg-data-profiling": "4.20.0",
-        "pandas": "2.3.3"
-      },
-      "dataset": "ames",
-      "tool": "ydata default"
-    },
-    {
-      "status": "ok",
-      "rows": 1460,
-      "columns": 81,
-      "warmup_s": 16.687,
-      "runs_s": [
-        15.053,
-        15.409,
-        15.596,
-        15.775,
-        15.564
-      ],
-      "peak_rss_mb": 543.4,
-      "rss_after_load_mb": 151.3,
-      "report_mb": 6.83,
-      "versions": {
-        "fg-data-profiling": "4.20.0",
-        "pandas": "2.3.3"
-      },
-      "dataset": "ames",
-      "tool": "ydata minimal"
-    },
-    {
-      "status": "ok",
-      "rows": 1460,
-      "columns": 81,
-      "warmup_s": 0.212,
-      "runs_s": [
-        0.254,
-        0.187,
-        0.185,
-        0.191,
-        0.19
-      ],
-      "peak_rss_mb": 295.1,
-      "rss_after_load_mb": 66.7,
-      "report_mb": 0.97,
-      "versions": {
-        "skrub": "0.11.0",
-        "polars": "2.0.0"
-      },
-      "dataset": "ames",
-      "tool": "skrub"
-    },
-    {
-      "status": "ok",
       "rows": 1000000,
       "columns": 11,
       "warmup_s": 5.998,
@@ -444,6 +340,110 @@
         "polars": "2.0.0"
       },
       "dataset": "homes-1000k",
+      "tool": "skrub"
+    },
+    {
+      "status": "ok",
+      "rows": 1460,
+      "columns": 81,
+      "warmup_s": 8.156,
+      "runs_s": [
+        5.309,
+        5.174,
+        5.139,
+        5.394,
+        5.416
+      ],
+      "peak_rss_mb": 284.4,
+      "rss_after_load_mb": 57.6,
+      "report_mb": 3.38,
+      "versions": {
+        "shirabe-profiling": "0.1.0",
+        "polars": "1.39.3"
+      },
+      "dataset": "ames",
+      "tool": "shirabe complete"
+    },
+    {
+      "status": "ok",
+      "rows": 1460,
+      "columns": 81,
+      "warmup_s": 0.606,
+      "runs_s": [
+        0.573,
+        0.582,
+        0.606,
+        0.593,
+        0.573
+      ],
+      "peak_rss_mb": 237.3,
+      "rss_after_load_mb": 57.8,
+      "report_mb": 0.84,
+      "versions": {
+        "shirabe-profiling": "0.1.0",
+        "polars": "1.39.3"
+      },
+      "dataset": "ames",
+      "tool": "shirabe overview"
+    },
+    {
+      "status": "ok",
+      "rows": 1460,
+      "columns": 81,
+      "warmup_s": 96.831,
+      "runs_s": [],
+      "peak_rss_mb": 1524.2,
+      "rss_after_load_mb": 125.5,
+      "report_mb": 55.61,
+      "versions": {
+        "fg-data-profiling": "4.20.0",
+        "pandas": "2.3.3"
+      },
+      "dataset": "ames",
+      "tool": "ydata default"
+    },
+    {
+      "status": "ok",
+      "rows": 1460,
+      "columns": 81,
+      "warmup_s": 16.572,
+      "runs_s": [
+        15.495,
+        14.94,
+        15.748,
+        15.641,
+        14.785
+      ],
+      "peak_rss_mb": 521.3,
+      "rss_after_load_mb": 143.6,
+      "report_mb": 5.72,
+      "versions": {
+        "fg-data-profiling": "4.20.0",
+        "pandas": "2.3.3"
+      },
+      "dataset": "ames",
+      "tool": "ydata minimal"
+    },
+    {
+      "status": "ok",
+      "rows": 1460,
+      "columns": 81,
+      "warmup_s": 0.252,
+      "runs_s": [
+        0.268,
+        0.192,
+        0.189,
+        0.188,
+        0.201
+      ],
+      "peak_rss_mb": 295.4,
+      "rss_after_load_mb": 66.4,
+      "report_mb": 0.97,
+      "versions": {
+        "skrub": "0.11.0",
+        "polars": "2.0.0"
+      },
+      "dataset": "ames",
       "tool": "skrub"
     }
   ]

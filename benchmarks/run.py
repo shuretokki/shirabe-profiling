@@ -40,6 +40,15 @@ TOOLS = {
 }
 
 
+def read_ames(csv: Path) -> pl.DataFrame:
+    """Read the Ames CSV from OpenML, where a question mark marks a missing value."""
+    return pl.read_csv(
+        csv,
+        null_values=["?"],
+        infer_schema_length=None,
+    )
+
+
 def prepare(name: str) -> Path:
     """Write the table to a Parquet file, once, and return its path."""
     DATA.mkdir(exist_ok=True)
@@ -52,11 +61,7 @@ def prepare(name: str) -> Path:
             import urllib.request
 
             urllib.request.urlretrieve(AMES_URL, csv)
-        pl.read_csv(
-            csv,
-            null_values=["NA"],
-            infer_schema_length=None,
-        ).write_parquet(path)
+        read_ames(csv).write_parquet(path)
         return path
     rows = int(name.removeprefix("homes-").removesuffix("k")) * 1000
     make_homes(n=rows).write_parquet(path)
