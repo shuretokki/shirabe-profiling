@@ -203,6 +203,38 @@ class TestRenderCharts:
         html = _render(categorical_df)
         assert "Top Values" in html
 
+    def test_encoded_zero_one_column_gets_a_bar_chart(self):
+        df = pl.DataFrame({"flag": [0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0], "n": list(range(8))})
+        html = _render(df)
+        assert "flag's Values" in html
+        assert "flag's Distribution" not in html
+
+    def test_binary_labels_and_counts_are_in_value_order(self):
+        from shirabe_profiling.analyzers import analyze
+        from shirabe_profiling.report.charts import EChartsRenderer
+        from shirabe_profiling.report.html import _chart_for_column
+        from shirabe_profiling.type_inference import infer_types
+
+        df = pl.DataFrame({"flag": [1, 1, 1, 0, None, 1]})
+        stats = analyze(
+            df,
+            infer_types(df),
+        )["flag"]
+        html = _chart_for_column(
+            stats,
+            EChartsRenderer(),
+            idx=0,
+            name="flag",
+        )
+        assert '"data": ["1", "0"]' in html
+        assert '"data": [4, 1]' in html
+        assert "flag's Values" in html
+
+    def test_three_values_keep_the_histogram(self):
+        df = pl.DataFrame({"code": [0, 1, 2, 0, 1, 2, 0, 1]})
+        html = _render(df)
+        assert "Distribution" in html
+
     def test_boolean_pie(self, boolean_df: pl.DataFrame):
         html = _render(boolean_df)
         assert "True" in html

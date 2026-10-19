@@ -623,6 +623,20 @@ def _skew_extra_rows(variant: dict[str, Any]) -> list[list[str]]:
     return rows
 
 
+def _binary_counts(stats: NumericStats) -> tuple[list[str], list[int | float]] | None:
+    """Return the labels and counts of a numeric column that holds exactly two values."""
+    counts = stats.value_counts
+    if len(counts) != 2:
+        return None
+    if sum(item["count"] for item in counts) != stats.count - stats.missing_count:
+        return None
+    ordered = sorted(
+        counts,
+        key=lambda item: item["value"],
+    )
+    return [f"{item['value']:g}" for item in ordered], [item["count"] for item in ordered]
+
+
 def _chart_for_column(
     stats: ColumnStats,
     renderer: ChartRenderer,
@@ -640,6 +654,16 @@ def _chart_for_column(
             [point["count"] for point in stats.timeline],
             title=title or f"{name} by {stats.timeline_unit}",
         )
+
+    if isinstance(stats, NumericStats):
+        binary = _binary_counts(stats)
+        if binary is not None:
+            return renderer.bar_horizontal(
+                div_id,
+                binary[0],
+                binary[1],
+                title=title or f"{name}'s Values",
+            )
 
     if isinstance(stats, NumericStats) and stats.histogram:
         labels = [str(round(h["breakpoint"], 2)) for h in stats.histogram]
