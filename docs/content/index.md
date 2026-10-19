@@ -9,18 +9,18 @@ seo:
 Profile a Polars table and write one HTML report
 
 #description
-shirabe-profiling reads a Polars DataFrame and writes one HTML report.
-In the report, you see the facts of each column and a list of quality alerts, and the Guide tab shows how to fix each alert.
+Pass a Polars DataFrame to get one HTML report with the facts of each column and a list of quality alerts.
+Open the Guide tab to see how to fix each alert.
 
 #links
   :::u-button
   ---
-  color: primary
+  color: neutral
   size: lg
-  to: /tutorials/create-your-first-report
+  to: /getting-started/introduction
   trailing-icon: i-lucide-arrow-right
   ---
-  Create your first report
+  Get started
   :::
 
   :::u-button
@@ -33,17 +33,6 @@ In the report, you see the facts of each column and a list of quality alerts, an
   ---
   View on GitHub
   :::
-
-#body
-```python
-import polars as pl
-from shirabe_profiling import ProfileReport
-
-df = pl.read_csv("data.csv")
-ProfileReport(df).to_html("report.html")
-```
-
-:u-color-mode-image{light="/images/report-overview.png" dark="/images/report-overview-dark.png" alt="The overview of a report, with the facts of a table and the list of alerts" class="mt-6 rounded-md border border-default"}
 ::
 
 ::u-page-section
@@ -59,7 +48,7 @@ What the report gives you
   Quality alerts
 
   #description
-  Find missing values, constant columns, skewed columns, high correlations, and more. Each alert names the column that has the problem.
+  Open the Alerts section to find missing values, constant columns, skewed columns, and high correlations, each with the name of its column.
   :::
 
   :::u-page-feature
@@ -70,7 +59,7 @@ What the report gives you
   A guide for every alert
 
   #description
-  The Guide tab gives the limit of each alert, some possible fixes, and the sources.
+  Open the Guide tab to see the limit of each alert, some possible fixes, and the sources.
   :::
 
   :::u-page-feature
@@ -92,7 +81,7 @@ What the report gives you
   Results in code
 
   #description
-  Read the numbers with `to_dict`, `to_json`, `stats`, and `alerts`. The package has type hints.
+  Call `to_dict`, `to_json`, `stats`, or `alerts` to read the numbers in code, with type hints for your editor.
   :::
 
   :::u-page-feature
