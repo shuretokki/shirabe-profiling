@@ -3,7 +3,7 @@
 
 [project]
 name = "shirabe-profiling"
-version = "0.1.0"
+version = "0.2.0"
 description = "High-performance Polars data profiling with web reports and quality warnings."
 dynamic = ["readme"]
 requires-python = ">=3.10"

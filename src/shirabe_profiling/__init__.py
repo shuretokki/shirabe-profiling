@@ -29,7 +29,7 @@ from shirabe_profiling.type_inference import ColumnType, infer_types
 if TYPE_CHECKING:
     from pathlib import Path
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = ["ProfileReport", "ProfileConfig", "ColumnType", "AlertType", "Alert"]
 
