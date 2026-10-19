@@ -4,8 +4,9 @@
 """Make the screenshots for the README.
 
 The script builds a report from the sample table of `make_homes`.
-It shows one view at a time in a headless browser and cuts each picture to one fixed size.
-Every picture is 1280 by 853 pixels (3:2), so the pictures in the README tables line up.
+It shows one view at a time in a headless browser and cuts each picture just below its content.
+Every picture is 1280 pixels wide, and its height fits its content.
+No blank strip is left under the content.
 A light and a dark overview exist, because the README swaps them with the theme of the reader.
 
 It needs Chrome, Chromium, or Edge. Set BROWSER to the program if the script cannot find it.
@@ -29,8 +30,8 @@ from shirabe_profiling import ProfileReport
 from shirabe_profiling.datasets import make_homes
 
 WIDTH = 1280
-VIEW_HEIGHT = 1100
-HEIGHT = 853
+MAX_HEIGHT = 2400
+BOTTOM_PAD = 24
 
 BROWSERS = (
     "google-chrome",
@@ -213,7 +214,7 @@ def capture(
         "--headless",
         "--disable-gpu",
         "--hide-scrollbars",
-        f"--window-size={WIDTH},{VIEW_HEIGHT}",
+        f"--window-size={WIDTH},{MAX_HEIGHT}",
         "--virtual-time-budget=9000",
         f"--screenshot={browser_path(browser, png)}",
         "file:///"
@@ -241,7 +242,7 @@ def crop(
     png: Path,
     target: Path,
 ) -> tuple[int, int]:
-    """Cut the picture to one fixed size, so that every picture in the README table matches."""
+    """Cut the picture just below its last element, so that no blank strip is left."""
     image = Image.open(png).convert("RGB")
     background = image.getpixel((4, image.height - 4))
     box = ImageChops.difference(
@@ -253,22 +254,21 @@ def crop(
         ),
     ).getbbox()
     bottom = box[3] if box else image.height
-    if bottom > HEIGHT:
-        print(f"  warning: the content of {target.name} is cut at {HEIGHT} pixels")
-    canvas = Image.new(
-        "RGB",
-        (WIDTH, HEIGHT),
-        background,
+    if bottom + BOTTOM_PAD > image.height:
+        print(f"  warning: the content of {target.name} is cut at {image.height} pixels")
+    cropped = image.crop(
+        (
+            0,
+            0,
+            min(WIDTH, image.width),
+            min(bottom + BOTTOM_PAD, image.height),
+        ),
     )
-    canvas.paste(
-        image.crop((0, 0, WIDTH, min(HEIGHT, image.height))),
-        (0, 0),
-    )
-    canvas.save(
+    cropped.save(
         target,
         optimize=True,
     )
-    return canvas.size
+    return cropped.size
 
 
 def main() -> None:
@@ -315,7 +315,7 @@ def main() -> None:
                 raw,
                 args.out / f"{shot.name}.png",
             )
-            print(f"{shot.name}.png  {width}x{height}  ({width / height:.2f}:1)")
+            print(f"{shot.name}.png  {width}x{height}")
     finally:
         shutil.rmtree(
             folder,
