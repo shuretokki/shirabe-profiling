@@ -34,10 +34,10 @@ docs-dev: _docs-images
       exit 1
     fi
 
-# Copy the report screenshots into the docs site, where the pages link them.
+# Copy the report screenshots that the docs pages link into the docs site.
 @_docs-images:
     mkdir -p docs/public/images
-    cp assets/screenshots/*.png docs/public/images/
+    { grep -rhoE '/images/report-[a-z-]+\.png' docs/content || true; } | sort -u | sed 's#^/images/##' | while read -r name; do cp "assets/screenshots/$name" docs/public/images/; done
 
 # Remake the README screenshots in assets/screenshots/ (needs Chrome, Chromium, or Edge, and internet access)
 @readme-images:
