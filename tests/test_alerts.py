@@ -6,11 +6,13 @@ from __future__ import annotations
 import polars as pl
 import pytest
 
-from shirabe_profiling.alerts import Alert, AlertType, check_quality
+from shirabe_profiling import ProfileReport
+from shirabe_profiling.alerts import Alert, AlertType, alert_order, check_quality
 from shirabe_profiling.analyzers import analyze
 from shirabe_profiling.config import ProfileConfig
 from shirabe_profiling.correlations import compute_correlations
 from shirabe_profiling.dataset_overview import compute_overview
+from shirabe_profiling.datasets import make_homes
 from shirabe_profiling.type_inference import infer_types
 
 
@@ -375,3 +377,63 @@ class TestCleanData:
             a for a in alerts if a.column is not None and a.alert_type != AlertType.UNIFORM
         ]
         assert len(col_alerts) == 0
+
+
+class TestAlertOrder:
+    def test_a_higher_value_comes_first_inside_a_type(self):
+        df = pl.DataFrame(
+            {
+                "low": [1, None, 3, 4, 5, 6, 7, 8, 9, 10],
+                "high": [None, None, None, None, None, None, None, 8, 9, 10],
+                "mid": [None, None, None, 4, 5, 6, 7, 8, 9, 10],
+            },
+        )
+        missing = [a for a in _get_alerts(df) if a.alert_type == AlertType.HIGH_MISSING]
+        assert [a.column for a in missing] == ["high", "mid", "low"]
+
+    def test_types_are_grouped_in_name_order(self):
+        df = pl.DataFrame(
+            {
+                "a": [1, 1, 2, 2],
+                "b": [None, None, 3, 3],
+            },
+        )
+        names = [a.alert_type.name for a in _get_alerts(df)]
+        assert len(set(names)) > 1
+        assert names == sorted(names)
+
+    def test_equal_values_are_sorted_by_column_name(self):
+        df = pl.DataFrame(
+            {
+                "b": [1] * 10,
+                "a": [2] * 10,
+            },
+        )
+        constant = [a for a in _get_alerts(df) if a.alert_type == AlertType.CONSTANT]
+        assert [a.column for a in constant] == ["a", "b"]
+
+    def test_a_report_with_a_target_is_in_order(self):
+        report = ProfileReport(
+            make_homes(),
+            target="price",
+        )
+        assert report.alerts == sorted(
+            report.alerts,
+            key=alert_order,
+        )
+        assert AlertType.TARGET_LEAKAGE in {a.alert_type for a in report.alerts}
+
+    def test_a_nan_value_goes_last_inside_a_type(self):
+        alerts = [
+            Alert(
+                "a",
+                AlertType.SKEWED,
+                float("nan"),
+            ),
+            Alert(
+                "b",
+                AlertType.SKEWED,
+                3.0,
+            ),
+        ]
+        assert [a.column for a in sorted(alerts, key=alert_order)] == ["b", "a"]

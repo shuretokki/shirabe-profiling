@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import polars as pl  # noqa: TC002 — used at runtime
 
-from shirabe_profiling.alerts import Alert, AlertType, check_quality
+from shirabe_profiling.alerts import Alert, AlertType, alert_order, check_quality
 from shirabe_profiling.analyzers import ColumnStats, analyze
 from shirabe_profiling.config import ProfileConfig
 from shirabe_profiling.correlations import CorrelationResult, compute_correlations
@@ -127,6 +127,7 @@ class ProfileReport:
                     self._config,
                 ),
             )
+            self._alerts.sort(key=alert_order)
         self._tables: ReportTables = compute_tables(
             self._df,
             self._column_stats,

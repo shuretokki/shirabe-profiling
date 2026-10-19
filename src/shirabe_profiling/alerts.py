@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import TYPE_CHECKING, Any
@@ -44,6 +45,12 @@ class Alert:
     details: dict[str, Any] = field(default_factory=dict)
 
 
+def alert_order(alert: Alert) -> tuple[str, float, str]:
+    """Return the sort key of an alert: type name, then value from high to low, then column."""
+    value = -alert.value if not math.isnan(alert.value) else math.inf
+    return (alert.alert_type.name, value, alert.column or "")
+
+
 def check_quality(
     column_stats: dict[str, ColumnStats],
     overview: DatasetOverview,
@@ -78,7 +85,10 @@ def check_quality(
             ),
         )
 
-    return alerts
+    return sorted(
+        alerts,
+        key=alert_order,
+    )
 
 
 def _check_column(
