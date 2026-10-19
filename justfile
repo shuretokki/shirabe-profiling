@@ -34,6 +34,27 @@ docs-dev: _docs-images
       exit 1
     fi
 
+# Build the documentation site in docs/ into docs/.output/public, using nub when it is installed and npm if not
+[group("dev")]
+[script("bash")]
+[working-directory("docs")]
+docs-build: _docs-images
+    set -euo pipefail
+    if command -v nub >/dev/null; then
+      nub run build
+    elif command -v npm >/dev/null; then
+      npm run build
+    else
+      echo "error: install node.js or nub to build the docs site" >&2
+      exit 1
+    fi
+
+# Check the links and anchors of the built docs site without network access (run just docs-build first)
+[group("checks")]
+@docs-links:
+    test -d docs/.output/public || { echo "error: run just docs-build first" >&2; exit 1; }
+    {{ require("lychee") }} --offline --include-fragments=anchor-only --root-dir "$PWD/docs/.output/public" --no-progress --format compact 'docs/.output/public/**/*.html'
+
 # Copy the report screenshots that the docs pages link into the docs site.
 @_docs-images:
     mkdir -p docs/public/images

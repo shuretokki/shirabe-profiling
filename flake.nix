@@ -24,6 +24,7 @@
             git-cliff
             gh
             nodejs
+            lychee
           ];
         };
       };

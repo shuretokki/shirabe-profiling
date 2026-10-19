@@ -39,6 +39,7 @@ just license-check  # every file has a license and a copyright holder (REUSE)
 The recipes need `uv`, `git-cliff`, and `gh` on the PATH, and the Nix shell has all three.
 The docs site in `docs/` needs Node 24, which the Nix shell also has.
 `just docs-dev` runs it with `nub` when that is installed, and with `npm` when it is not.
+`just docs-build` builds the site, and `just docs-links` checks its links and anchors with lychee, which the Nix shell has.
 
 ## Licenses
 
