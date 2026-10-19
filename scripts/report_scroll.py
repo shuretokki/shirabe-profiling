@@ -1,10 +1,10 @@
 # SPDX-FileCopyrightText: Copyright © 2026 shuretokki
 # SPDX-License-Identifier: Apache-2.0
 
-"""Make the scrolling GIFs of the report for the docs.
+"""Make the scrolling WebP animations of the report for the docs.
 
 The script takes one tall picture of the whole report for each theme.
-It then slides a window down the picture and saves the frames as a GIF.
+It then slides a window down the picture and saves the frames as an animated WebP file.
 It uses the same browser and the same sample table as `readme_images.py`.
 """
 
@@ -38,7 +38,7 @@ from readme_images import (  # noqa: E402
 TALL_HEIGHT = 12000
 BOTTOM_PAD = 24
 PAUSE_MS = 1500
-COLORS = 48
+QUALITY = 80
 
 THEMES = {
     "report-scroll": "light",
@@ -76,9 +76,6 @@ def make_frames(
     scaled = tall.resize(
         (width, round(tall.height * scale)),
         Image.Resampling.LANCZOS,
-    ).quantize(
-        colors=COLORS,
-        dither=Image.Dither.NONE,
     )
     last = max(scaled.height - view, 0)
     if last == 0 or count < 2:
@@ -87,7 +84,7 @@ def make_frames(
     return [scaled.crop((0, top, width, top + view)) for top in offsets]
 
 
-def save_gif(
+def save_webp(
     frames: list[Image.Image],
     target: Path,
     frame_ms: int,
@@ -101,30 +98,33 @@ def save_gif(
         append_images=frames[1:],
         duration=durations,
         loop=0,
-        optimize=True,
+        quality=QUALITY,
+        method=4,
     )
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Make the scrolling GIFs of the report.")
+    parser = argparse.ArgumentParser(
+        description="Make the scrolling WebP animations of the report.",
+    )
     parser.add_argument(
         "out",
         type=Path,
         nargs="?",
         default=Path("assets/screenshots"),
-        help="folder for the GIFs",
+        help="folder for the animations",
     )
     parser.add_argument(
         "--width",
         type=int,
         default=720,
-        help="width of the GIF in pixels",
+        help="width of the animation in pixels",
     )
     parser.add_argument(
         "--view",
         type=int,
         default=450,
-        help="height of the GIF in pixels",
+        help="height of the animation in pixels",
     )
     parser.add_argument(
         "--seconds",
@@ -192,14 +192,14 @@ def main() -> None:
                 args.view,
                 round(args.seconds * args.fps),
             )
-            target = args.out / f"{name}.gif"
-            save_gif(
+            target = args.out / f"{name}.webp"
+            save_webp(
                 frames,
                 target,
                 round(1000 / args.fps),
             )
             size = target.stat().st_size / 1_000_000
-            print(f"{name}.gif  {args.width}x{args.view}  {len(frames)} frames  {size:.1f} MB")
+            print(f"{name}.webp  {args.width}x{args.view}  {len(frames)} frames  {size:.1f} MB")
     finally:
         shutil.rmtree(
             folder,

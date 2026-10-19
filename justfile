@@ -58,7 +58,7 @@ docs-build: _docs-images
 # Copy the report screenshots that the docs pages link into the docs site.
 @_docs-images:
     mkdir -p docs/public/images
-    { grep -rhoE '/images/report-[a-z-]+\.(png|gif)' docs/content || true; } | sort -u | sed 's#^/images/##' | while read -r name; do cp "assets/screenshots/$name" docs/public/images/; done
+    { grep -rhoE '/images/report-[a-z-]+\.webp' docs/content || true; } | sort -u | sed 's#^/images/##' | while read -r name; do cp "assets/screenshots/$name" docs/public/images/; done
 
 # Remake the README screenshots and scrolling GIFs in assets/screenshots/ (needs Chrome, Chromium, or Edge, and internet access)
 @readme-images:

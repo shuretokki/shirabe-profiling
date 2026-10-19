@@ -6,5 +6,6 @@ export default defineNuxtConfig({
   ui: {
     theme: { colors: ['primary', 'info', 'success', 'warning', 'error'] }
   },
-  icon: { mode: 'svg' }
+  icon: { mode: 'svg' },
+  image: { provider: 'none' }
 })

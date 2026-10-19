@@ -7,7 +7,7 @@ import importlib.util
 import sys
 from pathlib import Path
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageChops, ImageDraw
 
 SCRIPT = Path(__file__).parent.parent / "scripts" / "readme_images.py"
 spec = importlib.util.spec_from_file_location(
@@ -72,6 +72,27 @@ class TestCrop:
             tmp_path / "tall-out.png",
         )
         assert tall[1] - short[1] == 400
+
+    def test_webp_output_keeps_every_pixel(self, tmp_path: Path):
+        raw = _picture(
+            tmp_path / "raw.png",
+            600,
+        )
+        size = readme_images.crop(
+            raw,
+            tmp_path / "out.webp",
+        )
+        saved = Image.open(tmp_path / "out.webp")
+        assert saved.format == "WEBP"
+        assert saved.size == size
+        original = Image.open(raw).convert("RGB").crop((0, 0, *size))
+        assert (
+            ImageChops.difference(
+                saved.convert("RGB"),
+                original,
+            ).getbbox()
+            is None
+        )
 
     def test_keeps_the_width(self, tmp_path: Path):
         raw = _picture(

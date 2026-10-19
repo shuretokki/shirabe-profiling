@@ -92,19 +92,19 @@ def _striped(height: int) -> Image.Image:
     return image
 
 
-def test_save_gif_writes_an_animated_file(tmp_path: Path) -> None:
+def test_save_webp_writes_an_animated_file(tmp_path: Path) -> None:
     frames = report_scroll.make_frames(
         _striped(2000),
         width=640,
         view=300,
         count=12,
     )
-    target = tmp_path / "scroll.gif"
-    report_scroll.save_gif(
+    target = tmp_path / "scroll.webp"
+    report_scroll.save_webp(
         frames,
         target,
         frame_ms=50,
     )
-    with Image.open(target) as gif:
-        assert gif.format == "GIF"
-        assert getattr(gif, "n_frames", 1) == len(frames)
+    with Image.open(target) as image:
+        assert image.format == "WEBP"
+        assert getattr(image, "n_frames", 1) == len(frames)

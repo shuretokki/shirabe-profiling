@@ -239,6 +239,24 @@ def capture(
         sys.exit(f"The browser made no picture for {page.name}.")
 
 
+def save_picture(
+    image: Image.Image,
+    target: Path,
+) -> None:
+    """Save a picture, as lossless WebP when the name ends in .webp."""
+    if target.suffix.lower() == ".webp":
+        image.save(
+            target,
+            lossless=True,
+            method=6,
+        )
+        return
+    image.save(
+        target,
+        optimize=True,
+    )
+
+
 def crop(
     png: Path,
     target: Path,
@@ -265,9 +283,9 @@ def crop(
             min(bottom + BOTTOM_PAD, image.height),
         ),
     )
-    cropped.save(
+    save_picture(
+        cropped,
         target,
-        optimize=True,
     )
     return cropped.size
 
@@ -314,9 +332,9 @@ def main() -> None:
             )
             width, height = crop(
                 raw,
-                args.out / f"{shot.name}.png",
+                args.out / f"{shot.name}.webp",
             )
-            print(f"{shot.name}.png  {width}x{height}")
+            print(f"{shot.name}.webp  {width}x{height}")
     finally:
         shutil.rmtree(
             folder,

@@ -29,10 +29,10 @@ Polars data profiling that writes one HTML report, with quality alerts and a gui
 </p>
 
 <p align="center">
-  <a href="assets/screenshots/report-overview.png">
+  <a href="assets/screenshots/report-overview.webp">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="assets/screenshots/report-overview-dark.png">
-      <img src="assets/screenshots/report-overview.png" alt="The overview of a report, with the facts of the dataset and the list of alerts" width="880">
+      <source media="(prefers-color-scheme: dark)" srcset="assets/screenshots/report-overview-dark.webp">
+      <img src="assets/screenshots/report-overview.webp" alt="The overview of a report, with the facts of the dataset and the list of alerts" width="880">
     </picture>
   </a>
 </p>
@@ -80,19 +80,19 @@ Click any picture to open it full size.
 
 | Target |
 |:--|
-| <a href="assets/screenshots/report-target.png"><img src="assets/screenshots/report-target.png" alt="Target section with the link of each column to the target" width="100%"></a> |
+| <a href="assets/screenshots/report-target.webp"><img src="assets/screenshots/report-target.webp" alt="Target section with the link of each column to the target" width="100%"></a> |
 
 | Column details |
 |:--|
-| <a href="assets/screenshots/report-columns.png"><img src="assets/screenshots/report-columns.png" alt="Column details with alert tags and skew tabs" width="100%"></a> |
+| <a href="assets/screenshots/report-columns.webp"><img src="assets/screenshots/report-columns.webp" alt="Column details with alert tags and skew tabs" width="100%"></a> |
 
 | Correlations |
 |:--|
-| <a href="assets/screenshots/report-correlations.png"><img src="assets/screenshots/report-correlations.png" alt="Correlation heatmap with the strongest pairs" width="100%"></a> |
+| <a href="assets/screenshots/report-correlations.webp"><img src="assets/screenshots/report-correlations.webp" alt="Correlation heatmap with the strongest pairs" width="100%"></a> |
 
 | Guide |
 |:--|
-| <a href="assets/screenshots/report-guide.png"><img src="assets/screenshots/report-guide.png" alt="The Guide tab with the High Missing alert open" width="100%"></a> |
+| <a href="assets/screenshots/report-guide.webp"><img src="assets/screenshots/report-guide.webp" alt="The Guide tab with the High Missing alert open" width="100%"></a> |
 
 The report also has:
 
