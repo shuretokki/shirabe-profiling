@@ -437,3 +437,62 @@ class TestAlertOrder:
             ),
         ]
         assert [a.column for a in sorted(alerts, key=alert_order)] == ["b", "a"]
+
+
+class TestInfiniteValues:
+    def test_infinite_values_raise_the_alert(self):
+        df = pl.DataFrame(
+            {"x": [1.0, 2.0, float("inf"), 4.0, float("-inf"), 6.0, 7.0, 8.0, 9.0, 10.0]},
+        )
+        alert = next(a for a in _get_alerts(df) if a.alert_type == AlertType.INFINITE_VALUES)
+        assert alert.column == "x"
+        assert alert.value == pytest.approx(0.2)
+        assert alert.details == {"n_infinite": 2}
+
+    def test_finite_values_raise_nothing(self):
+        df = pl.DataFrame({"x": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]})
+        assert AlertType.INFINITE_VALUES not in _alert_types(_get_alerts(df))
+
+    def test_an_integer_column_raises_nothing(self):
+        df = pl.DataFrame({"x": list(range(10))})
+        assert AlertType.INFINITE_VALUES not in _alert_types(_get_alerts(df))
+
+    def test_the_threshold_decides(self):
+        df = pl.DataFrame({"x": [1.0, 2.0, float("inf"), 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]})
+        loose = _get_alerts(
+            df,
+            ProfileConfig(infinite_threshold=0.5),
+        )
+        assert AlertType.INFINITE_VALUES not in _alert_types(loose)
+
+
+class TestConstantLength:
+    def test_fixed_width_codes_raise_the_alert(self):
+        df = pl.DataFrame({"zip": ["01234", "02345", "98765", "12345", "54321", "11111"]})
+        alert = next(a for a in _get_alerts(df) if a.alert_type == AlertType.CONSTANT_LENGTH)
+        assert alert.column == "zip"
+        assert alert.value == 5.0
+
+    def test_different_lengths_raise_nothing(self):
+        df = pl.DataFrame({"name": ["Al", "Barbara", "Cy", "Dee", "Eve", "Jo"]})
+        assert AlertType.CONSTANT_LENGTH not in _alert_types(_get_alerts(df))
+
+    def test_a_constant_column_raises_only_constant(self):
+        df = pl.DataFrame({"c": ["abc"] * 6})
+        types = _alert_types(_get_alerts(df))
+        assert AlertType.CONSTANT in types
+        assert AlertType.CONSTANT_LENGTH not in types
+
+    def test_labels_of_one_length_raise_nothing(self):
+        df = pl.DataFrame({"flag": ["M", "F", "M", "F", "M", "F", "M", "F"]})
+        assert AlertType.CONSTANT_LENGTH not in _alert_types(_get_alerts(df))
+
+    def test_missing_values_are_ignored(self):
+        df = pl.DataFrame({"code": ["A1", None, "B2", "C3", None, "D4"]})
+        assert AlertType.CONSTANT_LENGTH in _alert_types(_get_alerts(df))
+
+    def test_the_report_lists_both_alerts_in_the_guide(self):
+        df = pl.DataFrame({"x": [1.0, float("inf"), 3.0, 4.0], "code": ["A1", "B2", "C3", "D4"]})
+        html = ProfileReport(df).to_html()
+        assert "Infinite Values" in html
+        assert "Constant Length" in html

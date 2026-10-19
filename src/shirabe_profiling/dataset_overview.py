@@ -238,6 +238,7 @@ def _reproduction_info(config: ProfileConfig) -> dict[str, str]:
         "alert.correlation_threshold": config.correlation_threshold,
         "alert.constant_threshold": config.constant_threshold,
         "alert.zero_threshold": config.zero_threshold,
+        "alert.infinite_threshold": config.infinite_threshold,
         "alert.skewness_threshold": config.skewness_threshold,
         "alert.imbalance_threshold": config.imbalance_threshold,
         "alert.duplicate_threshold": config.duplicate_threshold,

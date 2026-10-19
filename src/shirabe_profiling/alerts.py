@@ -15,6 +15,7 @@ from shirabe_profiling.analyzers import (
     BooleanStats,
     CategoricalStats,
     NumericStats,
+    TextStats,
 )
 from shirabe_profiling.dataset_overview import DatasetOverview  # noqa: TC001 — used at runtime
 
@@ -35,6 +36,8 @@ class AlertType(Enum):
     HIGH_CORRELATION = auto()
     UNIFORM = auto()
     TARGET_LEAKAGE = auto()
+    INFINITE_VALUES = auto()
+    CONSTANT_LENGTH = auto()
 
 
 @dataclass(frozen=True)
@@ -126,6 +129,14 @@ def _check_column(
             ),
         )
 
+    constant_length = _check_constant_length(
+        col_name,
+        stats,
+        config,
+    )
+    if constant_length is not None:
+        alerts.append(constant_length)
+
     if isinstance(stats, CategoricalStats):
         alerts.extend(
             _check_categorical(
@@ -147,12 +158,45 @@ def _check_column(
     return alerts
 
 
+def _check_constant_length(
+    col_name: str,
+    stats: ColumnStats,
+    config: ProfileConfig,
+) -> Alert | None:
+    """Flag a text column whose values all have the same length, unless it is constant."""
+    if not isinstance(stats, TextStats):
+        return None
+    shortest = stats.length_min
+    longest = stats.length_max
+    if shortest is None or shortest != longest:
+        return None
+    if stats.count - stats.missing_count <= 0 or stats.distinct_count <= config.constant_threshold:
+        return None
+    return Alert(
+        col_name,
+        AlertType.CONSTANT_LENGTH,
+        float(shortest),
+    )
+
+
 def _check_numeric(
     col_name: str,
     stats: NumericStats,
     config: ProfileConfig,
 ) -> list[Alert]:
     alerts: list[Alert] = []
+
+    if stats.count > 0 and stats.n_infinite > 0:
+        share = stats.n_infinite / stats.count
+        if share > config.infinite_threshold:
+            alerts.append(
+                Alert(
+                    col_name,
+                    AlertType.INFINITE_VALUES,
+                    share,
+                    details={"n_infinite": stats.n_infinite},
+                ),
+            )
 
     if stats.distinct_pct > config.cardinality_threshold:
         alerts.append(

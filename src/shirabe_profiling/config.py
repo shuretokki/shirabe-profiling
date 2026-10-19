@@ -24,6 +24,7 @@ class ProfileConfig:
     correlation_threshold: float = 0.8  # |corr| > 0.8 → HIGH_CORRELATION alert
     constant_threshold: int = 1  # n_unique <= 1 → CONSTANT alert
     zero_threshold: float = 0.05  # > 5% zeros → HIGH_ZEROS alert
+    infinite_threshold: float = 0.0  # > 0% infinite values → INFINITE_VALUES alert
     skewness_threshold: float = 2.0  # |skewness| > 2 → SKEWED alert
     imbalance_threshold: float = 0.9  # top_value_pct > 90% → IMBALANCED alert
     duplicate_threshold: float = 0.0  # any duplicate → DUPLICATES alert
@@ -70,6 +71,9 @@ class ProfileConfig:
             raise ValueError(msg)
         if not 0.0 <= self.cardinality_threshold <= 1.0:
             msg = f"cardinality_threshold must be in [0, 1], got {self.cardinality_threshold}"
+            raise ValueError(msg)
+        if not 0.0 <= self.infinite_threshold <= 1.0:
+            msg = f"infinite_threshold must be in [0, 1], got {self.infinite_threshold}"
             raise ValueError(msg)
         if self.n_top_values < 1:
             msg = f"n_top_values must be >= 1, got {self.n_top_values}"

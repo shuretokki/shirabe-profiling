@@ -370,6 +370,29 @@ class TestAlertValueFormat:
     ) -> dict:
         return {"column": "x", "alert_type": alert_type, "value": value, "details": {}}
 
+    def test_constant_length_shows_characters(self):
+        from shirabe_profiling.report.html import _format_alert_value
+
+        assert (
+            _format_alert_value(
+                self._alert(
+                    "CONSTANT_LENGTH",
+                    5.0,
+                ),
+            )
+            == "5 characters"
+        )
+
+    def test_infinite_values_are_a_percentage(self):
+        from shirabe_profiling.report.html import _format_alert_value
+
+        assert "%" in _format_alert_value(
+            self._alert(
+                "INFINITE_VALUES",
+                0.2,
+            ),
+        )
+
     def test_share_alerts_are_percentages(self):
         from shirabe_profiling.report.html import _format_alert_value
 
@@ -634,10 +657,10 @@ class TestHeaderActionsAndGuide:
                 start,
             )
         ]
-        assert section.count("<details") == 10
-        assert section.count('class="alert-threshold"') == 10
-        assert section.count(">Possible fix<") == 10
-        assert section.count(">Sources<") == 10
+        assert section.count("<details") == 12
+        assert section.count('class="alert-threshold"') == 12
+        assert section.count(">Possible fix<") == 12
+        assert section.count(">Sources<") == 12
         assert "feat.engineering" in section
         assert "log1p" in section
         assert "HasX" in section

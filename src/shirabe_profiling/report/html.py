@@ -324,6 +324,8 @@ def _format_alert_value(alert: dict[str, Any]) -> str:
         return f"p = {value:.3f}"
     if kind == "CONSTANT":
         return f"{int(value)} distinct"
+    if kind == "CONSTANT_LENGTH":
+        return f"{int(value)} characters"
     return _format_pct(value)
 
 
@@ -384,6 +386,8 @@ _ALERT_ROWS = {
     "CONSTANT": "Distinct",
     "HIGH_CARDINALITY": "Distinct",
     "HIGH_ZEROS": "Zeros",
+    "INFINITE_VALUES": "Infinite",
+    "CONSTANT_LENGTH": "Min Length",
     "SKEWED": "Skewness",
     "IMBALANCED": "Imbalance",
 }

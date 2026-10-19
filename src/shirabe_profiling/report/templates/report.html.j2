@@ -212,7 +212,7 @@
 {%- endmacro %}
 
 {% macro alert_tone(alert_type) -%}
-{%- if alert_type in ('HIGH_MISSING', 'DUPLICATES', 'TARGET_LEAKAGE') %}badge-error{% elif alert_type in ('SKEWED', 'HIGH_ZEROS') %}badge-warning{% elif alert_type in ('IMBALANCED', 'CONSTANT') %}badge-number{% elif alert_type == 'HIGH_CORRELATION' %}badge-info{% elif alert_type == 'UNIFORM' %}badge-success{% endif -%}
+{%- if alert_type in ('HIGH_MISSING', 'DUPLICATES', 'TARGET_LEAKAGE', 'INFINITE_VALUES') %}badge-error{% elif alert_type in ('SKEWED', 'HIGH_ZEROS') %}badge-warning{% elif alert_type in ('IMBALANCED', 'CONSTANT', 'CONSTANT_LENGTH') %}badge-number{% elif alert_type == 'HIGH_CORRELATION' %}badge-info{% elif alert_type == 'UNIFORM' %}badge-success{% endif -%}
 {%- endmacro %}
 
 {% macro stat(label, value, pct=none, flag=none) -%}
@@ -248,7 +248,7 @@
                   {{ stat("Kurtosis", col_data.kurtosis | format_float) }}
                   {{ stat("Zeros", col_data.zeros_count, col_data.zeros_pct | format_pct, flag=flags.get("Zeros")) }}
                   {{ stat("Negatives", col_data.negative_count, col_data.negative_pct | format_pct) }}
-                  {{ stat("Infinite", col_data.n_infinite) }}
+                  {{ stat("Infinite", col_data.n_infinite, flag=flags.get("Infinite")) }}
                   {% if col_data.monotonic_increase %}{{ stat("Monotonic", "Increasing") }}{% endif %}
                   {% if col_data.monotonic_decrease %}{{ stat("Monotonic", "Decreasing") }}{% endif %}
                   {% for label, value in col_data.extra_rows or [] %}{{ stat(label, value) }}{% endfor %}
@@ -261,7 +261,7 @@
                   {{ stat("Remaining categories", col_data.other_values.distinct_remaining | format_number) }}
                   {% endif %}
                   {% if col_data.length_mean is not none %}{{ stat("Avg Length", col_data.length_mean | format_float) }}{% endif %}
-                  {% if col_data.length_min is not none %}{{ stat("Min Length", col_data.length_min) }}{% endif %}
+                  {% if col_data.length_min is not none %}{{ stat("Min Length", col_data.length_min, flag=flags.get("Min Length")) }}{% endif %}
                   {% if col_data.length_max is not none %}{{ stat("Max Length", col_data.length_max) }}{% endif %}
                   {% if col_data.length_median is not none %}{{ stat("Median Length", col_data.length_median | format_float) }}{% endif %}
                   {% if col_data.word_count_mean is not none %}{{ stat("Avg Words", col_data.word_count_mean | format_float) }}{% endif %}
@@ -283,7 +283,7 @@
 
                   {% if col_data.column_type == "TEXT" %}
                   {{ stat("Avg Length", col_data.length_mean | format_float) }}
-                  {{ stat("Min Length", col_data.length_min) }}
+                  {{ stat("Min Length", col_data.length_min, flag=flags.get("Min Length")) }}
                   {{ stat("Max Length", col_data.length_max) }}
                   {% endif %}
                 </tbody>
@@ -1322,6 +1322,21 @@
             ],
           },
           {
+            'name': 'Constant Length',
+            'meaning': 'Every value in a text column has the same length.',
+            'threshold': 'min = max',
+            'limit': 'in the length of the values.',
+            'fixes': [
+              ['The values are codes with a fixed width, such as a postal code', 'Keep the column as text or a category. Do not turn it into a number, because that drops the leading zeros.'],
+              ['The values are dates or times written as text, such as 20260101', 'Parse them into a date column. The report then shows the range and the timeline.'],
+              ['Every value is different, such as an ID', 'Drop it from the features. Keep it only to join tables.'],
+              ['Padding made the lengths equal', 'Strip the padding spaces or zeros, then profile the column again.'],
+            ],
+            'sources': [
+              ['Kuhn and Johnson, chapter 5', fes ~ '05-Encoding_Categorical_Predictors.html'],
+            ],
+          },
+          {
             'name': 'High Cardinality',
             'meaning': 'Almost every value in a column is different. ' ~ ext('https://en.wikipedia.org/wiki/Cardinality_(data_modeling)', 'Cardinality') ~ ' is the count of distinct values.',
             'threshold': '> 95%',
@@ -1367,6 +1382,22 @@
             ],
             'sources': [
               ['scikit-learn: Binarizer, to build a flag', skl ~ 'modules/generated/sklearn.preprocessing.Binarizer.html'],
+            ],
+          },
+          {
+            'name': 'Infinite Values',
+            'meaning': 'A numeric column has values that are infinite.',
+            'threshold': '> 0%',
+            'limit': 'of the values are infinite.',
+            'fixes': [
+              ['A division by zero made the value', 'Fix the formula. Replace a zero denominator with a missing value, then follow the High Missing advice.'],
+              ['Infinity stands for no limit or not known', 'Replace it with a missing value. Add a flag for the rows that had it.'],
+              ['A log or exp transform made the value', 'Check the input of the transform. The log of zero is minus infinity, so use log1p or add a small offset.'],
+              ['Your model cannot take infinite values', 'Most scikit-learn models raise an error on them. Replace the values before you fit.'],
+            ],
+            'sources': [
+              ['NumPy: isinf', 'https://numpy.org/doc/stable/reference/generated/numpy.isinf.html'],
+              ['scikit-learn: imputation', skl ~ 'modules/impute.html'],
             ],
           },
           {

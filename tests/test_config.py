@@ -77,6 +77,16 @@ class TestProfileConfigValidation:
         ):
             ProfileConfig(missing_threshold=-0.1)
 
+    def test_invalid_infinite_threshold(self):
+        with pytest.raises(
+            ValueError,
+            match="infinite_threshold",
+        ):
+            ProfileConfig(infinite_threshold=1.5)
+
+    def test_infinite_threshold_default_flags_any_infinite_value(self):
+        assert ProfileConfig().infinite_threshold == 0.0
+
     def test_invalid_cardinality_threshold(self):
         with pytest.raises(
             ValueError,
