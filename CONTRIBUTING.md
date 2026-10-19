@@ -80,6 +80,7 @@ The `ci` workflow runs `just full-check` on every push to main and on every pull
 The tag also starts the `docs` workflow, which builds the docs site under `/shirabe-profiling/`, checks its links, and deploys it to GitHub Pages.
 Set Pages to GitHub Actions as the source once, in the repository settings.
 A pre-release tag builds and checks the docs but does not deploy them.
+The docs job installs uv, because the `justfile` requires it at the top, even for the docs recipes.
 To test the base path on your machine, run `NUXT_APP_BASE_URL=/shirabe-profiling/ NUXT_SITE_URL=https://shuretokki.github.io NITRO_PRESET=github_pages just docs-build`.
 The workflow runs `npm install` without a lock file, because the `nub.lock` file is for nub, so a new Docus release can change the build.
 
