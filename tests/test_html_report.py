@@ -661,6 +661,30 @@ class TestHeaderActionsAndGuide:
         assert guide.count('target="_blank" rel="noopener"') >= 10
         assert "wikipedia.org/wiki/Skewness" in guide
 
+    def test_guide_advice_names_no_tool(self, mixed_df: pl.DataFrame):
+        html = _render(mixed_df)
+        start = html.index('id="guide-alerts"')
+        section = html[
+            start : html.index(
+                "</section>",
+                start,
+            )
+        ]
+        for tool in ("scikit", "NumPy", "caret", "pandas", "Polars"):
+            assert tool not in section
+
+    def test_alerts_without_a_sourced_fix_say_so(self, mixed_df: pl.DataFrame):
+        html = _render(mixed_df)
+        start = html.index('id="guide-alerts"')
+        section = html[
+            start : html.index(
+                "</section>",
+                start,
+            )
+        ]
+        assert section.count("None with a source yet.") == 3
+        assert section.count("None yet.") == 3
+
     def test_guide_has_no_keyboard_section(self, mixed_df: pl.DataFrame):
         html = _render(mixed_df)
         assert "guide-keyboard" not in html
@@ -695,7 +719,7 @@ class TestHeaderActionsAndGuide:
         assert section.count(">Sources<") == 12
         assert "feat.engineering" in section
         assert "log1p" in section
-        assert "HasX" in section
+        assert "HasX" not in section
 
 
 class TestReproductionPage:

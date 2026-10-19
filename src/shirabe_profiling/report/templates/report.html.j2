@@ -1285,7 +1285,6 @@
       <section aria-labelledby="sec-guide-alerts" id="guide-alerts">
         <h2 class="section-title" id="sec-guide-alerts">{{ icon('triangle-alert') }}Alerts</h2>
         {% set fes = 'https://feat.engineering/' %}
-        {% set skl = 'https://scikit-learn.org/stable/' %}
         {% set guide_alerts = [
           {
             'name': 'High Missing',
@@ -1293,16 +1292,14 @@
             'threshold': '> 5%',
             'limit': 'of the values are missing.',
             'fixes': [
-              ['The value is absent by design, such as no garage', 'Fill it with None in a category column. Fill it with 0 in a count or an area column.'],
-              ['The value exists but was not recorded', 'Impute it, for example with the median of a group. Fit the imputer on the train data only.'],
-              ['Your model accepts missing values', 'Leave the gaps. Gradient boosting trees in scikit-learn handle them without help.'],
-              ['The gaps can carry meaning', 'Add a flag that marks the missing rows. For prediction, the pattern of gaps can help the model.'],
+              ['Value is absent by design, such as no garage', 'Fill it with None in a category column. Fill it with 0 in a count or an area column.'],
+              ['Value exists but was not recorded', 'Impute it, for example with the median of a group. Fit the imputer on the train data only.'],
+              ['Your model accepts missing values', 'Leave the gaps. Some tree models handle missing values without imputation.'],
+              ['Gaps can carry meaning', 'Add a flag that marks the missing rows. For prediction, the pattern of gaps can help the model.'],
               ['Several columns are missing in the same rows', 'Open the Missing Patterns section. One cause can explain several columns at once.'],
-              ['About 20% or more is missing', 'Imputation is doubtful. Keep only a flag, or drop the column. Treat 20% as a rough guide.'],
             ],
             'sources': [
               ['Kuhn and Johnson, chapter 8', fes ~ '08-Handling_Missing_Data.html'],
-              ['scikit-learn: imputation', skl ~ 'modules/impute.html'],
               ['Sperrin and others, 2020', 'https://doi.org/10.1016/j.jclinepi.2020.03.028'],
             ],
           },
@@ -1318,23 +1315,15 @@
             ],
             'sources': [
               ['Kuhn and Johnson, chapter 5', fes ~ '05-Encoding_Categorical_Predictors.html'],
-              ['scikit-learn: VarianceThreshold', skl ~ 'modules/feature_selection.html#removing-features-with-low-variance'],
             ],
           },
           {
             'name': 'Constant Length',
             'meaning': 'Every value in a text column has the same length.',
             'threshold': 'min = max',
-            'limit': 'in the length of the values.',
-            'fixes': [
-              ['The values are codes with a fixed width, such as a postal code', 'Keep the column as text or a category. Do not turn it into a number, because that drops the leading zeros.'],
-              ['The values are dates or times written as text, such as 20260101', 'Parse them into a date column. The report then shows the range and the timeline.'],
-              ['Every value is different, such as an ID', 'Drop it from the features. Keep it only to join tables.'],
-              ['Padding made the lengths equal', 'Strip the padding spaces or zeros, then profile the column again.'],
-            ],
-            'sources': [
-              ['Kuhn and Johnson, chapter 5', fes ~ '05-Encoding_Categorical_Predictors.html'],
-            ],
+            'limit': 'for the length of the values.',
+            'fixes': [],
+            'sources': [],
           },
           {
             'name': 'High Cardinality',
@@ -1342,13 +1331,11 @@
             'threshold': '> 95%',
             'limit': 'of the values are distinct.',
             'fixes': [
-              ['A unique ID', 'Drop it from the features. Keep it only to join tables.'],
               ['A real category with many levels, such as zip code', 'Use target encoding. It replaces each level with the average target value. Fit it on the train data with cross fitting, so the target does not leak.'],
-              ['Rare levels hold few rows', 'Pool the rare levels into Other. In scikit-learn, set min_frequency.'],
+              ['Rare levels hold few rows', 'Pool the rare levels into Other.'],
               ['You want fewer columns without using the target', 'Use feature hashing. It maps many levels to a fixed number of columns.'],
             ],
             'sources': [
-              ['scikit-learn: encoding categorical features', skl ~ 'modules/preprocessing.html#encoding-categorical-features'],
               ['Kuhn and Johnson, chapter 5', fes ~ '05-Encoding_Categorical_Predictors.html'],
               ['Micci-Barreca, 2001', 'https://doi.org/10.1145/507533.507538'],
             ],
@@ -1359,14 +1346,13 @@
             'threshold': 'any',
             'limit': 'duplicate row.',
             'fixes': [
-              ['The copies are mistakes', 'Drop the extra copies before you split the data. A row in both the train set and the test set inflates the score.'],
+              ['Copies are mistakes', 'Drop the extra copies before you split the data. A row in both the train set and the test set inflates the score.'],
               ['Near copies exist', 'Look for near duplicates too. They inflate the score in the same way.'],
-              ['The repeats are real, such as repeat visits by one person', 'Keep them. Split by group, so that one person stays in one set. In scikit-learn, use GroupKFold.'],
+              ['Repeats are real, such as repeat visits by one person', 'Keep them. Split by group, so that one person stays in one set.'],
             ],
             'sources': [
               ['Kapoor and Narayanan, 2023', 'https://doi.org/10.1016/j.patter.2023.100804'],
               ['Barz and Denzler, 2020', 'https://arxiv.org/abs/1902.00423'],
-              ['scikit-learn: GroupKFold', skl ~ 'modules/generated/sklearn.model_selection.GroupKFold.html'],
             ],
           },
           {
@@ -1374,31 +1360,16 @@
             'meaning': 'A numeric column has many zeros.',
             'threshold': '> 5%',
             'limit': 'of the values are zero.',
-            'fixes': [
-              ['Zero means the thing does not exist, such as no pool', 'Keep the zeros. Add a HasX flag, for example HasPool.'],
-              ['Zero is a real measurement', 'Keep it as a number. Do not treat it as missing.'],
-              ['Zero stands in for a missing value', 'Replace the zeros with missing values. Then follow the High Missing advice.'],
-              ['Almost all values are zero', 'Test the link to the target. If the link is weak, keep only the flag, or drop the column.'],
-            ],
-            'sources': [
-              ['scikit-learn: Binarizer, to build a flag', skl ~ 'modules/generated/sklearn.preprocessing.Binarizer.html'],
-            ],
+            'fixes': [],
+            'sources': [],
           },
           {
             'name': 'Infinite Values',
             'meaning': 'A numeric column has values that are infinite.',
             'threshold': '> 0%',
             'limit': 'of the values are infinite.',
-            'fixes': [
-              ['A division by zero made the value', 'Fix the formula. Replace a zero denominator with a missing value, then follow the High Missing advice.'],
-              ['Infinity stands for no limit or not known', 'Replace it with a missing value. Add a flag for the rows that had it.'],
-              ['A log or exp transform made the value', 'Check the input of the transform. The log of zero is minus infinity, so use log1p or add a small offset.'],
-              ['Your model cannot take infinite values', 'Most scikit-learn models raise an error on them. Replace the values before you fit.'],
-            ],
-            'sources': [
-              ['NumPy: isinf', 'https://numpy.org/doc/stable/reference/generated/numpy.isinf.html'],
-              ['scikit-learn: imputation', skl ~ 'modules/impute.html'],
-            ],
+            'fixes': [],
+            'sources': [],
           },
           {
             'name': 'Skewed',
@@ -1408,15 +1379,15 @@
             'fixes': [
               ['You use a linear model, a neural network, a support vector machine, or nearest neighbors', 'Transform the column. The long tail can dominate the fit. Fit the transform on the train data only.'],
               ['You use a tree model', 'Skip the transform. Trees are not affected by skew.'],
-              ['The values are positive', 'Use log1p, which is log(1 + x). It also accepts zeros.'],
+              ['Values are positive', 'Use log(1 + x), also called log1p. It also accepts zeros.'],
               ['Some values are negative', 'Use the Yeo-Johnson power transform. Box-Cox needs strictly positive values.'],
               ['A few extreme values cause the skew', 'Open the Outliers section first. Fix a data error at its source.'],
               ['You are not sure', 'Compare the score with and without the transform. A transform does not always improve the model.'],
             ],
             'sources': [
               ['Kuhn and Johnson, chapter 6', fes ~ '06-Engineering_Numeric_Predictors.html'],
-              ['scikit-learn: power transforms', skl ~ 'modules/preprocessing.html#non-linear-transformation'],
-              ['NumPy: log1p', 'https://numpy.org/doc/stable/reference/generated/numpy.log1p.html'],
+              ['Box and Cox, 1964', 'https://doi.org/10.1111/j.2517-6161.1964.tb00553.x'],
+              ['Yeo and Johnson, 2000', 'https://doi.org/10.1093/biomet/87.4.954'],
             ],
           },
           {
@@ -1425,15 +1396,13 @@
             'threshold': '> 90%',
             'limit': 'of the column is one value.',
             'fixes': [
-              ['About 99% of the rows share one value', 'The column likely holds little information. Test its link to the target before you drop it.'],
+              ['About 99% of the rows share one value', 'Expect little information in the column. Test its link to the target before you drop it.'],
               ['A rare value marks the event that you want to predict, such as fraud', 'Keep the column. The rare value can be the signal.'],
               ['A category column has rare levels', 'Pool the rare levels into Other.'],
               ['A rare level can vanish in a split', 'Pool the level, or make sure that each split has it. A split without the level creates an empty column.'],
-              ['You need a cutoff', 'Kuhn and Johnson suggest a rough cutoff of 19 for the ratio of the top value to the second value. Context can change it.'],
             ],
             'sources': [
               ['Kuhn and Johnson, chapter 5', fes ~ '05-Encoding_Categorical_Predictors.html'],
-              ['caret: nearZeroVar', 'https://rdrr.io/cran/caret/man/nearZeroVar.html'],
             ],
           },
           {
@@ -1446,11 +1415,9 @@
               ['You read feature importance', 'Group the correlated columns and keep one from each group. Correlated columns share their importance, so each one looks weak.'],
               ['Many columns move together', 'Combine them with principal component analysis (PCA).'],
               ['One column links more closely to the target', 'Keep that column.'],
-              ['One column is computed from the other', 'Drop the computed column.'],
               ['A very sparse column is in the pair', 'Few values can create a link by chance. Do not rely on the correlation.'],
             ],
             'sources': [
-              ['scikit-learn: correlated features', skl ~ 'auto_examples/inspection/plot_permutation_importance_multicollinear.html'],
               ['Kuhn and Johnson, chapter 6', fes ~ '06-Engineering_Numeric_Predictors.html'],
             ],
           },
@@ -1460,8 +1427,7 @@
             'threshold': 'p > 0.05',
             'limit': 'The p-value of the test for an even spread.',
             'fixes': [
-              ['The column holds row numbers or IDs', 'A sequential ID looks evenly spread. Treat it like High Cardinality.'],
-              ['The column has few values', 'The test is not valid for small samples. Each bin needs an expected count of at least 5. Look at the missing values first.'],
+              ['Column has few values', 'The test is not valid for small samples. Each bin needs an expected count of at least 5. Look at the missing values first.'],
               ['You want to confirm the spread', 'Open the chart in Column Details. A flat histogram confirms it.'],
             ],
             'sources': [
@@ -1475,16 +1441,15 @@
             'threshold': 'Phi K ≥ 0.95',
             'limit': 'The link between the column and the target.',
             'fixes': [
-              ['The value is known only after the outcome', 'Drop the column. The model cannot use it when it predicts new cases.'],
-              ['The column is a copy or a proxy of the target', 'Drop it. A proxy for the outcome gives the answer away.'],
-              ['The link is real and known in advance', 'Keep it. You can use a strong link when you know the value at prediction time. Look at how the value is recorded.'],
-              ['You prepared the data before the split', 'Fit scalers, encoders, and selectors on the train data only. Use a Pipeline, so that each fold stays clean.'],
-              ['The rows have a time order', 'Split by time. Train on the past and test on the future.'],
+              ['Value is known only after the outcome', 'Drop the column. The model cannot use it when it predicts new cases.'],
+              ['Column is a copy or a proxy of the target', 'Drop it. A proxy for the outcome gives the answer away.'],
+              ['Link is real and known in advance', 'Keep it. You can use a strong link when you know the value at prediction time. Look at how the value is recorded.'],
+              ['You prepared the data before the split', 'Fit scalers, encoders, and selectors on the train data only. Use a pipeline, so that each fold stays clean.'],
+              ['Rows have a time order', 'Split by time. Train on the past and test on the future.'],
             ],
             'sources': [
               ['Kapoor and Narayanan, 2023', 'https://doi.org/10.1016/j.patter.2023.100804'],
               ['Kaufman and others, 2012', 'https://doi.org/10.1145/2382577.2382579'],
-              ['scikit-learn: common pitfalls', skl ~ 'common_pitfalls.html'],
             ],
           },
         ] %}
@@ -1504,6 +1469,7 @@
                   <span class="alert-label">Raised when</span>
                   <span class="alert-limit-value"><code class="alert-threshold">{{ alert.threshold }}</code> {{ alert.limit }}</span>
                 </div>
+                {% if alert.fixes %}
                 <div class="alert-fixes">
                   <h3 class="alert-label">Possible fix</h3>
                   <ol class="fix-steps">
@@ -1512,9 +1478,15 @@
                     {% endfor %}
                   </ol>
                 </div>
+                {% else %}
+                <div class="alert-limit">
+                  <span class="alert-label">Possible fix</span>
+                  <span class="alert-limit-value">None with a source yet.</span>
+                </div>
+                {% endif %}
                 <div class="alert-limit">
                   <span class="alert-label">Sources</span>
-                  <span class="alert-limit-value">{% for label, url in alert.sources %}{{ ext(url, label) }}{% if not loop.last %}, {% endif %}{% endfor %}</span>
+                  <span class="alert-limit-value">{% for label, url in alert.sources %}{{ ext(url, label) }}{% if not loop.last %}, {% endif %}{% else %}None yet.{% endfor %}</span>
                 </div>
               </div>
             </details>
