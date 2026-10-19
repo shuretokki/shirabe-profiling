@@ -1,3 +1,6 @@
+const base = process.env.NUXT_APP_BASE_URL ?? '/'
+const site = process.env.NUXT_SITE_URL
+
 export default defineNuxtConfig({
   extends: ['docus'],
   content: {
@@ -8,13 +11,16 @@ export default defineNuxtConfig({
   },
   icon: { mode: 'svg' },
   image: { provider: 'none' },
+  robots: { robotsTxt: false },
+  llms: { domain: site ? `${site}${base}`.replace(/\/$/, '') : undefined },
   appConfig: {
     header: {
       logo: {
         light: '/logo/wordmark-on-light.svg',
         dark: '/logo/wordmark-on-dark.svg',
         alt: 'shirabe-profiling',
-        class: 'h-8'
+        class: 'h-8',
+        favicon: `${base}favicon.ico`
       }
     }
   }

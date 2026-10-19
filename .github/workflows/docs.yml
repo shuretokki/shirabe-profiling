@@ -1,0 +1,66 @@
+name: docs
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and check the docs
+    runs-on: ubuntu-latest
+    outputs:
+      prerelease: ${{ steps.kind.outputs.prerelease }}
+    env:
+      NUXT_APP_BASE_URL: /shirabe-profiling/
+      NUXT_SITE_URL: https://shuretokki.github.io
+      NITRO_PRESET: github_pages
+    steps:
+      - uses: actions/checkout@v4
+      - id: kind
+        run: |
+          if [[ "$GITHUB_REF_NAME" =~ ((a|b|rc)[0-9]+|\.dev[0-9]+)$ ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: extractions/setup-just@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: lychee
+      - run: npm install
+        working-directory: docs
+      - run: just docs-build
+      - name: Check the links in the layout that Pages serves
+        run: |
+          mkdir site
+          cp -r docs/.output/public site/shirabe-profiling
+          lychee --offline --include-fragments=anchor-only --root-dir "$PWD/site" --no-progress --format compact 'site/**/*.html'
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/.output/public
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    if: needs.build.outputs.prerelease == 'false'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

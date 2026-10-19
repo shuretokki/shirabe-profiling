@@ -77,6 +77,12 @@ Then create the two environments in the repository settings.
 Start the workflow by hand from the Actions tab to upload to TestPyPI.
 The `ci` workflow runs `just full-check` on every push to main and on every pull request, and the tests on Python 3.10 to 3.13.
 
+The tag also starts the `docs` workflow, which builds the docs site under `/shirabe-profiling/`, checks its links, and deploys it to GitHub Pages.
+Set Pages to GitHub Actions as the source once, in the repository settings.
+A pre-release tag builds and checks the docs but does not deploy them.
+To test the base path on your machine, run `NUXT_APP_BASE_URL=/shirabe-profiling/ NUXT_SITE_URL=https://shuretokki.github.io NITRO_PRESET=github_pages just docs-build`.
+The workflow runs `npm install` without a lock file, because the `nub.lock` file is for nub, so a new Docus release can change the build.
+
 The release stops unless you are on main with a clean tree that is not behind origin.
 It also needs agreeing version files and a changelog section.
 The package must meet the PyPI upload rules, and its version must not be on PyPI yet.
