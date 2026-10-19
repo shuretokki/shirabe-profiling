@@ -10,6 +10,7 @@ Instant HTML profiling for Polars tables
 
 #description
 Transform your Polars DataFrames into interactive, comprehensive HTML data profiles with automated quality alerts in seconds.
+
 :u-color-mode-image{light="/images/report-overview.webp" dark="/images/report-overview-dark.webp" alt="The overview of the report, with the facts of the table and the list of alerts" class="rounded-md border border-default mx-auto"}
 
 #links
