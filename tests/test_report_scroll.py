@@ -51,10 +51,17 @@ def test_frames_start_at_the_top_and_end_at_the_bottom() -> None:
         ),
         width=640,
         view=300,
-        step=100,
+        count=12,
     )
     assert all(frame.size == (640, 300) for frame in frames)
     assert len(frames) >= 3
+
+
+def test_ease_starts_and_stops_slowly() -> None:
+    assert report_scroll.ease(0) == 0
+    assert report_scroll.ease(1) == 1
+    assert report_scroll.ease(0.1) < 0.1
+    assert report_scroll.ease(0.9) > 0.9
 
 
 def test_frames_of_a_short_page_are_one_frame() -> None:
@@ -65,7 +72,7 @@ def test_frames_of_a_short_page_are_one_frame() -> None:
         ),
         width=640,
         view=300,
-        step=100,
+        count=12,
     )
     assert len(frames) == 1
 
@@ -90,12 +97,13 @@ def test_save_gif_writes_an_animated_file(tmp_path: Path) -> None:
         _striped(2000),
         width=640,
         view=300,
-        step=100,
+        count=12,
     )
     target = tmp_path / "scroll.gif"
     report_scroll.save_gif(
         frames,
         target,
+        frame_ms=50,
     )
     with Image.open(target) as gif:
         assert gif.format == "GIF"

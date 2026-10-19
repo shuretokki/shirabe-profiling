@@ -37,9 +37,8 @@ from readme_images import (  # noqa: E402
 
 TALL_HEIGHT = 12000
 BOTTOM_PAD = 24
-PAUSE_MS = 1200
-FRAME_MS = 90
-COLORS = 128
+PAUSE_MS = 1500
+COLORS = 48
 
 THEMES = {
     "report-scroll": "light",
@@ -61,34 +60,39 @@ def content_bottom(image: Image.Image) -> int:
     return box[3] if box else image.height
 
 
+def ease(t: float) -> float:
+    """Return a smooth start and stop for a value from 0 to 1."""
+    return t * t * (3 - 2 * t)
+
+
 def make_frames(
     tall: Image.Image,
     width: int,
     view: int,
-    step: int,
+    count: int,
 ) -> list[Image.Image]:
-    """Return the frames of a window that moves from the top to the bottom of the picture."""
+    """Return the frames of a window that glides from the top to the bottom of the picture."""
     scale = width / tall.width
     scaled = tall.resize(
         (width, round(tall.height * scale)),
         Image.Resampling.LANCZOS,
+    ).quantize(
+        colors=COLORS,
+        dither=Image.Dither.NONE,
     )
     last = max(scaled.height - view, 0)
-    offsets = list(range(0, last, step)) + [last]
-    return [
-        scaled.crop((0, top, width, top + view)).quantize(
-            colors=COLORS,
-            dither=Image.Dither.NONE,
-        )
-        for top in offsets
-    ]
+    if last == 0 or count < 2:
+        return [scaled.crop((0, 0, width, view))]
+    offsets = [round(last * ease(index / (count - 1))) for index in range(count)]
+    return [scaled.crop((0, top, width, top + view)) for top in offsets]
 
 
 def save_gif(
     frames: list[Image.Image],
     target: Path,
+    frame_ms: int,
 ) -> None:
-    durations = [FRAME_MS] * len(frames)
+    durations = [frame_ms] * len(frames)
     durations[0] = PAUSE_MS
     durations[-1] = PAUSE_MS
     frames[0].save(
@@ -113,20 +117,26 @@ def main() -> None:
     parser.add_argument(
         "--width",
         type=int,
-        default=960,
+        default=720,
         help="width of the GIF in pixels",
     )
     parser.add_argument(
         "--view",
         type=int,
-        default=600,
+        default=450,
         help="height of the GIF in pixels",
     )
     parser.add_argument(
-        "--step",
+        "--seconds",
+        type=float,
+        default=14.0,
+        help="time the scroll takes from the top to the bottom",
+    )
+    parser.add_argument(
+        "--fps",
         type=int,
-        default=90,
-        help="pixels to scroll for each frame",
+        default=20,
+        help="frames for each second",
     )
     args = parser.parse_args()
     args.out.mkdir(
@@ -180,12 +190,13 @@ def main() -> None:
                 tall,
                 args.width,
                 args.view,
-                args.step,
+                round(args.seconds * args.fps),
             )
             target = args.out / f"{name}.gif"
             save_gif(
                 frames,
                 target,
+                round(1000 / args.fps),
             )
             size = target.stat().st_size / 1_000_000
             print(f"{name}.gif  {args.width}x{args.view}  {len(frames)} frames  {size:.1f} MB")
