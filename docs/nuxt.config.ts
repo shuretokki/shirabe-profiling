@@ -7,5 +7,15 @@ export default defineNuxtConfig({
     theme: { colors: ['primary', 'info', 'success', 'warning', 'error'] }
   },
   icon: { mode: 'svg' },
-  image: { provider: 'none' }
+  image: { provider: 'none' },
+  appConfig: {
+    header: {
+      logo: {
+        light: '/logo/wordmark-on-light.svg',
+        dark: '/logo/wordmark-on-dark.svg',
+        alt: 'shirabe-profiling',
+        class: 'h-8'
+      }
+    }
+  }
 })

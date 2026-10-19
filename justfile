@@ -55,9 +55,10 @@ docs-build: _docs-images
     test -d docs/.output/public || { echo "error: run just docs-build first" >&2; exit 1; }
     {{ require("lychee") }} --offline --include-fragments=anchor-only --root-dir "$PWD/docs/.output/public" --no-progress --format compact 'docs/.output/public/**/*.html'
 
-# Copy the report screenshots that the docs pages link into the docs site.
+# Copy the report pictures, the videos, and the wordmark that the docs site uses.
 @_docs-images:
-    mkdir -p docs/public/images
+    mkdir -p docs/public/images docs/public/logo
+    cp assets/logo/wordmark-on-light.svg assets/logo/wordmark-on-dark.svg docs/public/logo/
     { grep -rhoE '/images/report-[a-z-]+' docs/content || true; } | sort -u | sed 's#^/images/##' | while read -r base; do cp assets/screenshots/"$base"* docs/public/images/; done
 
 # Remake the README pictures and the docs videos in assets/screenshots/ (needs Chrome, Chromium, or Edge, ffmpeg, and internet access)
