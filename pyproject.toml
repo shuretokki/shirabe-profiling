@@ -91,7 +91,7 @@ pattern = '\[([^\]]+)\]\(((?!https?://|#)[^)\s]+)\)'
 replacement = '[\1](https://github.com/shuretokki/shirabe-profiling/tree/main/\g<2>)'
 
 [tool.hatch.build.targets.sdist]
-exclude = ["/docs"]
+exclude = ["/docs", "/assets/screenshots/*.mp4", "/assets/screenshots/*.webm"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/shirabe_profiling"]
