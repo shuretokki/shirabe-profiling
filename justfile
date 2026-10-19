@@ -300,6 +300,10 @@ _validate:
       done
       # twine is the check that the Python Packaging guide names for the README and the metadata.
       uvx twine check --strict "$tmp"/* >/dev/null 2>&1 || fail "twine check failed, run uvx twine check --strict dist/*"
+      # the wheel must install in a clean environment and make a report, which catches a missing module or file.
+      wheel=$(ls "$tmp"/*.whl)
+      smoke='from shirabe_profiling import ProfileReport; from shirabe_profiling.datasets import make_homes; assert "<html" in ProfileReport(make_homes(n=300), target="price").to_html()'
+      (cd "$tmp" && uv run --no-project --isolated --with "$wheel" python -c "$smoke" >/dev/null 2>&1) || fail "the wheel does not install and make a report in a clean environment"
       uv run python scripts/check_package.py "$tmp" || status=1
     else
       fail "uv build failed"

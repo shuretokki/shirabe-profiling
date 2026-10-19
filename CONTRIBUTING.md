@@ -69,6 +69,12 @@ Rewrite the draft as plain sentences and put it in `CHANGELOG.md`.
 5. `just release` does the same, asks for a `y`, then tags `v0.2.0`, pushes main and the tag, and creates the GitHub release from the changelog section.
 6. `just publish-test` and `just publish` upload to TestPyPI and PyPI.
 
+The tag also starts the `release` workflow, which builds the package, runs `just _validate`, and uploads to PyPI with trusted publishing, so it needs no token.
+Register a publisher once on PyPI and on TestPyPI, with the owner `shuretokki`, the repository `shirabe-profiling`, the workflow `release.yml`, and the environment `pypi` on PyPI or `testpypi` on TestPyPI.
+Then create the two environments in the repository settings.
+Start the workflow by hand from the Actions tab to upload to TestPyPI.
+The `ci` workflow runs `just full-check` on every push to main and on every pull request, and the tests on Python 3.10 to 3.13.
+
 The release stops unless you are on main with a clean tree that is not behind origin.
 It also needs agreeing version files and a changelog section.
 The package must meet the PyPI upload rules, and its version must not be on PyPI yet.
