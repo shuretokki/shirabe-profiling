@@ -55,6 +55,8 @@ Install the package from PyPI:
 pip install shirabe-profiling
 ```
 
+With uv, run `uv add shirabe-profiling` in a project, or `uv pip install shirabe-profiling` in a virtual environment.
+
 Then write a report:
 
 ```python
