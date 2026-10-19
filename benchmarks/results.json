@@ -1,0 +1,450 @@
+{
+  "date": "2026-10-19",
+  "commit": "9355e2c",
+  "hardware": {
+    "cpu": "AMD Ryzen 5 5600 6-Core Processor",
+    "threads": 12,
+    "memory_gb": 8.1,
+    "os": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "runs": 5,
+  "timeout_s": 900.0,
+  "memory_limit_mb": 3000.0,
+  "results": [
+    {
+      "status": "ok",
+      "rows": 10000,
+      "columns": 11,
+      "warmup_s": 0.848,
+      "runs_s": [
+        0.347,
+        0.381,
+        0.342,
+        0.386,
+        0.405
+      ],
+      "peak_rss_mb": 274.1,
+      "rss_after_load_mb": 56.8,
+      "report_mb": 1.0,
+      "versions": {
+        "shirabe-profiling": "0.1.0",
+        "polars": "1.39.3"
+      },
+      "dataset": "homes-10k",
+      "tool": "shirabe complete"
+    },
+    {
+      "status": "ok",
+      "rows": 10000,
+      "columns": 11,
+      "warmup_s": 0.196,
+      "runs_s": [
+        0.184,
+        0.182,
+        0.188,
+        0.18,
+        0.197
+      ],
+      "peak_rss_mb": 226.2,
+      "rss_after_load_mb": 57.0,
+      "report_mb": 0.3,
+      "versions": {
+        "shirabe-profiling": "0.1.0",
+        "polars": "1.39.3"
+      },
+      "dataset": "homes-10k",
+      "tool": "shirabe overview"
+    },
+    {
+      "status": "ok",
+      "rows": 10000,
+      "columns": 11,
+      "warmup_s": 7.537,
+      "runs_s": [
+        6.827,
+        7.24,
+        7.129,
+        6.913,
+        7.151
+      ],
+      "peak_rss_mb": 504.2,
+      "rss_after_load_mb": 160.8,
+      "report_mb": 3.72,
+      "versions": {
+        "fg-data-profiling": "4.20.0",
+        "pandas": "2.3.3"
+      },
+      "dataset": "homes-10k",
+      "tool": "ydata default"
+    },
+    {
+      "status": "ok",
+      "rows": 10000,
+      "columns": 11,
+      "warmup_s": 2.889,
+      "runs_s": [
+        2.821,
+        2.806,
+        2.944,
+        2.975,
+        2.795
+      ],
+      "peak_rss_mb": 456.5,
+      "rss_after_load_mb": 158.7,
+      "report_mb": 0.91,
+      "versions": {
+        "fg-data-profiling": "4.20.0",
+        "pandas": "2.3.3"
+      },
+      "dataset": "homes-10k",
+      "tool": "ydata minimal"
+    },
+    {
+      "status": "ok",
+      "rows": 10000,
+      "columns": 11,
+      "warmup_s": 0.737,
+      "runs_s": [
+        0.6,
+        0.592,
+        0.615,
+        0.692,
+        0.576
+      ],
+      "peak_rss_mb": 336.1,
+      "rss_after_load_mb": 65.7,
+      "report_mb": 0.47,
+      "versions": {
+        "skrub": "0.11.0",
+        "polars": "2.0.0"
+      },
+      "dataset": "homes-10k",
+      "tool": "skrub"
+    },
+    {
+      "status": "ok",
+      "rows": 100000,
+      "columns": 11,
+      "warmup_s": 1.508,
+      "runs_s": [
+        1.043,
+        0.971,
+        0.954,
+        0.946,
+        0.938
+      ],
+      "peak_rss_mb": 620.6,
+      "rss_after_load_mb": 65.4,
+      "report_mb": 6.37,
+      "versions": {
+        "shirabe-profiling": "0.1.0",
+        "polars": "1.39.3"
+      },
+      "dataset": "homes-100k",
+      "tool": "shirabe complete"
+    },
+    {
+      "status": "ok",
+      "rows": 100000,
+      "columns": 11,
+      "warmup_s": 0.241,
+      "runs_s": [
+        0.212,
+        0.209,
+        0.227,
+        0.21,
+        0.219
+      ],
+      "peak_rss_mb": 289.0,
+      "rss_after_load_mb": 65.4,
+      "report_mb": 0.3,
+      "versions": {
+        "shirabe-profiling": "0.1.0",
+        "polars": "1.39.3"
+      },
+      "dataset": "homes-100k",
+      "tool": "shirabe overview"
+    },
+    {
+      "status": "ok",
+      "rows": 100000,
+      "columns": 11,
+      "warmup_s": 8.155,
+      "runs_s": [
+        7.516,
+        7.66,
+        7.781,
+        7.993,
+        7.845
+      ],
+      "peak_rss_mb": 703.4,
+      "rss_after_load_mb": 204.7,
+      "report_mb": 3.75,
+      "versions": {
+        "fg-data-profiling": "4.20.0",
+        "pandas": "2.3.3"
+      },
+      "dataset": "homes-100k",
+      "tool": "ydata default"
+    },
+    {
+      "status": "ok",
+      "rows": 100000,
+      "columns": 11,
+      "warmup_s": 3.061,
+      "runs_s": [
+        2.975,
+        2.937,
+        2.983,
+        2.78,
+        2.939
+      ],
+      "peak_rss_mb": 570.5,
+      "rss_after_load_mb": 200.7,
+      "report_mb": 0.92,
+      "versions": {
+        "fg-data-profiling": "4.20.0",
+        "pandas": "2.3.3"
+      },
+      "dataset": "homes-100k",
+      "tool": "ydata minimal"
+    },
+    {
+      "status": "ok",
+      "rows": 100000,
+      "columns": 11,
+      "warmup_s": 0.812,
+      "runs_s": [
+        0.669,
+        0.673,
+        0.698,
+        0.753,
+        0.654
+      ],
+      "peak_rss_mb": 350.5,
+      "rss_after_load_mb": 74.0,
+      "report_mb": 0.47,
+      "versions": {
+        "skrub": "0.11.0",
+        "polars": "2.0.0"
+      },
+      "dataset": "homes-100k",
+      "tool": "skrub"
+    },
+    {
+      "status": "ok",
+      "rows": 1460,
+      "columns": 81,
+      "warmup_s": 55.509,
+      "runs_s": [
+        5.132,
+        5.078,
+        5.088,
+        5.18,
+        5.084
+      ],
+      "peak_rss_mb": 283.1,
+      "rss_after_load_mb": 57.6,
+      "report_mb": 3.21,
+      "versions": {
+        "shirabe-profiling": "0.1.0",
+        "polars": "1.39.3"
+      },
+      "dataset": "ames",
+      "tool": "shirabe complete"
+    },
+    {
+      "status": "ok",
+      "rows": 1460,
+      "columns": 81,
+      "warmup_s": 0.608,
+      "runs_s": [
+        0.593,
+        0.583,
+        0.617,
+        0.582,
+        0.599
+      ],
+      "peak_rss_mb": 234.9,
+      "rss_after_load_mb": 57.7,
+      "report_mb": 0.82,
+      "versions": {
+        "shirabe-profiling": "0.1.0",
+        "polars": "1.39.3"
+      },
+      "dataset": "ames",
+      "tool": "shirabe overview"
+    },
+    {
+      "status": "ok",
+      "rows": 1460,
+      "columns": 81,
+      "warmup_s": 78.918,
+      "runs_s": [],
+      "peak_rss_mb": 1358.5,
+      "rss_after_load_mb": 149.2,
+      "report_mb": 46.82,
+      "versions": {
+        "fg-data-profiling": "4.20.0",
+        "pandas": "2.3.3"
+      },
+      "dataset": "ames",
+      "tool": "ydata default"
+    },
+    {
+      "status": "ok",
+      "rows": 1460,
+      "columns": 81,
+      "warmup_s": 16.687,
+      "runs_s": [
+        15.053,
+        15.409,
+        15.596,
+        15.775,
+        15.564
+      ],
+      "peak_rss_mb": 543.4,
+      "rss_after_load_mb": 151.3,
+      "report_mb": 6.83,
+      "versions": {
+        "fg-data-profiling": "4.20.0",
+        "pandas": "2.3.3"
+      },
+      "dataset": "ames",
+      "tool": "ydata minimal"
+    },
+    {
+      "status": "ok",
+      "rows": 1460,
+      "columns": 81,
+      "warmup_s": 0.212,
+      "runs_s": [
+        0.254,
+        0.187,
+        0.185,
+        0.191,
+        0.19
+      ],
+      "peak_rss_mb": 295.1,
+      "rss_after_load_mb": 66.7,
+      "report_mb": 0.97,
+      "versions": {
+        "skrub": "0.11.0",
+        "polars": "2.0.0"
+      },
+      "dataset": "ames",
+      "tool": "skrub"
+    },
+    {
+      "status": "ok",
+      "rows": 1000000,
+      "columns": 11,
+      "warmup_s": 5.998,
+      "runs_s": [
+        4.342,
+        4.237,
+        4.205,
+        4.536,
+        4.373
+      ],
+      "peak_rss_mb": 1496.4,
+      "rss_after_load_mb": 154.8,
+      "report_mb": 6.46,
+      "versions": {
+        "shirabe-profiling": "0.1.0",
+        "polars": "1.39.3"
+      },
+      "dataset": "homes-1000k",
+      "tool": "shirabe complete"
+    },
+    {
+      "status": "ok",
+      "rows": 1000000,
+      "columns": 11,
+      "warmup_s": 0.997,
+      "runs_s": [
+        0.846,
+        0.772,
+        0.79,
+        0.795,
+        0.767
+      ],
+      "peak_rss_mb": 984.0,
+      "rss_after_load_mb": 160.4,
+      "report_mb": 0.3,
+      "versions": {
+        "shirabe-profiling": "0.1.0",
+        "polars": "1.39.3"
+      },
+      "dataset": "homes-1000k",
+      "tool": "shirabe overview"
+    },
+    {
+      "status": "ok",
+      "rows": 1000000,
+      "columns": 11,
+      "warmup_s": 31.441,
+      "runs_s": [
+        25.562,
+        24.911,
+        27.135,
+        27.76,
+        26.453
+      ],
+      "peak_rss_mb": 2002.1,
+      "rss_after_load_mb": 399.5,
+      "report_mb": 4.17,
+      "versions": {
+        "fg-data-profiling": "4.20.0",
+        "pandas": "2.3.3"
+      },
+      "dataset": "homes-1000k",
+      "tool": "ydata default"
+    },
+    {
+      "status": "ok",
+      "rows": 1000000,
+      "columns": 11,
+      "warmup_s": 5.057,
+      "runs_s": [
+        4.6,
+        3.832,
+        4.344,
+        4.654,
+        3.777
+      ],
+      "peak_rss_mb": 1393.4,
+      "rss_after_load_mb": 443.0,
+      "report_mb": 0.92,
+      "versions": {
+        "fg-data-profiling": "4.20.0",
+        "pandas": "2.3.3"
+      },
+      "dataset": "homes-1000k",
+      "tool": "ydata minimal"
+    },
+    {
+      "status": "ok",
+      "rows": 1000000,
+      "columns": 11,
+      "warmup_s": 1.484,
+      "runs_s": [
+        1.291,
+        1.332,
+        1.228,
+        1.357,
+        1.229
+      ],
+      "peak_rss_mb": 540.9,
+      "rss_after_load_mb": 160.0,
+      "report_mb": 0.48,
+      "versions": {
+        "skrub": "0.11.0",
+        "polars": "2.0.0"
+      },
+      "dataset": "homes-1000k",
+      "tool": "skrub"
+    }
+  ]
+}

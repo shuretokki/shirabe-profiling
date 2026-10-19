@@ -10,6 +10,7 @@ __pycache__/
 *.so
 *.egg-info/
 dist/
+benchmarks/data/
 build/
 .venv/
 .idea/
