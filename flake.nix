@@ -25,6 +25,7 @@
             gh
             nodejs
             lychee
+            ffmpeg-headless
           ];
         };
       };

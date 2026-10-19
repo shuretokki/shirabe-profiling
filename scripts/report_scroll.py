@@ -1,19 +1,23 @@
 # SPDX-FileCopyrightText: Copyright © 2026 shuretokki
 # SPDX-License-Identifier: Apache-2.0
 
-"""Make the scrolling WebP animations of the report for the docs.
+"""Make the scrolling videos of the report for the docs.
 
 The script takes one tall picture of the whole report for each theme.
-It then slides a window down the picture and saves the frames as an animated WebP file.
-It uses the same browser and the same sample table as `readme_images.py`.
+It slides a window down the picture and sends every frame to ffmpeg.
+ffmpeg writes a WebM file and an MP4 file, and the script saves the first frame as a still poster.
+The window moves a fraction of a pixel in each frame, so the motion stays even.
 """
 
 from __future__ import annotations
 
 import argparse
+import math
 import shutil
+import subprocess
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from PIL import Image, ImageChops
 
@@ -32,18 +36,38 @@ from readme_images import (  # noqa: E402
     capture,
     find_browser,
     page_for,
+    save_picture,
     work_dir,
 )
 
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
 TALL_HEIGHT = 12000
 BOTTOM_PAD = 24
-PAUSE_MS = 1500
-QUALITY = 80
 
 THEMES = {
     "report-scroll": "light",
     "report-scroll-dark": "dark",
 }
+
+COLOR_FILTER = "scale=out_color_matrix=bt709:out_range=tv,format=yuv420p"
+COLOR_TAGS = (
+    "-colorspace",
+    "bt709",
+    "-color_primaries",
+    "bt709",
+    "-color_trc",
+    "bt709",
+)
+
+
+def find_ffmpeg() -> str:
+    """Return the ffmpeg program, or stop with a hint."""
+    found = shutil.which("ffmpeg")
+    if found:
+        return found
+    sys.exit("ffmpeg not found. Run the script inside `nix develop`, or install ffmpeg.")
 
 
 def content_bottom(image: Image.Image) -> int:
@@ -65,77 +89,197 @@ def ease(t: float) -> float:
     return t * t * (3 - 2 * t)
 
 
-def make_frames(
+def scroll_tops(
+    last: float,
+    glide: int,
+    hold: int,
+) -> list[float]:
+    """Return the top of the window for each frame: rest, glide down, rest again."""
+    if glide < 2:
+        return [0.0] * hold + [last] * hold + [0.0]
+    moving = [last * ease(index / (glide - 1)) for index in range(glide)]
+    return [0.0] * hold + moving + [last] * hold
+
+
+def source_view(
     tall: Image.Image,
     width: int,
     view: int,
-    count: int,
-) -> list[Image.Image]:
-    """Return the frames of a window that glides from the top to the bottom of the picture."""
-    scale = width / tall.width
-    scaled = tall.resize(
-        (width, round(tall.height * scale)),
+) -> float:
+    """Return how many rows of the tall picture one frame shows."""
+    return view * tall.width / width
+
+
+def with_height(
+    tall: Image.Image,
+    minimum: float,
+) -> Image.Image:
+    """Return the picture, padded with its background when it is shorter than one frame."""
+    needed = math.ceil(minimum)
+    if tall.height >= needed:
+        return tall
+    padded = Image.new(
+        "RGB",
+        (tall.width, needed),
+        tall.getpixel((4, tall.height - 4)),
+    )
+    padded.paste(
+        tall,
+        (0, 0),
+    )
+    return padded
+
+
+def render_frame(
+    tall: Image.Image,
+    top: float,
+    width: int,
+    view: int,
+) -> Image.Image:
+    """Return one frame, cut from a fractional row of the tall picture."""
+    rows = source_view(
+        tall,
+        width,
+        view,
+    )
+    top = min(max(top, 0.0), max(tall.height - rows - 1e-6, 0.0))
+    return tall.resize(
+        (width, view),
         Image.Resampling.LANCZOS,
+        box=(0, top, tall.width, top + rows),
     )
-    last = max(scaled.height - view, 0)
-    if last == 0 or count < 2:
-        return [scaled.crop((0, 0, width, view))]
-    offsets = [round(last * ease(index / (count - 1))) for index in range(count)]
-    return [scaled.crop((0, top, width, top + view)) for top in offsets]
 
 
-def save_webp(
-    frames: list[Image.Image],
-    target: Path,
-    frame_ms: int,
+def frames_for(
+    tall: Image.Image,
+    tops: list[float],
+    width: int,
+    view: int,
+) -> Iterator[Image.Image]:
+    """Yield the frames, and draw a resting frame only once."""
+    previous_top: float | None = None
+    previous: Image.Image | None = None
+    for top in tops:
+        if previous is None or top != previous_top:
+            previous = render_frame(
+                tall,
+                top,
+                width,
+                view,
+            )
+            previous_top = top
+        yield previous
+
+
+def ffmpeg_command(
+    ffmpeg: str,
+    width: int,
+    view: int,
+    fps: int,
+    mp4: Path,
+    webm: Path,
+) -> list[str]:
+    return [
+        ffmpeg,
+        "-y",
+        "-loglevel",
+        "error",
+        "-f",
+        "rawvideo",
+        "-pix_fmt",
+        "rgb24",
+        "-s",
+        f"{width}x{view}",
+        "-r",
+        str(fps),
+        "-i",
+        "-",
+        "-vf",
+        COLOR_FILTER,
+        "-an",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "slow",
+        "-crf",
+        "27",
+        *COLOR_TAGS,
+        "-movflags",
+        "+faststart",
+        str(mp4),
+        "-vf",
+        COLOR_FILTER,
+        "-an",
+        "-c:v",
+        "libvpx-vp9",
+        "-b:v",
+        "0",
+        "-crf",
+        "40",
+        "-row-mt",
+        "1",
+        *COLOR_TAGS,
+        str(webm),
+    ]
+
+
+def encode(
+    frames: Iterator[Image.Image],
+    command: list[str],
 ) -> None:
-    durations = [frame_ms] * len(frames)
-    durations[0] = PAUSE_MS
-    durations[-1] = PAUSE_MS
-    frames[0].save(
-        target,
-        save_all=True,
-        append_images=frames[1:],
-        duration=durations,
-        loop=0,
-        quality=QUALITY,
-        method=4,
+    process = subprocess.Popen(
+        command,
+        stdin=subprocess.PIPE,
     )
+    assert process.stdin is not None
+    try:
+        for frame in frames:
+            process.stdin.write(frame.convert("RGB").tobytes())
+    except BrokenPipeError:
+        pass
+    finally:
+        process.stdin.close()
+    if process.wait() != 0:
+        sys.exit("ffmpeg failed to write the video.")
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Make the scrolling WebP animations of the report.",
-    )
+    parser = argparse.ArgumentParser(description="Make the scrolling videos of the report.")
     parser.add_argument(
         "out",
         type=Path,
         nargs="?",
         default=Path("assets/screenshots"),
-        help="folder for the animations",
+        help="folder for the videos and posters",
     )
     parser.add_argument(
         "--width",
         type=int,
-        default=720,
-        help="width of the animation in pixels",
+        default=1280,
+        help="width of the video in pixels, an even number",
     )
     parser.add_argument(
         "--view",
         type=int,
-        default=450,
-        help="height of the animation in pixels",
+        default=720,
+        help="height of the video in pixels, an even number",
     )
     parser.add_argument(
         "--seconds",
         type=float,
-        default=14.0,
+        default=22.0,
         help="time the scroll takes from the top to the bottom",
+    )
+    parser.add_argument(
+        "--hold",
+        type=float,
+        default=1.5,
+        help="seconds to rest at the top and at the bottom",
     )
     parser.add_argument(
         "--fps",
         type=int,
-        default=20,
+        default=60,
         help="frames for each second",
     )
     args = parser.parse_args()
@@ -144,6 +288,7 @@ def main() -> None:
         exist_ok=True,
     )
 
+    ffmpeg = find_ffmpeg()
     browser = find_browser()
     print(f"Browser: {browser}")
     html = ProfileReport(
@@ -183,23 +328,58 @@ def main() -> None:
             bottom = content_bottom(image)
             if bottom + BOTTOM_PAD > image.height:
                 print(f"  warning: the report of {name} is cut at {image.height} pixels")
-            tall = image.crop(
-                (0, 0, WIDTH, min(bottom + BOTTOM_PAD, image.height)),
+            tall = with_height(
+                image.crop(
+                    (0, 0, WIDTH, min(bottom + BOTTOM_PAD, image.height)),
+                ),
+                source_view(
+                    image,
+                    args.width,
+                    args.view,
+                ),
             )
-            frames = make_frames(
+            rows = source_view(
                 tall,
                 args.width,
                 args.view,
+            )
+            tops = scroll_tops(
+                max(tall.height - rows, 0.0),
                 round(args.seconds * args.fps),
+                round(args.hold * args.fps),
             )
-            target = args.out / f"{name}.webp"
-            save_webp(
-                frames,
-                target,
-                round(1000 / args.fps),
+            mp4 = args.out / f"{name}.mp4"
+            webm = args.out / f"{name}.webm"
+            encode(
+                frames_for(
+                    tall,
+                    tops,
+                    args.width,
+                    args.view,
+                ),
+                ffmpeg_command(
+                    ffmpeg,
+                    args.width,
+                    args.view,
+                    args.fps,
+                    mp4,
+                    webm,
+                ),
             )
-            size = target.stat().st_size / 1_000_000
-            print(f"{name}.webp  {args.width}x{args.view}  {len(frames)} frames  {size:.1f} MB")
+            save_picture(
+                render_frame(
+                    tall,
+                    0.0,
+                    args.width,
+                    args.view,
+                ),
+                args.out / f"{name}.webp",
+            )
+            print(
+                f"{name}  {args.width}x{args.view}  {len(tops)} frames  "
+                f"mp4 {mp4.stat().st_size / 1_000_000:.1f} MB  "
+                f"webm {webm.stat().st_size / 1_000_000:.1f} MB",
+            )
     finally:
         shutil.rmtree(
             folder,
