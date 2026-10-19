@@ -45,6 +45,43 @@ class TestPandasInput:
         result = ingest(pdf)
         assert result.columns == ["col_a", "col_b"]
 
+    def test_missing_pyarrow_error_names_the_extra(self, monkeypatch: pytest.MonkeyPatch):
+        pd = pytest.importorskip("pandas")
+
+        def fail(_pdf: object) -> pl.DataFrame:
+            msg = "pyarrow is required for converting a pandas dataframe to Polars"
+            raise ModuleNotFoundError(msg)
+
+        monkeypatch.setattr(
+            pl,
+            "from_pandas",
+            fail,
+        )
+        with pytest.raises(
+            ValueError,
+            match=r"shirabe-profiling\[pandas\]",
+        ):
+            ingest(pd.DataFrame({"a": [1]}))
+
+    def test_other_conversion_errors_have_no_hint(self, monkeypatch: pytest.MonkeyPatch):
+        pd = pytest.importorskip("pandas")
+
+        def fail(_pdf: object) -> pl.DataFrame:
+            msg = "something else broke"
+            raise RuntimeError(msg)
+
+        monkeypatch.setattr(
+            pl,
+            "from_pandas",
+            fail,
+        )
+        with pytest.raises(
+            ValueError,
+            match="something else broke",
+        ) as caught:
+            ingest(pd.DataFrame({"a": [1]}))
+        assert "[pandas]" not in str(caught.value)
+
 
 class TestFileInput:
     def test_csv_file(

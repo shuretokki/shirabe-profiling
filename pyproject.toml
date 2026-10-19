@@ -46,6 +46,9 @@ dependencies = [
     "phik>=0.12",
 ]
 
+[project.optional-dependencies]
+pandas = ["pandas", "polars[pyarrow]"]
+
 [project.urls]
 Homepage = "https://github.com/shuretokki/shirabe-profiling"
 Repository = "https://github.com/shuretokki/shirabe-profiling"

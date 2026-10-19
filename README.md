@@ -57,6 +57,8 @@ pip install shirabe-profiling
 
 With uv, run `uv add shirabe-profiling` in a project, or `uv pip install shirabe-profiling` in a virtual environment.
 
+For pandas tables with text columns, install the extra: `pip install "shirabe-profiling[pandas]"`.
+
 Then write a report:
 
 ```python

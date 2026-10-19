@@ -51,6 +51,8 @@ def _from_pandas(pdf: Any) -> pl.DataFrame:
         return pl.from_pandas(pdf)
     except Exception as exc:
         msg = f"Failed to convert Pandas DataFrame to Polars: {exc}"
+        if "pyarrow" in str(exc).lower():
+            msg += '\nInstall pyarrow with: pip install "shirabe-profiling[pandas]"'
         raise ValueError(msg) from exc
 
 
