@@ -23,7 +23,7 @@ sync:
 [group("dev")]
 [script("bash")]
 [working-directory("docs")]
-docs-dev:
+docs-dev: _docs-images
     set -euo pipefail
     if command -v nub >/dev/null; then
       nub run dev
@@ -33,6 +33,11 @@ docs-dev:
       echo "error: install node.js or nub to run the docs site" >&2
       exit 1
     fi
+
+# Copy the report screenshots into the docs site, where the pages link them.
+@_docs-images:
+    mkdir -p docs/public/images
+    cp assets/screenshots/*.png docs/public/images/
 
 # Remake the README screenshots in assets/screenshots/ (needs Chrome, Chromium, or Edge, and internet access)
 @readme-images:
