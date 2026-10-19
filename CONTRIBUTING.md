@@ -83,7 +83,7 @@ A PyPI release never changes, so delete the changelog section of the pre-release
 
 ## README Screenshots
 
-`just readme-images` makes the pictures in `assets/screenshots/` again, so run it after a change to the report design.
+`just readme-images` makes the pictures and the scrolling GIFs in `assets/screenshots/` again, so run it after a change to the report design.
 It builds a report from a synthetic dataset, crops each view with a headless browser, and needs an internet connection for the report scripts.
 It needs Chrome, Chromium, or Edge, and you can set `BROWSER` to the program if the script cannot find it.
 

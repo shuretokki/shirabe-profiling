@@ -58,11 +58,12 @@ docs-build: _docs-images
 # Copy the report screenshots that the docs pages link into the docs site.
 @_docs-images:
     mkdir -p docs/public/images
-    { grep -rhoE '/images/report-[a-z-]+\.png' docs/content || true; } | sort -u | sed 's#^/images/##' | while read -r name; do cp "assets/screenshots/$name" docs/public/images/; done
+    { grep -rhoE '/images/report-[a-z-]+\.(png|gif)' docs/content || true; } | sort -u | sed 's#^/images/##' | while read -r name; do cp "assets/screenshots/$name" docs/public/images/; done
 
-# Remake the README screenshots in assets/screenshots/ (needs Chrome, Chromium, or Edge, and internet access)
+# Remake the README screenshots and scrolling GIFs in assets/screenshots/ (needs Chrome, Chromium, or Edge, and internet access)
 @readme-images:
     uv run python scripts/readme_images.py assets/screenshots
+    uv run python scripts/report_scroll.py assets/screenshots
 
 # Print a CHANGELOG.md draft for the commits since the last tag, without changing a file
 [group("release")]

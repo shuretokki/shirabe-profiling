@@ -208,13 +208,14 @@ def capture(
     browser: str,
     page: Path,
     png: Path,
+    height: int = MAX_HEIGHT,
 ) -> None:
     command = [
         browser,
         "--headless",
         "--disable-gpu",
         "--hide-scrollbars",
-        f"--window-size={WIDTH},{MAX_HEIGHT}",
+        f"--window-size={WIDTH},{height}",
         "--virtual-time-budget=9000",
         f"--screenshot={browser_path(browser, png)}",
         "file:///"
