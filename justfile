@@ -156,7 +156,7 @@ release *flags:
     git tag -a "$tag" -m "$version"
     git push origin main
     git push origin "$tag"
-    {{ require("gh") }} release create "$tag" --verify-tag $prerelease --title "shirabe-profiling $version" --notes-file "$notes"
+    {{ require("gh") }} release create "$tag" --verify-tag $prerelease --title "$version" --notes-file "$notes"
     echo "next: just publish-test, then just publish"
 
 # Upload this version to TestPyPI, the practice index (needs UV_PUBLISH_TEST_TOKEN in .env)
