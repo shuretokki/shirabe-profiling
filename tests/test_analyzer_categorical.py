@@ -386,3 +386,35 @@ class TestCategoricalOtherValues:
         )
         col = report.to_dict()["columns"]["cat"]
         assert col["other_values"] is None
+
+
+class TestCategoricalDtypes:
+    @pytest.mark.parametrize(
+        "dtype",
+        [pl.Categorical, pl.Enum(["a", "b", "c"])],
+        ids=["categorical", "enum"],
+    )
+    def test_matches_the_string_column(
+        self,
+        dtype: pl.DataType,
+        config: ProfileConfig,
+    ):
+        values = ["a", "b", "a", "c", "a", "b", None]
+        as_string = analyze_categorical(
+            pl.DataFrame({"x": values}),
+            "x",
+            config,
+        )
+        as_dtype = analyze_categorical(
+            pl.DataFrame(
+                {
+                    "x": pl.Series(
+                        values,
+                        dtype=dtype,
+                    ),
+                },
+            ),
+            "x",
+            config,
+        )
+        assert as_dtype == as_string

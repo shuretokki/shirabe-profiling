@@ -25,6 +25,9 @@ def analyze_categorical(
     if n_rows == 0:
         return _empty_stats(col_name)
 
+    if df.schema[col_name] != pl.String:
+        df = df.with_columns(col.cast(pl.String))
+
     row = df.select(
         col.null_count().alias("missing_count"),
         col.drop_nulls().n_unique().alias("distinct_count"),

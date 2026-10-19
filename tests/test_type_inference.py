@@ -79,6 +79,18 @@ class TestCategoricalInference:
         types = infer_types(df)
         assert types["cat"] == ColumnType.CATEGORICAL
 
+    def test_enum_dtype(self):
+        df = pl.DataFrame(
+            {
+                "grade": pl.Series(
+                    ["a", "b", "a"],
+                    dtype=pl.Enum(["a", "b"]),
+                ),
+            },
+        )
+        types = infer_types(df)
+        assert types["grade"] == ColumnType.CATEGORICAL
+
 
 class TestTextInference:
     def test_high_cardinality_string(self, high_cardinality_df: pl.DataFrame):

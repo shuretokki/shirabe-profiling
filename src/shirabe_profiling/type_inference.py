@@ -116,7 +116,7 @@ def _infer_single(
     if col_name in numeric_cols:
         return ColumnType.NUMERIC
 
-    if dtype_class == pl.Categorical:
+    if dtype_class in (pl.Categorical, pl.Enum):
         return ColumnType.CATEGORICAL
 
     if dtype_class in (pl.String, pl.Utf8):
