@@ -1,123 +1,119 @@
 ---
 seo:
-  title: Write beautiful docs with Markdown
-  description: Ship fast, flexible, and SEO-optimized documentation with beautiful
-    design out of the box. Docus brings together the best of the Nuxt ecosystem.
-    Powered by Nuxt UI.
+  title: shirabe-profiling
+  description: Profile a Polars table and write one HTML report, with quality alerts and a guide to fix each alert.
 ---
 
 ::u-page-hero
 #title
-Write beautiful docs with Markdown
+Profile a Polars table and write one HTML report
 
 #description
-Ship fast, flexible, and SEO-optimized documentation with beautiful design out of the box.
-
-Docus brings the best of the Nuxt ecosystem into one CLI.
+shirabe-profiling reads a Polars DataFrame and writes one HTML report.
+In the report, you see the facts of each column and a list of quality alerts, and the Guide tab shows how to fix each alert.
 
 #links
   :::u-button
   ---
-  color: neutral
-  size: xl
-  to: /getting-started/installation
+  color: primary
+  size: lg
+  to: /tutorials/create-your-first-report
   trailing-icon: i-lucide-arrow-right
   ---
-  Get started
+  Create your first report
   :::
 
   :::u-button
   ---
   color: neutral
-  icon: simple-icons-github
-  size: xl
-  to: https://github.com/nuxt-content/docus
+  icon: i-simple-icons-github
+  size: lg
+  to: https://github.com/shuretokki/shirabe-profiling
   variant: outline
   ---
-  Star on GitHub
+  View on GitHub
   :::
+
+#body
+```python
+import polars as pl
+from shirabe_profiling import ProfileReport
+
+df = pl.read_csv("data.csv")
+ProfileReport(df).to_html("report.html")
+```
+
+:u-color-mode-image{light="/images/report-overview.png" dark="/images/report-overview-dark.png" alt="The overview of a report, with the facts of a table and the list of alerts" class="mt-6 rounded-md border border-default"}
 ::
 
 ::u-page-section
 #title
-Shipped with many features
+What the report gives you
 
 #features
   :::u-page-feature
   ---
-  icon: i-simple-icons-nuxt
-  target: _blank
-  to: https://nuxt.com
+  icon: i-lucide-triangle-alert
   ---
   #title
-  Built with [Nuxt 4]{.text-primary}
-  
+  Quality alerts
+
   #description
-  Optimized by the most famous Vue framework. Docus gives you everything you need to build fast, performant, and SEO-friendly websites.
+  Find missing values, constant columns, skewed columns, high correlations, and more. Each alert names the column that has the problem.
   :::
 
   :::u-page-feature
   ---
-  icon: i-simple-icons-nuxt
-  target: _blank
-  to: https://ui.nuxt.com/
+  icon: i-lucide-book-open
   ---
   #title
-  Powered by [Nuxt UI]{.text-primary}
-  
+  A guide for every alert
+
   #description
-  Beautiful out of the box, minimal by design but highly customizable. Docus leverages Nuxt UI to give you the best docs writing experience with zero boilerplate, just focus on your content.
+  The Guide tab gives the limit of each alert, some possible fixes, and the sources.
   :::
 
   :::u-page-feature
   ---
-  icon: i-simple-icons-nuxt
-  target: _blank
-  to: https://content.nuxt.com
+  icon: i-lucide-target
   ---
   #title
-  Enhanced Markdown syntax by [Nuxt Content]{.text-primary}
-  
+  Made for modeling
+
   #description
-  The only thing you need to take care about is writing your content. Write your pages in Markdown and extend with MDC syntax to embed Nuxt UI or custom Vue components. Structure, routing, and rendering are handled for you.
+  Name the target to see how each column links to it and to get a warning about leakage. Skewed columns get transform tabs.
   :::
 
   :::u-page-feature
   ---
-  icon: i-simple-icons-nuxt
-  target: _blank
-  to: https://nuxt.com/docs/guide/directory-structure/app-config
+  icon: i-lucide-braces
   ---
   #title
-  Customize with [Nuxt App Config]{.text-primary}
-  
+  Results in code
+
   #description
-  Update colors, social links, header logos and component styles globally using the `app.config.ts`, no direct code modifications required.
+  Read the numbers with `to_dict`, `to_json`, `stats`, and `alerts`. The package has type hints.
   :::
 
   :::u-page-feature
   ---
-  icon: i-simple-icons-nuxt
-  target: _blank
-  to: https://content.nuxt.com/studio
+  icon: i-lucide-file-input
   ---
   #title
-  Edit in production with [Nuxt Studio]{.text-primary}
-  
+  Many inputs
+
   #description
-  Edit your content in production with zero Markdown knowledge required. Let your non technical colleagues collaborate on the documentation and integrate Vue components without code skills.
+  Pass a Polars DataFrame or LazyFrame, a pandas DataFrame, or the path of a CSV, TSV, or Parquet file.
   :::
 
   :::u-page-feature
   ---
-  icon: i-simple-icons-nuxt
-  target: _blank
-  to: https://ui.nuxt.com/components/content-search
+  icon: i-lucide-sun-moon
   ---
   #title
-  Built-in navigation and [full-text search]{.text-primary}
-  
+  Dark and light themes
+
   #description
-  Only focus on ordering your content, Docus handles the search modal and auto-generates the side navigation for you.
+  Switch between dark and light in the settings menu, or let the report follow the theme of your system.
   :::
 ::
