@@ -22,9 +22,6 @@ The recipes use nub when it is installed, and npm if not. Node.js 22 or newer is
 - `public/images/`, `public/logo/`, and `public/fonts/` hold the static files.
   The recipes copy the pictures and the wordmark from `assets/` at build time, and git ignores those copies.
 
-`app/app.config.ts`, `app/app.css`, `app/assets/css/`, and `public/fonts/` are copies from the design kit.
-Change the kit and copy it again, instead of editing these files here.
-
 ## Deploying
 
 A release tag builds the site under `/shirabe-profiling/` and deploys it to GitHub Pages.
