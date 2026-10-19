@@ -1,82 +1,31 @@
-# Docus Default Starter
+# Documentation site
 
-> A beautiful, minimal starter for creating documentation with Docus
+This folder holds the documentation site of shirabe-profiling. It is built with Docus, a Nuxt layer.
 
-This is the default Docus starter template that provides everything you need to build beautiful documentation sites with Markdown and Vue components.
+## Running the site
 
-> [!TIP]
-> If you're looking for i18n support, check out the [i18n starter](https://github.com/nuxt-themes/docus/tree/main/.starters/i18n).
+Run these commands from the repository root.
 
-## ✨ Features
+| Command | Result |
+| --- | --- |
+| `just docs-dev` | Serves the site with live reload. |
+| `just docs-build` | Builds the static site into `docs/.output/public`. |
+| `just docs-links` | Checks the links and anchors of the built site, with no network. |
 
-- 🎨 **Beautiful Design** - Clean, modern documentation theme
-- 📱 **Responsive** - Mobile-first responsive design  
-- 🌙 **Dark Mode** - Built-in dark/light mode support
-- 🔍 **Search** - Full-text search functionality
-- 📝 **Markdown Enhanced** - Extended markdown with custom components
-- 🎨 **Customizable** - Easy theming and brand customization
-- ⚡ **Fast** - Optimized for performance with Nuxt 4
-- 🔧 **TypeScript** - Full TypeScript support
+The recipes use nub when it is installed, and npm if not. Node.js 22 or newer is needed.
 
-## 🚀 Quick Start
+## Layout
 
-```bash
-# Install dependencies
-npm install
+- `content/` holds the pages as Markdown. The numbers in the file names set the order of the sidebar.
+- `app/components/` holds the Vue components that the pages use.
+- `nuxt.config.ts` holds the site settings, such as the logo and the base path.
+- `public/images/`, `public/logo/`, and `public/fonts/` hold the static files.
+  The recipes copy the pictures and the wordmark from `assets/` at build time, and git ignores those copies.
 
-# Start development server
-npm run dev
-```
+`app/app.config.ts`, `app/app.css`, `app/assets/css/`, and `public/fonts/` are copies from the design kit.
+Change the kit and copy it again, instead of editing these files here.
 
-Your documentation site will be running at `http://localhost:3000`
+## Deploying
 
-## 📁 Project Structure
-
-```
-my-docs/
-├── content/              # Your markdown content
-│   ├── index.md         # Homepage
-│   ├── 1.getting-started/  # Getting started section
-│   └── 2.essentials/    # Essential documentation
-├── public/              # Static assets
-└── package.json         # Dependencies and scripts
-```
-
-## ⚡ Built with
-
-This starter comes pre-configured with:
-
-- [Nuxt 4](https://nuxt.com) - The web framework
-- [Nuxt Content](https://content.nuxt.com/) - File-based CMS
-- [Nuxt UI](https://ui.nuxt.com) - UI components
-- [Nuxt Image](https://image.nuxt.com/) - Optimized images
-- [Tailwind CSS 4](https://tailwindcss.com/) - Utility-first CSS
-- [Docus Layer](https://www.npmjs.com/package/docus) - Documentation theme
-
-## 📖 Documentation
-
-For detailed documentation on customizing your Docus project, visit the [Docus Documentation](https://docus.dev)
-
-### 🤖 AI Assistant Skill
-
-Get started quickly with Docus by adding specialized knowledge to your AI assistant (Cursor, Claude, etc.):
-
-```bash
-npx skills add nuxt-content/docus
-```
-
-This skill helps you create documentation faster by providing your AI assistant with best practices, MDC component usage, ready-to-use templates, writing guidelines, and configuration tips for Docus. Perfect for quickly scaffolding new documentation projects.
-
-## 🚀 Deployment
-
-Build for production:
-
-```bash
-npm run build
-```
-
-The built files will be in the `.output` directory, ready for deployment to any hosting provider that supports Node.js.
-
-## 📄 License
-
-[MIT License](https://opensource.org/licenses/MIT) 
+A release tag builds the site under `/shirabe-profiling/` and deploys it to GitHub Pages.
+Read `CONTRIBUTING.md` for the steps and for how to test the base path on your machine.
